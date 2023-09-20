@@ -5,7 +5,8 @@ typedef enum {
     NODE_TYPE_NUMBER,         // Represents a number
     NODE_TYPE_ID,             // Represents an identifier
     NODE_TYPE_DECLARATION,    // Represents a declaration (e.g., int x;)
-    NODE_TYPE_ASSIGNMENT     // Represents an assignment (e.g., x = 5;)
+    NODE_TYPE_ASSIGNMENT,   // Represents an assignment (e.g., x = 5;)
+    NODE_TYPE_WRITE         // Represents writing something
 } NodeType;
 
 typedef struct ASTNode {
@@ -24,6 +25,9 @@ typedef struct ASTNode {
             char* identifier;
             struct ASTNode* expression;
         } assignment;
+        struct {
+            struct ASTNode* expression;
+        } write;  // Added this to represent the write operation
     };
 
 } ASTNode;

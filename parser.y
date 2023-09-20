@@ -68,6 +68,16 @@ statement: ID EQ expression SEMICOLON
           }
           ;
 
+statement: WRITE expression SEMICOLON
+           {
+               ASTNode* new_node = malloc(sizeof(ASTNode));
+               new_node->type = NODE_TYPE_WRITE;
+               new_node->write.expression = $2;  // $2 represents the expression within the parentheses
+               $$ = new_node;
+           }
+           ;
+
+
 expression: NUMBER
            {
                ASTNode* new_node = malloc(sizeof(ASTNode));
