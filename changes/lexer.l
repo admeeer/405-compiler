@@ -127,7 +127,7 @@ character   ["'"]({letter}|{digit})["'"]
 
 {float}     {words++; chars+= strlen(yytext);
                 printf("%s : FLOAT\n", yytext);
-                yylval.float_T = atof(yytext);
+                yylval.floatValue = atof(yytext);
                 return float;
             }
 
@@ -204,9 +204,9 @@ character   ["'"]({letter}|{digit})["'"]
 		}
 
 "*"	{chars++;
-			printf("%s : MULTIPLY\n", yytext);
+			printf("%s : MULTIPLICATION\n", yytext);
 			yylval.string = strdup(yytext); 
-			return MULTIPLY;
+			return MULTIPLICATION;
 		}
 
 "/"	{chars++;

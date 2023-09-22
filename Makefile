@@ -11,5 +11,6 @@ parser: lex.yy.c parser.tab.c parser.tab.h
 	./parser testProg.cmm
 
 clean:
+	clear
 	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output
 	ls -l
