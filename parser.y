@@ -1,119 +1,234 @@
+// Alexander Peltier, Matthew Powers, Parker Spaan
+// CST 405
+
+
 %{
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "AbstractSyntaxTree.h"
-#include "symbolTable.h"
+#include "AST.h"
+//#include "sT.h"
+//#include "IRc.h"
+//#include "MIPSc.h"
 
 extern int yylex();
 extern int yyparse();
 extern FILE* yyin;
 
 void yyerror(const char* s);
+
 %}
 
 %union {
-    char* string;
+
     int number;
-    ASTNode* node;  // For nodes of our AST
+    float floatValue;
+    char character;
+    char* string;
+    struct AST* ast;
+
 }
 
-%token<string> TYPE
-%token<string> ID
-%token<number> NUMBER
-%token WRITE SEMICOLON EQ
+%token <string> identifier;
+%token <number> integer
+%token <floatValue> float_T
+%token <string> string
 
-%type<node> program declaration declarations statement statements expression
+%token <string> SEMICOLON
+%token <string> EQ
+%token <string> WRITE
+%token <string> WRITELN
+
+%token <string> FUNCTION
+%token <string> IF
+%token <string> ELSE
+%token <string> WHILE
+
+%token <string> PLUS
+%token <string> MINUS
+%token <string> MULTIPLY
+%token <string> DIVIDE
+%token <string> BINOP
+
+%token <string> LBRACKET
+%token <string> RBRACKET
+%token <string> LPAREN
+%token <string> RPAREN
+%token <string> LCURLY
+%token <string> RCURLY
+
+%token <string> INT
+%token <string> CHAR
+%token <string> FLOAT
+
+%token <string> RETURN
+
+%token <string> character
+
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration Type Statement StatementList expression MathExpression Term BuildingBlock BinOp
+
+%start Program
 
 %%
 
-program: declarations statements
-        ;
+Program:
 
+    DeclarationList {
+        $$ = $1;
+    }
+;
+DeclarationList:
 
+    Declaration DeclarationList {
+        $1-> right = $2;
+        $$ = $1;
+    }
 
-declarations:
-           /* empty */
-           | declarations declaration
-           ;
+    | Declaration {
+        $$ = $1;
+    }
+;
+Declaration:
 
-declaration: TYPE ID SEMICOLON
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_DECLARATION;
-               new_node->declaration.type = $1;
-               new_node->declaration.identifier = $2;
-               add_symbol($2, $1);
-               $$ = new_node;
-           }
-           ;
+    VariableDeclaration {}
 
-statements: 
-           /* empty */
-           | statements statement
-           ;
+    | StatementList {
 
-statement: ID EQ expression SEMICOLON
-          {
-              if (!lookup_symbol($1)) {
-                  fprintf(stderr, "Error: Variable %s not declared.\n", $1);
-                  exit(1);
-              }
-              ASTNode* new_node = malloc(sizeof(ASTNode));
-              new_node->type = NODE_TYPE_ASSIGNMENT;
-              new_node->assignment.identifier = $1;
-              new_node->assignment.expression = $3;
-              $$ = new_node;
-          }
-          ;
+    }
+;
+VariableDeclarationList: 
+    
+    | VariableDeclaration VariableDeclarationList {
+        $1->right = $2;
+        $$ = $1;
+    }
 
-statement: WRITE expression SEMICOLON
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_WRITE;
-               new_node->write.expression = $2;  // $2 represents the expression within the parentheses
-               $$ = new_node;
-           }
-           ;
+    | VariableDeclaration
+;
+VariableDeclaration:
 
+    Type identifier SEMICOLON {
+        printf("\nRULE RECOGNIZED: VARIABLE DECLARATION %s\n", $2);
+    }
 
-expression: NUMBER
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_NUMBER;
-               new_node->number = $1;
-               $$ = new_node;
-           }
-         | ID
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_ID;
-               new_node->identifier = $1;
-               $$ = new_node;
-           }
-           ;
+;
+Type: INT {}
+    | FLOAT {}
+    | CHAR {}
+;
+StatementList:
+    Statement
+    
+    | Statement StatementList {
+        $1->right = $2;
+        $$ = $1;
+    }
+;
+Statement:
+
+    SEMICOLON {
+        printf("\nRULE RECOGNIZED: SEMICOLON \n");
+    }
+
+    | expression SEMICOLON {
+        $$ = $1;
+    }
+
+    | RETURN expression SEMICOLON {
+        printf("\nRULE RECOGNIZED: RETURN \n");
+    }
+
+    | WRITE expression SEMICOLON {
+        printf("\nRULE RECOGNIZED: WRITE \n");
+    }
+
+    | WRITELN SEMICOLON {
+        printf("\nRULE RECOGNIZED: WRITELN %s\n", $1);
+    }
+;
+expression:
+    BuildingBlock
+
+    | MathExpression
+
+    | identifier EQ expression {
+        printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
+    }
+
+    | identifier PLUS PLUS {
+
+    }
+
+    | identifier LBRACKET integer RBRACKET
+
+;
+
+BuildingBlock:
+    identifier {
+
+    }
+    
+    | float_T {
+        printf("\nRULE RECOGNIZED: FLOAT \n");
+    }
+
+    | integer {
+        printf("\nRULE RECOGNIZED: INTEGER \n");
+    }
+    
+    | character {
+        printf("\nRULE RECOGNIZED: CHARACTER \n");
+    }
+;
+
+MathExpression:
+
+    Term
+
+    | MathExpression PLUS Term {
+
+    }
+
+    | MathExpression MINUS Term {
+
+    }
+;
+
+Term:
+;
+
+BinOp: PLUS {}
+    | MINUS {}
+    | MULTIPLY {}
+    | DIVIDE {}
 
 %%
 
-int main(int argc, char** argv) {
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            perror("fopen");
-            return 1;
-        }
-    }
-
-    yyparse();
-
-    if (yyin != stdin) {
-        fclose(yyin);
-    }
-
-    return 0;
-}
 
 void yyerror(const char* s) {
-    fprintf(stderr, "Error: %s\n", s);
+	fprintf(stderr, "Parse error: %s\n", s);
+	exit(1);
+}
+
+int main(int argc, char**argv)
+{
+/* 
+	#ifdef YYDEBUG
+		yydebug = 1;
+	#endif */
+
+	printf("\n\n##### COMPILER STARTED #####\n\n");
+
+	
+	if (argc > 1){
+	  if(!(yyin = fopen(argv[1], "r")))
+          {
+		perror(argv[1]);
+		return(1);
+	  }
+	}
+	yyparse();
+
 }

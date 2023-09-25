@@ -56,4 +56,170 @@ extern FILE* yyin;
 %token <string> LCURLY
 %token <string> RCURLY
 
+%token <string> INT
+%token <string> CHAR
+%token <string> FLOAT
 
+%token <string> RETURN
+
+%token <string> CHARACTER
+
+Program:
+
+    DeclarationList {
+        $$ = $1;
+    }
+;
+DeclarationList:
+
+    Declaration DeclarationList {
+        $1-> right = $2;
+        $$ = $1;
+    }
+
+    | Declaration {
+        $$ = $1;
+    }
+;
+Declaration:
+
+    VariableDeclaration {}
+
+    | StatementList {
+
+    }
+;
+VariableDeclarationList: 
+    
+    | VariableDeclaration VariableDeclarationList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+    | VariableDeclaration
+;
+VariableDeclaration:
+
+    Type identifier SEMICOLON {
+        printf("\nRULE RECOGNIZED: VARIABLE DECLARATION %s\n", $2);
+    }
+
+;
+Type: INT {}
+    | FLOAT {}
+    | CHAR {}
+;
+StatementList:
+    Statement
+    
+    | Statement StatementList {
+        $1->right = $2;
+        $$ = $1;
+    }
+;
+Statement:
+
+    SEMICOLON {
+        printf("\nRULE RECOGNIZED: SEMICOLON \n");
+    }
+
+    | Expr SEMICOLON {
+        $$ = $1;
+    }
+
+    | RETURN expression SEMICOLON {
+        printf("\nRULE RECOGNIZED: RETURN \n");
+    }
+
+    | WRITE expression SEMICOLON {
+        printf("\nRULE RECOGNIZED: WRITE \n");
+    }
+
+    | WRITELN SEMICOLON {
+        printf("\nRULE RECOGNIZED: WRITELN %s\n", $1);
+    }
+;
+expression:
+    BuildingBlock
+
+    | MathExpression
+
+    | identifier EQ expression {
+        printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
+    }
+
+    | ID PLUS PLUS {
+
+    }
+
+    | ID LBRACKET INTEGER RBRACKET
+
+;
+
+BuildingBlock:
+    ID {
+
+    }
+    
+    | float {
+        printf("\nRULE RECOGNIZED: FLOAT \n");
+    }
+
+    | integer {
+        printf("\nRULE RECOGNIZED: INTEGER \n");
+    }
+    
+    | character {
+        printf("\nRULE RECOGNIZED: CHARACTER \n");
+    }
+;
+
+MathExpression:
+
+    Term
+
+    | MathExpression PLUS Term {
+
+    }
+
+    | MathExpression MINUS Term {
+
+    }
+;
+
+Term:
+;
+
+BINOP: PLUS {}
+    | MINUS {}
+    | TIMES {}
+    | DIVIDE {}
+
+%%
+
+
+void yyerror(const char* s) {
+	fprintf(stderr, "Parse error: %s\n", s);
+	exit(1);
+}
+
+int main(int argc, char**argv)
+{
+/* 
+	#ifdef YYDEBUG
+		yydebug = 1;
+	#endif */
+
+	printf("\n\n##### COMPILER STARTED #####\n\n");
+
+	
+	if (argc > 1){
+	  if(!(yyin = fopen(argv[1], "r")))
+          {
+		perror(argv[1]);
+		return(1);
+	  }
+	}
+	yyparse();
+
+}

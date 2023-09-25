@@ -27,7 +27,7 @@ digit       [0-9]
 identifier          {letter}({letter}|{digit})*
 delim       [ \t\n]
 integer	    {digit}+
-float       {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
+float_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
 character   ["'"]({letter}|{digit})["'"]
 
 
@@ -62,13 +62,6 @@ character   ["'"]({letter}|{digit})["'"]
 			yylval.string = strdup(yytext); 
 			return FLOAT;
 		}
-
-"list" {words++; chars += strlen(yytext);
-			printf("%s : LIST\n", yytext);
-			yylval.string = strdup(yytext); 
-			return LIST;
-		}
-
 
 "write"	{words++; chars += strlen(yytext);
 			printf("%s : WRITE\n", yytext);
@@ -125,10 +118,10 @@ character   ["'"]({letter}|{digit})["'"]
 				return integer;
 			}
 
-{float}     {words++; chars+= strlen(yytext);
-                printf("%s : FLOAT\n", yytext);
-                yylval.float_T = atof(yytext);
-                return float;
+{float_T}     {words++; chars+= strlen(yytext);
+                printf("%s : FLOAT_T\n", yytext);
+                yylval.floatValue = atof(yytext);
+                return float_T;
             }
 
 {string}    {words++; chars+= strlen(yytext);
