@@ -15,6 +15,8 @@ int lines = 0;
 
 %}
 
+/* track line number */
+%option yylineno
 
 /* this pattern matches a string that starts and ends with a double quote and may contain */
 /* any characters in between, except for unescaped double-quotes or newlines. It also supports */
@@ -24,7 +26,7 @@ string		"\"([^\"\n]|(\\.))*\""
 letter      [a-zA-Z]
 word        [a-zA-Z_][a-zA-Z0-9_]*
 digit       [0-9]
-identifier          {letter}({letter}|{digit})*
+IDENTIFIER  {letter}({letter}|{digit})*
 delim       [ \t\n]
 integer	    {digit}+
 float_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
@@ -106,10 +108,10 @@ character   ["'"]({letter}|{digit})["'"]
 		}
 
 
-{identifier}	{words++; chars += strlen(yytext);
+{IDENTIFIER}	{words++; chars += strlen(yytext);
 			printf("%s : IDENTIFIER\n",yytext);
 			yylval.string = strdup(yytext); 
-			return identifier;
+			return IDENTIFIER;
 			}
 			
 {integer}	{words++; chars += strlen(yytext);
@@ -143,9 +145,9 @@ character   ["'"]({letter}|{digit})["'"]
 		}
 		
 "="			{chars++;
-			printf("%s : EQ\n", yytext);
+			printf("%s : EQUALS\n", yytext);
 			yylval.string = strdup(yytext); 
-			return EQ;
+			return EQUALS;
 		}
 
 "=="	{chars++;
@@ -185,15 +187,15 @@ character   ["'"]({letter}|{digit})["'"]
 		}		
 	
 "+"	    {chars++;
-			printf("%s : PLUS\n", yytext);
+			printf("%s : ADD\n", yytext);
 			yylval.string = strdup(yytext); 
-			return PLUS;
+			return ADD;
 		}
 
 "-"	{chars++;
-			printf("%s : MINUS\n", yytext);
+			printf("%s : SUBTRACT\n", yytext);
 			yylval.string = strdup(yytext); 
-			return MINUS;
+			return SUBTRACT;
 		}
 
 "*"	{chars++;

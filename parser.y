@@ -9,12 +9,16 @@
 #include <string.h>
 
 #include "AST.h"
+#include "parser.tab.h"
 //#include "sT.h"
 //#include "IRc.h"
 //#include "MIPSc.h"
 
 extern int yylex();
 extern int yyparse();
+extern int yydebug;
+extern int yylineno;
+
 extern FILE* yyin;
 
 void yyerror(const char* s);
@@ -31,13 +35,13 @@ void yyerror(const char* s);
 
 }
 
-%token <string> identifier;
+%token <string> IDENTIFIER;
 %token <number> integer
 %token <floatValue> float_T
 %token <string> string
 
 %token <string> SEMICOLON
-%token <string> EQ
+%token <string> EQUALS
 %token <string> WRITE
 %token <string> WRITELN
 
@@ -46,8 +50,8 @@ void yyerror(const char* s);
 %token <string> ELSE
 %token <string> WHILE
 
-%token <string> PLUS
-%token <string> MINUS
+%token <string> ADD
+%token <string> SUBTRACT
 %token <string> MULTIPLY
 %token <string> DIVIDE
 %token <string> BINOP
@@ -67,9 +71,16 @@ void yyerror(const char* s);
 
 %token <string> character
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration Type Statement StatementList expression MathExpression Term BuildingBlock BinOp
+%left ADD
+%left SUBTRACT
+%left MULTIPLY
+%left DIVIDE
+
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration Type Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
+
+%locations
 
 %%
 
@@ -98,6 +109,7 @@ Declaration:
 
     }
 ;
+
 VariableDeclarationList: 
     
     | VariableDeclaration VariableDeclarationList {
@@ -107,18 +119,22 @@ VariableDeclarationList:
 
     | VariableDeclaration
 ;
+
 VariableDeclaration:
 
-    Type identifier SEMICOLON {
-        printf("\nRULE RECOGNIZED: VARIABLE DECLARATION %s\n", $2);
+    Type IDENTIFIER SEMICOLON {
+        //printf("\nRULE RECOGNIZED: VARIABLE DECLARATION %s\n", $2);
     }
 
 ;
+
 Type: INT {}
     | FLOAT {}
     | CHAR {}
 ;
+
 StatementList:
+
     Statement
     
     | Statement StatementList {
@@ -126,99 +142,127 @@ StatementList:
         $$ = $1;
     }
 ;
+
 Statement:
 
     SEMICOLON {
-        printf("\nRULE RECOGNIZED: SEMICOLON \n");
+        //printf("\nRULE RECOGNIZED: SEMICOLON \n");
     }
 
-    | expression SEMICOLON {
+    | Expression SEMICOLON {
+        //printf("\nRULE RECOGNIZED: STATEMENT DECLARATION \n");
         $$ = $1;
     }
 
-    | RETURN expression SEMICOLON {
-        printf("\nRULE RECOGNIZED: RETURN \n");
+    | RETURN Expression SEMICOLON {
+        //printf("\nRULE RECOGNIZED: RETURN \n");
     }
 
-    | WRITE expression SEMICOLON {
-        printf("\nRULE RECOGNIZED: WRITE \n");
+    | WRITE Expression SEMICOLON {
+        //printf("\nRULE RECOGNIZED: WRITE \n");
     }
 
     | WRITELN SEMICOLON {
-        printf("\nRULE RECOGNIZED: WRITELN %s\n", $1);
+        //printf("\nRULE RECOGNIZED: WRITELN %s\n", $1);
     }
 ;
-expression:
+
+Expression:
+
     BuildingBlock
 
-    | MathExpression
+    | AddSubtractExpression
 
-    | identifier EQ expression {
-        printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
+    | IDENTIFIER EQUALS Expression {
+        //printf("\nMatched an ASSIGNMENT Expression: %s = \n");
+        //printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
     }
 
-    | identifier PLUS PLUS {
+    | IDENTIFIER ADD ADD {
 
     }
-
-    | identifier LBRACKET integer RBRACKET
 
 ;
 
 BuildingBlock:
-    identifier {
+
+    IDENTIFIER {
 
     }
     
     | float_T {
-        printf("\nRULE RECOGNIZED: FLOAT \n");
+        //printf("\nRULE RECOGNIZED: FLOAT \n");
     }
 
     | integer {
-        printf("\nRULE RECOGNIZED: INTEGER \n");
+        //printf("\nRULE RECOGNIZED: INTEGER \n");
     }
     
     | character {
-        printf("\nRULE RECOGNIZED: CHARACTER \n");
+        //printf("\nRULE RECOGNIZED: CHARACTER \n");
     }
 ;
 
-MathExpression:
+AddSubtractExpression:
 
-    Term
+    MultiplyDivideExpression
 
-    | MathExpression PLUS Term {
+    | AddSubtractExpression SUBTRACT MultiplyDivideExpression {
 
     }
 
-    | MathExpression MINUS Term {
+    | AddSubtractExpression ADD MultiplyDivideExpression {
 
     }
 ;
 
-Term:
+MultiplyDivideExpression:
+
+    Operand
+
+    | MultiplyDivideExpression MULTIPLY Operand {
+
+    }
+
+    | MultiplyDivideExpression DIVIDE Operand {
+
+    }
 ;
 
-BinOp: PLUS {}
-    | MINUS {}
+Operand:
+
+    IDENTIFIER {
+
+    }
+
+    | integer {
+
+    }
+
+    | LPAREN AddSubtractExpression RPAREN {
+        
+    }
+
+;
+
+BinOp: ADD {}
+    | SUBTRACT {}
     | MULTIPLY {}
     | DIVIDE {}
 
+
+
 %%
 
-
-void yyerror(const char* s) {
-	fprintf(stderr, "Parse error: %s\n", s);
-	exit(1);
+void yyerror(const char *str)
+{
+    fprintf(stderr,"Error | Line: %d\n%s\n",yylineno,str);
 }
 
 int main(int argc, char**argv)
 {
-/* 
-	#ifdef YYDEBUG
-		yydebug = 1;
-	#endif */
 
+    //yydebug = 1;
 	printf("\n\n##### COMPILER STARTED #####\n\n");
 
 	
