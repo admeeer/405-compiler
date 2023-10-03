@@ -3,30 +3,30 @@
 #include <string.h>
 
 typedef enum {
-    ASSIGNMENT,
-    TYPE,
-    RETURN,
-    WRITE,
-    WRITELN,
-    EQUALS,
-    INT,
-    IDENTIFIER,
-    FLOAT,
-    CHARACTER
+    T_ASSIGNMENT,
+    T_TYPE,
+    T_RETURN,
+    T_WRITE,
+    T_WRITELN,
+    T_EQUALS,
+    T_INT,
+    T_IDENTIFIER,
+    T_FLOAT,
+    T_CHAR
 } NodeType;
 
 const char* nodeTypeToString(NodeType type) {
     switch (type) {
-        case TYPE: return "TYPE";
-        case ASSIGNMENT: return "ASSIGNMENT";
-        case RETURN: return "RETURN";
-        case WRITE: return "WRITE";
-        case WRITELN: return "WRITELN";
-        case EQUALS: return "EQUALS";
-        case INT: return "INT";
-        case IDENTIFIER: return "IDENTIFIER";
-        case FLOAT: return "FLOAT";
-        case CHARACTER: return "CHARACTER";
+        case T_TYPE: return "TYPE";
+        case T_ASSIGNMENT: return "ASSIGNMENT";
+        case T_RETURN: return "RETURN";
+        case T_WRITE: return "WRITE";
+        case T_WRITELN: return "WRITELN";
+        case T_EQUALS: return "EQUALS";
+        case T_INT: return "INT";
+        case T_IDENTIFIER: return "IDENTIFIER";
+        case T_FLOAT: return "FLOAT";
+        case T_CHAR: return "CHARACTER";
         default: return "UNDEFINED";
     }
 }
@@ -62,7 +62,7 @@ void printDots(int num)
 void printAST(struct AST* tree, int level){
     if (tree == NULL) return;
     printDots(level);
-    printf("%s\n", tree->nodeType);
+    printf("%s\n", nodeTypeToString(tree->nodeType));
     printDots(level);
     printf("%s %s\n", tree->LHS, tree->RHS);
     if(tree->right != NULL) printAST(tree->right, level+1); else return;
@@ -74,7 +74,7 @@ void printNode(struct AST* node) {
 
     printf("Current node ---->\n");
     printDots(3);
-    printf("%s\n", node->nodeType);
+    printf("%s\n", nodeTypeToString(node->nodeType));
     printDots(3);
     printf("%s %s\n\n", node->LHS, node->RHS);
 

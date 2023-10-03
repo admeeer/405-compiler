@@ -76,7 +76,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%TYPE <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -124,7 +124,7 @@ VariableDeclaration:
 
     TYPE IDENTIFIER SEMICOLON {
         
-        $$ = insertIntoAST(TYPE, $1->nodeType, $2);
+        $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
 
     }
 
@@ -158,18 +158,18 @@ Statement:
 
     | RETURN Expression SEMICOLON {
         
-        $$ = insertIntoAST(RETURN, "", $2->RHS);
+        $$ = insertIntoAST(T_RETURN, "", $2->RHS);
 
     }
 
     | WRITE Expression SEMICOLON {
         
-        $$ = insertIntoAST("WRITE", "", $2->RHS);
+        $$ = insertIntoAST(T_WRITE, "", $2->RHS);
     }
 
     | WRITELN SEMICOLON {
         
-        $$ = insertIntoAST("WRITELN", "", "");
+        $$ = insertIntoAST(T_WRITELN, "", "");
 
     }
 ;
@@ -182,7 +182,7 @@ Expression:
 
     | IDENTIFIER Equals Expression {
         
-        $$ = insertIntoAST(EQUALS, $1, $3->RHS);
+        $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
 
     }
 
@@ -192,7 +192,7 @@ BuildingBlock:
 
     IDENTIFIER {
 
-        $$ = insertIntoAST(IDENTIFIER, "", $1);
+        $$ = insertIntoAST(T_IDENTIFIER, "", $1);
 
     }
     
@@ -200,7 +200,7 @@ BuildingBlock:
         
         char value[10];
         sprintf(value, "%f", $1);
-        $$ = insertIntoAST(FLOAT, "", value);
+        $$ = insertIntoAST(T_FLOAT, "", value);
 
     }
 
@@ -208,13 +208,13 @@ BuildingBlock:
 
         char value[10];
         sprintf(value, "%f", $1);
-        $$ = insertIntoAST(INT, "", value);
+        $$ = insertIntoAST(T_INT, "", value);
 
     }
     
     | CHARACTER {
         
-        $$ = insertIntoAST(CHAR, "", $1);
+        $$ = insertIntoAST(T_CHAR, "", $1);
 
     }
 ;
@@ -226,7 +226,7 @@ AddSubtractExpression:
     | AddSubtractExpression SUBTRACT MultiplyDivideExpression {
 
         
-        $$ = insertIntoAST(INT, "", value);
+        //$$ = insertIntoAST(T_INT, "", value);
 
     }
 
