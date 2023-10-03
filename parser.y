@@ -1,119 +1,278 @@
+// Alexander Peltier, Matthew Powers, Parker Spaan
+// CST 405
+
+
 %{
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "AbstractSyntaxTree.h"
-#include "symbolTable.h"
+#include "AST.h"
+#include "parser.tab.h"
+//#include "sT.h"
+//#include "IRc.h"
+//#include "MIPSc.h"
 
 extern int yylex();
 extern int yyparse();
+extern int yydebug;
+extern int yylineno;
+
 extern FILE* yyin;
 
 void yyerror(const char* s);
+
 %}
 
 %union {
-    char* string;
+
     int number;
-    ASTNode* node;  // For nodes of our AST
+    float floatValue;
+    char character;
+    char* string;
+    struct AST* ast;
+
 }
 
-%token<string> TYPE
-%token<string> ID
-%token<number> NUMBER
-%token WRITE SEMICOLON EQ
+%token <string> IDENTIFIER;
+%token <number> integer
+%token <floatValue> float_T
+%token <string> string
 
-%type<node> program declaration declarations statement statements expression
+%token <string> SEMICOLON
+%token <string> EQUALS
+%token <string> WRITE
+%token <string> WRITELN
+
+%token <string> FUNCTION
+%token <string> IF
+%token <string> ELSE
+%token <string> WHILE
+
+%token <string> ADD
+%token <string> SUBTRACT
+%token <string> MULTIPLY
+%token <string> DIVIDE
+%token <string> BINOP
+
+%token <string> LBRACKET
+%token <string> RBRACKET
+%token <string> LPAREN
+%token <string> RPAREN
+%token <string> LCURLY
+%token <string> RCURLY
+
+%token <string> INT
+%token <string> CHAR
+%token <string> FLOAT
+
+%token <string> RETURN
+
+%token <string> character
+
+%left ADD
+%left SUBTRACT
+%left MULTIPLY
+%left DIVIDE
+
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration Type Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+
+%start Program
+
+%locations
 
 %%
 
-program: declarations statements
-        ;
+Program:
+
+    DeclarationList {
+        $$ = $1;
+    }
+;
+DeclarationList:
+
+    Declaration DeclarationList {
+        $1-> right = $2;
+        $$ = $1;
+    }
+
+    | Declaration {
+        $$ = $1;
+    }
+;
+Declaration:
+
+    VariableDeclaration {}
+
+    | StatementList {
+
+    }
+;
+
+VariableDeclarationList: 
+    
+    | VariableDeclaration VariableDeclarationList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+    | VariableDeclaration
+;
+
+VariableDeclaration:
+
+    Type IDENTIFIER SEMICOLON {
+        //printf("\nRULE RECOGNIZED: VARIABLE DECLARATION %s\n", $2);
+    }
+
+;
+
+Type: INT {}
+    | FLOAT {}
+    | CHAR {}
+;
+
+StatementList:
+
+    Statement
+    
+    | Statement StatementList {
+        $1->right = $2;
+        $$ = $1;
+    }
+;
+
+Statement:
+
+    SEMICOLON {
+        //printf("\nRULE RECOGNIZED: SEMICOLON \n");
+    }
+
+    | Expression SEMICOLON {
+        //printf("\nRULE RECOGNIZED: STATEMENT DECLARATION \n");
+        $$ = $1;
+    }
+
+    | RETURN Expression SEMICOLON {
+        //printf("\nRULE RECOGNIZED: RETURN \n");
+    }
+
+    | WRITE Expression SEMICOLON {
+        //printf("\nRULE RECOGNIZED: WRITE \n");
+    }
+
+    | WRITELN SEMICOLON {
+        //printf("\nRULE RECOGNIZED: WRITELN %s\n", $1);
+    }
+;
+
+Expression:
+
+    BuildingBlock
+
+    | AddSubtractExpression
+
+    | IDENTIFIER EQUALS Expression {
+        //printf("\nMatched an ASSIGNMENT Expression: %s = \n");
+        //printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
+    }
+
+    | IDENTIFIER ADD ADD {
+
+    }
+
+;
+
+BuildingBlock:
+
+    IDENTIFIER {
+
+    }
+    
+    | float_T {
+        //printf("\nRULE RECOGNIZED: FLOAT \n");
+    }
+
+    | integer {
+        //printf("\nRULE RECOGNIZED: INTEGER \n");
+    }
+    
+    | character {
+        //printf("\nRULE RECOGNIZED: CHARACTER \n");
+    }
+;
+
+AddSubtractExpression:
+
+    MultiplyDivideExpression
+
+    | AddSubtractExpression SUBTRACT MultiplyDivideExpression {
+
+    }
+
+    | AddSubtractExpression ADD MultiplyDivideExpression {
+
+    }
+;
+
+MultiplyDivideExpression:
+
+    Operand
+
+    | MultiplyDivideExpression MULTIPLY Operand {
+
+    }
+
+    | MultiplyDivideExpression DIVIDE Operand {
+
+    }
+;
+
+Operand:
+
+    IDENTIFIER {
+
+    }
+
+    | integer {
+
+    }
+
+    | LPAREN AddSubtractExpression RPAREN {
+        
+    }
+
+;
+
+BinOp: ADD {}
+    | SUBTRACT {}
+    | MULTIPLY {}
+    | DIVIDE {}
 
 
 
-declarations:
-           /* empty */
-           | declarations declaration
-           ;
+%%
 
-declaration: TYPE ID SEMICOLON
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_DECLARATION;
-               new_node->declaration.type = $1;
-               new_node->declaration.identifier = $2;
-               add_symbol($2, $1);
-               $$ = new_node;
-           }
-           ;
+void yyerror(const char *str)
+{
+    fprintf(stderr,"Error | Line: %d\n%s\n",yylineno,str);
+}
 
-statements: 
-           /* empty */
-           | statements statement
-           ;
+int main(int argc, char**argv)
+{
 
-statement: ID EQ expression SEMICOLON
+    //yydebug = 1;
+	printf("\n\n##### COMPILER STARTED #####\n\n");
+
+	
+	if (argc > 1){
+	  if(!(yyin = fopen(argv[1], "r")))
           {
-              if (!lookup_symbol($1)) {
-                  fprintf(stderr, "Error: Variable %s not declared.\n", $1);
-                  exit(1);
-              }
-              ASTNode* new_node = malloc(sizeof(ASTNode));
-              new_node->type = NODE_TYPE_ASSIGNMENT;
-              new_node->assignment.identifier = $1;
-              new_node->assignment.expression = $3;
-              $$ = new_node;
-          }
-          ;
+		perror(argv[1]);
+		return(1);
+	  }
+	}
+	yyparse();
 
-statement: WRITE expression SEMICOLON
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_WRITE;
-               new_node->write.expression = $2;  // $2 represents the expression within the parentheses
-               $$ = new_node;
-           }
-           ;
-
-
-expression: NUMBER
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_NUMBER;
-               new_node->number = $1;
-               $$ = new_node;
-           }
-         | ID
-           {
-               ASTNode* new_node = malloc(sizeof(ASTNode));
-               new_node->type = NODE_TYPE_ID;
-               new_node->identifier = $1;
-               $$ = new_node;
-           }
-           ;
-
-%%
-
-int main(int argc, char** argv) {
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            perror("fopen");
-            return 1;
-        }
-    }
-
-    yyparse();
-
-    if (yyin != stdin) {
-        fclose(yyin);
-    }
-
-    return 0;
-}
-
-void yyerror(const char* s) {
-    fprintf(stderr, "Error: %s\n", s);
 }

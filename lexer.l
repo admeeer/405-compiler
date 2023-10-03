@@ -15,6 +15,8 @@ int lines = 0;
 
 %}
 
+/* track line number */
+%option yylineno
 
 /* this pattern matches a string that starts and ends with a double quote and may contain */
 /* any characters in between, except for unescaped double-quotes or newlines. It also supports */
@@ -24,10 +26,10 @@ string		"\"([^\"\n]|(\\.))*\""
 letter      [a-zA-Z]
 word        [a-zA-Z_][a-zA-Z0-9_]*
 digit       [0-9]
-identifier          {letter}({letter}|{digit})*
+IDENTIFIER  {letter}({letter}|{digit})*
 delim       [ \t\n]
 integer	    {digit}+
-float       {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
+float_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
 character   ["'"]({letter}|{digit})["'"]
 
 
@@ -62,13 +64,6 @@ character   ["'"]({letter}|{digit})["'"]
 			yylval.string = strdup(yytext); 
 			return FLOAT;
 		}
-
-"list" {words++; chars += strlen(yytext);
-			printf("%s : LIST\n", yytext);
-			yylval.string = strdup(yytext); 
-			return LIST;
-		}
-
 
 "write"	{words++; chars += strlen(yytext);
 			printf("%s : WRITE\n", yytext);
@@ -113,10 +108,10 @@ character   ["'"]({letter}|{digit})["'"]
 		}
 
 
-{identifier}	{words++; chars += strlen(yytext);
+{IDENTIFIER}	{words++; chars += strlen(yytext);
 			printf("%s : IDENTIFIER\n",yytext);
 			yylval.string = strdup(yytext); 
-			return identifier;
+			return IDENTIFIER;
 			}
 			
 {integer}	{words++; chars += strlen(yytext);
@@ -125,10 +120,10 @@ character   ["'"]({letter}|{digit})["'"]
 				return integer;
 			}
 
-{float}     {words++; chars+= strlen(yytext);
-                printf("%s : FLOAT\n", yytext);
+{float_T}     {words++; chars+= strlen(yytext);
+                printf("%s : FLOAT_T\n", yytext);
                 yylval.floatValue = atof(yytext);
-                return float;
+                return float_T;
             }
 
 {string}    {words++; chars+= strlen(yytext);
@@ -150,9 +145,9 @@ character   ["'"]({letter}|{digit})["'"]
 		}
 		
 "="			{chars++;
-			printf("%s : EQ\n", yytext);
+			printf("%s : EQUALS\n", yytext);
 			yylval.string = strdup(yytext); 
-			return EQ;
+			return EQUALS;
 		}
 
 "=="	{chars++;
@@ -192,21 +187,21 @@ character   ["'"]({letter}|{digit})["'"]
 		}		
 	
 "+"	    {chars++;
-			printf("%s : PLUS\n", yytext);
+			printf("%s : ADD\n", yytext);
 			yylval.string = strdup(yytext); 
-			return PLUS;
+			return ADD;
 		}
 
 "-"	{chars++;
-			printf("%s : MINUS\n", yytext);
+			printf("%s : SUBTRACT\n", yytext);
 			yylval.string = strdup(yytext); 
-			return MINUS;
+			return SUBTRACT;
 		}
 
 "*"	{chars++;
-			printf("%s : MULTIPLICATION\n", yytext);
+			printf("%s : MULTIPLY\n", yytext);
 			yylval.string = strdup(yytext); 
-			return MULTIPLICATION;
+			return MULTIPLY;
 		}
 
 "/"	{chars++;
