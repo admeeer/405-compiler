@@ -1,83 +1,56 @@
-//Abstract Syntax Tree Implementation
+// CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
+
 #include <string.h>
 
-struct AST{
-    char nodeType[50];
-    char LHS[50];
-    char RHS[50];
-    
-    struct AST * left;
-    struct AST * right;
+typedef enum {
+    ASSIGNMENT,
+    TYPE,
+    RETURN,
+    WRITE,
+    WRITELN,
+    EQUALS,
+    INT,
+    IDENTIFIER,
+    FLOAT,
+    CHARACTER
+} NodeType;
 
-    // review pointers to structs in C
-    // complete the tree struct with pointers
+const char* nodeTypeToString(NodeType type) {
+    switch (type) {
+        case TYPE: return "TYPE";
+        case ASSIGNMENT: return "ASSIGNMENT";
+        case RETURN: return "RETURN";
+        case WRITE: return "WRITE";
+        case WRITELN: return "WRITELN";
+        case EQUALS: return "EQUALS";
+        case INT: return "INT";
+        case IDENTIFIER: return "IDENTIFIER";
+        case FLOAT: return "FLOAT";
+        case CHARACTER: return "CHARACTER";
+        default: return "UNDEFINED";
+    }
+}
+
+struct AST{
+
+    NodeType nodeType;
+
+    char *LHS;
+    char *RHS;
+    
+    struct AST* left;
+    struct AST* right;
+
 };
 
+struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
 
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
 
-struct AST * AST_assignment(char nodeType[50], char LHS[50], char RHS[50]){
-    
-
-    struct AST* ASTassign = malloc(sizeof(struct AST));
-    strcpy(ASTassign->nodeType, nodeType);
-    strcpy(ASTassign->LHS, LHS);
-    strcpy(ASTassign->RHS, RHS);
-
-    // if (!ASTassign->right) {
-    //     printf("right is null: %s\n", ASTassign->right);
-    // }
-
-    
-
-/*
-       =
-     /   \
-    x     y
-
-*/
-    return ASTassign;
-    
-}
-struct AST * AST_BinaryExpression(char nodeType[50], char LHS[50], char RHS[50]){
-
-    struct AST* ASTBinExp = malloc(sizeof(struct AST));
-    strcpy(ASTBinExp->nodeType, nodeType);
-    strcpy(ASTBinExp->LHS, LHS);
-    strcpy(ASTBinExp->RHS, RHS);
-    return ASTBinExp;
-    
-}
-struct AST * AST_Type(char nodeType[50], char LHS[50], char RHS[50]){
-
-    struct AST* ASTtype = malloc(sizeof(struct AST));
-    strcpy(ASTtype->nodeType, nodeType);
-    strcpy(ASTtype->LHS, LHS);
-    strcpy(ASTtype->RHS, RHS);
-        
-    return ASTtype;
-    
-}
-
-struct AST * AST_Func(char nodeType[50], char LHS[50], char RHS[50]){
-    
-    struct AST* ASTtype = malloc(sizeof(struct AST));
-    strcpy(ASTtype->nodeType, nodeType);
-    strcpy(ASTtype->LHS, LHS);
-    strcpy(ASTtype->RHS, RHS);
-        
-    return ASTtype;
-    
-}
-
-struct AST * AST_Write(char nodeType[50], char LHS[50], char RHS[50]){
-    
-    struct AST* ASTtype = malloc(sizeof(struct AST));
-    strcpy(ASTtype->nodeType, nodeType);
-    strcpy(ASTtype->LHS, LHS);
-    strcpy(ASTtype->LHS, RHS);
-        
-    return ASTtype;
-    
+    return node;
 }
 
 void printDots(int num)

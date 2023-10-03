@@ -69,14 +69,14 @@ void yyerror(const char* s);
 
 %token <string> RETURN
 
-%token <string> Character
+%token <string> CHARACTER
 
 %left ADD
 %left SUBTRACT
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration Type Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%TYPE <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -122,13 +122,15 @@ VariableDeclarationList:
 
 VariableDeclaration:
 
-    Type IDENTIFIER SEMICOLON {
-        //printf("\nRULE RECOGNIZED: VARIABLE DECLARATION %s\n", $2);
+    TYPE IDENTIFIER SEMICOLON {
+        
+        $$ = insertIntoAST(TYPE, $1->nodeType, $2);
+
     }
 
 ;
 
-Type: INT {}
+TYPE: INT {}
     | FLOAT {}
     | CHAR {}
 ;
@@ -155,15 +157,20 @@ Statement:
     }
 
     | RETURN Expression SEMICOLON {
-        //printf("\nRULE RECOGNIZED: RETURN \n");
+        
+        $$ = insertIntoAST(RETURN, "", $2->RHS);
+
     }
 
     | WRITE Expression SEMICOLON {
-        //printf("\nRULE RECOGNIZED: WRITE \n");
+        
+        $$ = insertIntoAST("WRITE", "", $2->RHS);
     }
 
     | WRITELN SEMICOLON {
-        //printf("\nRULE RECOGNIZED: WRITELN %s\n", $1);
+        
+        $$ = insertIntoAST("WRITELN", "", "");
+
     }
 ;
 
@@ -174,8 +181,9 @@ Expression:
     | AddSubtractExpression
 
     | IDENTIFIER Equals Expression {
-        //printf("\nMatched an ASSIGNMENT Expression: %s = \n");
-        //printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
+        
+        $$ = insertIntoAST(EQUALS, $1, $3->RHS);
+
     }
 
 ;
@@ -184,18 +192,30 @@ BuildingBlock:
 
     IDENTIFIER {
 
+        $$ = insertIntoAST(IDENTIFIER, "", $1);
+
     }
     
     | FLOAT_T {
-        //printf("\nRULE RECOGNIZED: FLOAT \n");
+        
+        char value[10];
+        sprintf(value, "%f", $1);
+        $$ = insertIntoAST(FLOAT, "", value);
+
     }
 
     | INTEGER {
-        //printf("\nRULE RECOGNIZED: INTEGER \n");
+
+        char value[10];
+        sprintf(value, "%f", $1);
+        $$ = insertIntoAST(INT, "", value);
+
     }
     
-    | Character {
-        //printf("\nRULE RECOGNIZED: Character \n");
+    | CHARACTER {
+        
+        $$ = insertIntoAST(CHAR, "", $1);
+
     }
 ;
 
@@ -204,6 +224,9 @@ AddSubtractExpression:
     MultiplyDivideExpression
 
     | AddSubtractExpression SUBTRACT MultiplyDivideExpression {
+
+        
+        $$ = insertIntoAST(INT, "", value);
 
     }
 

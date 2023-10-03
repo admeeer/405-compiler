@@ -30,7 +30,7 @@ IDENTIFIER  {letter}({letter}|{digit})*
 delim       [ \t\n]
 INTEGER     {digit}+
 FLOAT_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
-Character  ["'"]({letter}|{digit})["'"]
+CHARACTER  ["'"]({letter}|{digit})["'"]
 
 
 %% 
@@ -132,10 +132,10 @@ Character  ["'"]({letter}|{digit})["'"]
                 return string;
             }
 
-{Character} {words++; chars+= strlen(yytext);
+{CHARACTER} {words++; chars+= strlen(yytext);
                 printf("%s : CHARACTER\n", yytext);
                 yylval.character = strdup(yytext);
-                return Character;
+                return CHARACTER;
             }
 
 ";"			{chars++;
