@@ -36,12 +36,12 @@ void yyerror(const char* s);
 }
 
 %token <string> IDENTIFIER;
-%token <number> integer
-%token <floatValue> float_T
+%token <number> INTEGER
+%token <floatValue> FLOAT_T
 %token <string> string
 
 %token <string> SEMICOLON
-%token <string> EQUALS
+%token <string> Equals
 %token <string> WRITE
 %token <string> WRITELN
 
@@ -69,7 +69,7 @@ void yyerror(const char* s);
 
 %token <string> RETURN
 
-%token <string> character
+%token <string> Character
 
 %left ADD
 %left SUBTRACT
@@ -173,13 +173,9 @@ Expression:
 
     | AddSubtractExpression
 
-    | IDENTIFIER EQUALS Expression {
+    | IDENTIFIER Equals Expression {
         //printf("\nMatched an ASSIGNMENT Expression: %s = \n");
         //printf("\nRULE RECOGNIZED: ASSIGNMENT STATEMENT \n");
-    }
-
-    | IDENTIFIER ADD ADD {
-
     }
 
 ;
@@ -190,16 +186,16 @@ BuildingBlock:
 
     }
     
-    | float_T {
+    | FLOAT_T {
         //printf("\nRULE RECOGNIZED: FLOAT \n");
     }
 
-    | integer {
+    | INTEGER {
         //printf("\nRULE RECOGNIZED: INTEGER \n");
     }
     
-    | character {
-        //printf("\nRULE RECOGNIZED: CHARACTER \n");
+    | Character {
+        //printf("\nRULE RECOGNIZED: Character \n");
     }
 ;
 
@@ -235,7 +231,7 @@ Operand:
 
     }
 
-    | integer {
+    | INTEGER {
 
     }
 

@@ -28,9 +28,9 @@ word        [a-zA-Z_][a-zA-Z0-9_]*
 digit       [0-9]
 IDENTIFIER  {letter}({letter}|{digit})*
 delim       [ \t\n]
-integer	    {digit}+
-float_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
-character   ["'"]({letter}|{digit})["'"]
+INTEGER     {digit}+
+FLOAT_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
+Character  ["'"]({letter}|{digit})["'"]
 
 
 %% 
@@ -114,16 +114,16 @@ character   ["'"]({letter}|{digit})["'"]
 			return IDENTIFIER;
 			}
 			
-{integer}	{words++; chars += strlen(yytext);
+{INTEGER}	{words++; chars += strlen(yytext);
 				printf("%s : INTEGER\n",yytext);
 				yylval.number = atoi(strdup(yytext)); 
-				return integer;
+				return INTEGER;
 			}
 
-{float_T}     {words++; chars+= strlen(yytext);
+{FLOAT_T}     {words++; chars+= strlen(yytext);
                 printf("%s : FLOAT_T\n", yytext);
                 yylval.floatValue = atof(yytext);
-                return float_T;
+                return FLOAT_T;
             }
 
 {string}    {words++; chars+= strlen(yytext);
@@ -132,10 +132,10 @@ character   ["'"]({letter}|{digit})["'"]
                 return string;
             }
 
-{character} {words++; chars+= strlen(yytext);
+{Character} {words++; chars+= strlen(yytext);
                 printf("%s : CHARACTER\n", yytext);
                 yylval.character = strdup(yytext);
-                return character;
+                return Character;
             }
 
 ";"			{chars++;
@@ -147,7 +147,7 @@ character   ["'"]({letter}|{digit})["'"]
 "="			{chars++;
 			printf("%s : EQUALS\n", yytext);
 			yylval.string = strdup(yytext); 
-			return EQUALS;
+			return Equals;
 		}
 
 "=="	{chars++;
