@@ -21,6 +21,8 @@ extern int yylineno;
 
 extern FILE* yyin;
 
+int computeEquation(struct AST* num1, struct AST* num2, char operator);
+
 void yyerror(const char* s);
 
 %}
@@ -227,12 +229,29 @@ AddSubtractExpression:
 
     | AddSubtractExpression SUBTRACT MultiplyDivideExpression {
 
-        
-        //$$ = insertIntoAST(T_INT, "", value);
+        char value[5];
+
+        char operatorArray[3];
+
+        sprintf(operatorArray, "%s", $2);
+
+        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+        $$ = insertIntoAST(T_INT, "", value);
 
     }
 
     | AddSubtractExpression ADD MultiplyDivideExpression {
+
+        char value[5];
+
+        char operatorArray[3];
+
+        sprintf(operatorArray, "%s", $2);
+
+        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+        $$ = insertIntoAST(T_INT, "", value);
 
     }
 ;
@@ -243,9 +262,29 @@ MultiplyDivideExpression:
 
     | MultiplyDivideExpression MULTIPLY Operand {
 
+        char value[5];
+
+        char operatorArray[3];
+
+        sprintf(operatorArray, "%s", $2);
+
+        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+        $$ = insertIntoAST(T_INT, "", value);
+
     }
 
     | MultiplyDivideExpression DIVIDE Operand {
+
+        char value[5];
+
+        char operatorArray[3];
+
+        sprintf(operatorArray, "%s", $2);
+
+        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+        $$ = insertIntoAST(T_INT, "", value);
 
     }
 ;
@@ -303,5 +342,58 @@ int main(int argc, char**argv)
 	  }
 	}
 	yyparse();
+
+}
+
+int computeEquation(struct AST* num1, struct AST* num2, char operator) {
+	char mipsVal1[10];
+	char mipsVal2[10];
+	int val1; int val2;	
+	val1 = atoi(num1->RHS);
+	val2 = atoi(num2->RHS);
+	
+	if (!(num1->nodeType, T_IDENTIFIER)) {
+		strcpy(mipsVal1, num1->LHS);
+	} else {
+		strcpy(mipsVal1, num1->RHS);
+	}
+
+	if (!(num2->nodeType, T_IDENTIFIER)) {
+		strcpy(mipsVal2, num2->LHS);
+	} else {
+		strcpy(mipsVal2, num2->RHS);
+	}
+	/*if (inFunction) {*/
+	/*	emitMIPSEquation(mipsVal1, mipsVal2, operator);*/
+	/*}*/
+
+	/* char newVal[3]; */
+	int newVal;
+	/* printf("Equation detected: %d %c %d", val1, operator, val2); */
+
+	switch (operator) {
+		case '+':
+			newVal = val1 + val2;
+			/* sprintf(newVal, "%d", val1 + val2); */
+			/* printf("Addtion Expr found!\n"); */
+			break;
+		case '-':
+			newVal = val1 - val2;
+			/* sprintf(newVal, "%d", val1 - val2); */
+			/* printf("Subtraction Expr found!\n"); */
+			break;
+		case '*':
+			newVal = val1 * val2;
+			/* sprintf(newVal, "%d", val1 * val2); */
+			/* printf("Multiplication Expr found!\n"); */
+			break;
+		case '/':
+			newVal = val1 / val2;
+			/* sprintf(newVal, "%d", val1 / val2); */
+			/* printf("Division Expr found!\n"); */
+			break;
+	}
+
+	/* printf("Newval = %d\n", newVal); */
 
 }

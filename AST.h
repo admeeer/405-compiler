@@ -17,8 +17,8 @@ typedef enum {
 
 const char* nodeTypeToString(NodeType type) {
     switch (type) {
-        case T_TYPE: return "TYPE";
         case T_ASSIGNMENT: return "ASSIGNMENT";
+        case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
         case T_WRITELN: return "WRITELN";
@@ -64,7 +64,7 @@ void printAST(struct AST* tree, int level){
     printDots(level);
     printf("%s\n", nodeTypeToString(tree->nodeType));
     printDots(level);
-    printf("left %s right %s\n", tree->LHS, tree->RHS);
+    printf("%s %s\n", tree->LHS, tree->RHS);
     if(tree->right != NULL) printAST(tree->right, level+1); else return;
     if(tree->left != NULL) printAST(tree->left, level+1); else return;
     
