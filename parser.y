@@ -127,16 +127,32 @@ VariableDeclaration:
 
     TYPE IDENTIFIER SEMICOLON {
         
+        printf("the LHS and RHS respectively are %s and %s", $1->LHS, $1->RHS);
         printf("The node type of $1 is %s", nodeTypeToString($1->nodeType));
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+        //$$ = insertIntoAST(T_TYPE,"INT", $2);
 
     }
 
 ;
 
-TYPE: INT {}
-    | FLOAT {}
-    | CHAR {}
+TYPE: 
+
+    INT {
+    
+        $$ = insertIntoAST(T_INT, "", "");
+    
+    }
+    | FLOAT {
+
+        $$ = insertIntoAST(T_FLOAT, "", "");
+
+    }
+    | CHAR {
+
+        $$ = insertIntoAST(T_CHAR, "", "");
+        
+    }
 ;
 
 StatementList:
