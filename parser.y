@@ -90,7 +90,7 @@ Program:
 
     DeclarationList {
         $$ = $1;
-        printAST($$, 3);
+        //printAST($$, 3);
     }
 ;
 DeclarationList:
@@ -151,7 +151,7 @@ TYPE:
     | CHAR {
 
         $$ = insertIntoAST(T_CHAR, "", "");
-        
+
     }
 ;
 
@@ -251,6 +251,7 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
+        printf("trying to compute %d and %d", $1, $3);
         sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
 
         $$ = insertIntoAST(T_INT, "", value);
@@ -264,7 +265,7 @@ AddSubtractExpression:
         char operatorArray[3];
 
         sprintf(operatorArray, "%s", $2);
-
+        printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
         sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
 
         $$ = insertIntoAST(T_INT, "", value);
