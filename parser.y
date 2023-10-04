@@ -88,6 +88,7 @@ Program:
 
     DeclarationList {
         $$ = $1;
+        printAST($$, 3);
     }
 ;
 DeclarationList:
@@ -124,6 +125,7 @@ VariableDeclaration:
 
     TYPE IDENTIFIER SEMICOLON {
         
+        printf("The node type of $1 is %s", nodeTypeToString($1->nodeType));
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
 
     }
@@ -207,7 +209,7 @@ BuildingBlock:
     | INTEGER {
 
         char value[10];
-        sprintf(value, "%f", $1);
+        sprintf(value, "%d", $1);
         $$ = insertIntoAST(T_INT, "", value);
 
     }
@@ -252,14 +254,22 @@ Operand:
 
     IDENTIFIER {
 
+        $$ = insertIntoAST(T_IDENTIFIER, "", $1);
+
     }
 
     | INTEGER {
+
+        char value[10];
+        sprintf(value, "%d", $1);
+        $$ = insertIntoAST(T_INT, "", value);
 
     }
 
     | LPAREN AddSubtractExpression RPAREN {
         
+        $$ = insertIntoAST(T_INT, "", $2->RHS);
+
     }
 
 ;

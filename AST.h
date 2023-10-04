@@ -64,7 +64,7 @@ void printAST(struct AST* tree, int level){
     printDots(level);
     printf("%s\n", nodeTypeToString(tree->nodeType));
     printDots(level);
-    printf("%s %s\n", tree->LHS, tree->RHS);
+    printf("left %s right %s\n", tree->LHS, tree->RHS);
     if(tree->right != NULL) printAST(tree->right, level+1); else return;
     if(tree->left != NULL) printAST(tree->left, level+1); else return;
     
