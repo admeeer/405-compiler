@@ -7,8 +7,8 @@ typedef enum {
     S_VARIABLE
 } SymbolType;
 
-const char* SymbolTypeToString(SymbolType Type) {
-    switch (Type) {
+const char* SymbolTypeToString(SymbolType type) {
+    switch (type) {
         case S_VARIABLE: return "VARIABLE";
         default: return "UNDEFINED";
     }
@@ -25,13 +25,13 @@ typedef struct Symbol {
 Symbol* GlobalSymbolTable = NULL;
 
 // Function to add a symbol
-void SymbolTableInsertInto(char identifier[50], SymbolType SymbolType, NodeType SymbolNodeType) {
+void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType symbolNodeType) {
 
     Symbol* symbol = malloc(sizeof(Symbol));
 
     strcpy(symbol->SymbolIdentifier, identifier);
-    symbol->SymbolType = SymbolType;
-    symbol->SymbolNodeType = SymbolNodeType;
+    symbol->SymbolType = symbolType;
+    symbol->SymbolNodeType = symbolNodeType;
     //strcpy(symbol->SymbolValue, value);
     symbol->Adjacent = GlobalSymbolTable;
 
