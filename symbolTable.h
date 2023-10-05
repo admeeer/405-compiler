@@ -27,28 +27,27 @@ Symbol* GlobalSymbolTable = NULL;
 // Function to add a symbol
 void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType symbolNodeType) {
 
-    Symbol* symbol = malloc(sizeof(Symbol));
+    Symbol* Node = malloc(sizeof(Symbol));
 
-    strcpy(symbol->SymbolIdentifier, identifier);
-    symbol->SymbolType = symbolType;
-    symbol->SymbolNodeType = symbolNodeType;
-    //strcpy(symbol->SymbolValue, value);
-    symbol->Adjacent = GlobalSymbolTable;
+    strcpy(Node->SymbolIdentifier, identifier);
+    Node->SymbolType = symbolType;
+    Node->SymbolNodeType = symbolNodeType;
+    Node->Adjacent = GlobalSymbolTable;
 
-    GlobalSymbolTable = symbol;
+    GlobalSymbolTable = Node;
 }
 
 int SymbolTableExists(char identifier[50]) {
 
-    Symbol* node = GlobalSymbolTable;
+    Symbol* Node = GlobalSymbolTable;
 
-    while (node) {
+    while (Node) {
 
-        if (strcmp(node->SymbolIdentifier, identifier) == 0) {
+        if (strcmp(Node->SymbolIdentifier, identifier) == 0) {
             return 1;
         }
 
-        node = node->Adjacent;
+        Node = Node->Adjacent;
 
     }
     return 0;
@@ -61,13 +60,13 @@ void SymbolTablePrint() {
     printf("\nidentifier    SymbolValue  SymbolType  SymbolNodeType\n");
     printf("-                                               -\n");
 
-    Symbol* node = GlobalSymbolTable;
+    Symbol* Node = GlobalSymbolTable;
 
-    while (node) {
+    while (Node) {
 
-        printf("%10s %10s %10s %10s\n", node->SymbolIdentifier, node->SymbolValue, SymbolTypeToString(node->SymbolType), nodeTypeToString(node->SymbolNodeType));
+        printf("%10s %10s %10s %10s\n", Node->SymbolIdentifier, Node->SymbolValue, SymbolTypeToString(Node->SymbolType), nodeTypeToString(Node->SymbolNodeType));
 
-        node = node->Adjacent;
+        Node = Node->Adjacent;
 
     }
 
@@ -84,15 +83,15 @@ char* SymbolTableGetValue(char identifier[50]) {
 
    }
 
-   Symbol* node = GlobalSymbolTable;
+   Symbol* Node = GlobalSymbolTable;
 
-   while (node) {
+   while (Node) {
 
-        if (!strcmp(node->SymbolIdentifier, identifier)) {
-            return node->SymbolValue;
+        if (!strcmp(Node->SymbolIdentifier, identifier)) {
+            return Node->SymbolValue;
         }
 
-        node = node->Adjacent;
+        Node = Node->Adjacent;
 
    }
 
@@ -108,17 +107,17 @@ void SymbolTableSetValue(char identifier[50], char value[25]) {
 
    }
 
-   Symbol* node = GlobalSymbolTable;
+   Symbol* Node = GlobalSymbolTable;
 
-   while (node) {
+   while (Node) {
 
-        if (!strcmp(node->SymbolIdentifier, identifier)) {
-            strcpy(node->SymbolValue, value);
+        if (!strcmp(Node->SymbolIdentifier, identifier)) {
+            strcpy(Node->SymbolValue, value);
             SymbolTablePrint();
             return;
         }
 
-        node = node->Adjacent;
+        Node = Node->Adjacent;
 
    }
 
@@ -131,15 +130,15 @@ NodeType SymbolTableGetNodeType(char identifier[50]) {
 
    }
 
-   Symbol* node = GlobalSymbolTable;
+   Symbol* Node = GlobalSymbolTable;
 
-   while (node) {
+   while (Node) {
 
-        if (!strcmp(node->SymbolIdentifier, identifier)) {
-            return node->SymbolNodeType;
+        if (!strcmp(Node->SymbolIdentifier, identifier)) {
+            return Node->SymbolNodeType;
         }
 
-        node = node->Adjacent;
+        Node = Node->Adjacent;
 
    }
 
