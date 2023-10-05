@@ -79,3 +79,14 @@ void printNode(struct AST* node) {
     printf("%s %s\n\n", node->LHS, node->RHS);
 
 }
+
+void generateIR(struct AST* node) {
+    if(node == NULL) return;
+
+    if(strcmp(nodeTypeToString(node->nodeType), "UNDEFINED")) {
+        printf("type is %s left is %s and right is %s\n\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
+    }
+
+    generateIR(node->left);
+    generateIR(node->right);
+}

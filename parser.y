@@ -10,7 +10,8 @@
 
 #include "AST.h"
 #include "parser.tab.h"
-//#include "sT.h"
+#include "symbolTable.h"
+
 //#include "IRC.h"
 //#include "MIPSc.h"
 
@@ -90,7 +91,8 @@ Program:
 
     DeclarationList {
         $$ = $1;
-        //printAST($$, 3);
+        printAST($$, 3);
+        generateIR($$);
     }
 ;
 DeclarationList:
@@ -131,6 +133,11 @@ VariableDeclaration:
         //printf("The node type of $1 is %s", nodeTypeToString($1->nodeType));
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
         //$$ = insertIntoAST(T_TYPE,"INT", $2);
+
+        if(!SymbolTableExists($2)){
+            SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
+            SymbolTablePrint();
+        }
 
     }
 
@@ -202,8 +209,19 @@ Expression:
 
     | IDENTIFIER Equals Expression {
         
-        $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
+        //printf("IDENTIFIER Equals Expression $1 = %s and $3 = %s\n", $1, $3->RHS);
 
+        if(!SymbolTableExists($1)) {
+            perror("Parser Semantic Error! Tried setting an undeclared variable to a value!");
+        }
+
+        if(SymbolTableGetNodeType($1) != $3->nodeType) {
+            perror("Parser Type Mismatch Error! Attempted to assign a type to a different type!");
+        } 
+
+        SymbolTableSetValue($1, $3->RHS);
+
+        $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
     }
 
 ;
@@ -251,7 +269,7 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        printf("trying to compute %d and %d", $1, $3);
+        //printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
         sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
 
         $$ = insertIntoAST(T_INT, "", value);
@@ -265,8 +283,12 @@ AddSubtractExpression:
         char operatorArray[3];
 
         sprintf(operatorArray, "%s", $2);
-        printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
+
+        //printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
         sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+
+        //printf("the value of compute equation is %d and the value of value is %s\n", computeEquation($1, $3, operatorArray[0]), value);
 
         $$ = insertIntoAST(T_INT, "", value);
 
@@ -310,7 +332,7 @@ Operand:
 
     IDENTIFIER {
 
-        $$ = insertIntoAST(T_IDENTIFIER, "", $1);
+        $$ = insertIntoAST(T_IDENTIFIER, $1, SymbolTableGetValue($1));
 
     }
 
@@ -379,13 +401,15 @@ int computeEquation(struct AST* num1, struct AST* num2, char operator) {
 	val1 = atoi(num1->RHS);
 	val2 = atoi(num2->RHS);
 	
-	if (!(num1->nodeType, T_IDENTIFIER)) {
+	if (!(num1->nodeType == T_IDENTIFIER)) {
+        //printf("got here at some point\n");
 		strcpy(mipsVal1, num1->LHS);
+        //printf("num1 lhs is %s\n", num1->LHS);
 	} else {
 		strcpy(mipsVal1, num1->RHS);
 	}
 
-	if (!(num2->nodeType, T_IDENTIFIER)) {
+	if (!(num2->nodeType == T_IDENTIFIER)) {
 		strcpy(mipsVal2, num2->LHS);
 	} else {
 		strcpy(mipsVal2, num2->RHS);
@@ -420,7 +444,7 @@ int computeEquation(struct AST* num1, struct AST* num2, char operator) {
 			/* printf("Division Expr found!\n"); */
 			break;
 	}
-
+    return newVal;
 	/* printf("Newval = %d\n", newVal); */
 
 }
