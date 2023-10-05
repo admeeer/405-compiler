@@ -11,7 +11,7 @@
 #include "AST.h"
 #include "parser.tab.h"
 //#include "sT.h"
-//#include "IRc.h"
+//#include "IRC.h"
 //#include "MIPSc.h"
 
 extern int yylex();
@@ -127,8 +127,8 @@ VariableDeclaration:
 
     TYPE IDENTIFIER SEMICOLON {
         
-        printf("the LHS and RHS respectively are %s and %s", $1->LHS, $1->RHS);
-        printf("The node type of $1 is %s", nodeTypeToString($1->nodeType));
+        //printf("the LHS and RHS respectively are %s and %s", $1->LHS, $1->RHS);
+        //printf("The node type of $1 is %s", nodeTypeToString($1->nodeType));
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
         //$$ = insertIntoAST(T_TYPE,"INT", $2);
 
@@ -348,9 +348,13 @@ int main(int argc, char**argv)
 {
 
     //yydebug = 1;
-	printf("\n\n##### COMPILER STARTED #####\n\n");
 
-	
+	printf("\n\nCompiler initialized!\n\n");
+
+    //printf("Initializing intermediate code files ...\n\n");
+
+    //IR_initFile();
+
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
           {
@@ -358,7 +362,13 @@ int main(int argc, char**argv)
 		return(1);
 	  }
 	}
+
 	yyparse();
+
+    //printf("\nEmitting intermediate code to file...\n\n");
+
+    //emitEndOfAssemblyCodeIR();
+
 
 }
 
