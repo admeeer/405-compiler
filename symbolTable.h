@@ -24,7 +24,6 @@ typedef struct Symbol {
 
 Symbol* GlobalSymbolTable = NULL;
 
-// Function to add a symbol
 void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType symbolNodeType) {
 
     Symbol* Node = malloc(sizeof(Symbol));
@@ -53,8 +52,6 @@ int SymbolTableExists(char identifier[50]) {
     return 0;
 }
 
-
-
 void SymbolTablePrint() {
 
     printf("\nidentifier    SymbolValue  SymbolType  SymbolNodeType\n");
@@ -72,7 +69,6 @@ void SymbolTablePrint() {
 
     printf("-                                               -\n\n");
 }
-
 
 char* SymbolTableGetValue(char identifier[50]) {
 
@@ -143,6 +139,5 @@ NodeType SymbolTableGetNodeType(char identifier[50]) {
    }
 
 }
-
 
 #endif // SYMBOL_TABLE_H
