@@ -99,6 +99,7 @@ void emitIntVarIR(char id[50], int val) {
 
 void addMainToDataIR() {
 
+    IRC = fopen("IRC.ir", "a+");
     intermediateIRC = fopen("intermediateIRC.ir", "a+");
     //funcs = fopen("funcs.ir", "a+");
  
@@ -118,6 +119,8 @@ void addMainToDataIR() {
     }
 
     fprintf(IRC, "\n");
+
+    fclose(IRC);
 
     //remove(intermediateIRC);
     
