@@ -11,8 +11,9 @@
 #include "AST.h"
 #include "parser.tab.h"
 #include "symbolTable.h"
+#include "IRC.h"
 
-//#include "IRC.h"
+
 //#include "MIPSc.h"
 
 extern int yylex();
@@ -92,7 +93,8 @@ Program:
     DeclarationList {
         $$ = $1;
         printAST($$, 3);
-        generateIR($$);
+        IREmission($$);
+        //generateIR($$);
     }
 ;
 DeclarationList:
@@ -136,7 +138,7 @@ VariableDeclaration:
 
         if(!SymbolTableExists($2)){
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
-            SymbolTablePrint();
+            //SymbolTablePrint();
         }
 
     }
@@ -191,6 +193,8 @@ Statement:
 
     | WRITE Expression SEMICOLON {
         
+        SymbolTableSetSymbolUsed($2->RHS);
+
         $$ = insertIntoAST(T_WRITE, "", $2->RHS);
     }
 
@@ -371,11 +375,11 @@ int main(int argc, char**argv)
 
     //yydebug = 1;
 
-	printf("\n\nCompiler initialized!\n\n");
+	printf("\n\nLexer & Parser Initialized!\n\n");
 
-    //printf("Initializing intermediate code files ...\n\n");
+    printf("Initializing Intermediate Code Representation Files ...\n\n");
 
-    //IR_initFile();
+    IRInitializeFile();
 
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
@@ -387,9 +391,10 @@ int main(int argc, char**argv)
 
 	yyparse();
 
-    //printf("\nEmitting intermediate code to file...\n\n");
+    printf("\nCalling for Emission to Intermediate Code Representation Files ...\n\n");
 
-    //emitEndOfAssemblyCodeIR();
+    IREmissionCleanUp();
+
 
 
 }

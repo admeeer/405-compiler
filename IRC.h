@@ -1,127 +1,93 @@
 
 // CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
 
-FILE * intermediateIRC;
+FILE * IRCMain;
+FILE * IRCData;
 FILE * IRC;
 
-void  IR_initFile() {
 
-    
-    intermediateIRC = fopen("intermediateIRC.ir", "w");
-    IRC = fopen("IRC.ir", "w");
-    
-    if(intermediateIRC == NULL) {
-        perror("Failed to initialize intermediateIRC file!");
+void IRInitializeFile() {
+
+    IRCMain = fopen("IRCMain.ir", "w");
+
+    if(IRCMain == NULL) {
+        perror("Failed to initialize file IRCMain !");
     }
+
+    IRCData = fopen("IRCData.ir", "w");
+
+    if(IRCData == NULL) {
+        perror("Failed to initialize file IRCData !");
+    }
+
+    IRC = fopen("IRC.ir", "w");
 
     if(IRC == NULL) {
-        perror("Failed to initialize IRC file!");
+        perror("Failed to initialize file IRC !");
     }
+
+    fprintf(IRCMain, "main:\n\n");
+
+    fprintf(IRCData, "data:\n\n");
+
+    fclose(IRCMain);
+
+    fclose(IRCData);
     
-    fprintf(intermediateIRC, "main\n\n");
-
-    fprintf(IRC, "data\n\n");
-
-    fclose(intermediateIRC);
-
 }
 
-void emitIRAssignment(char * id1, char * id2){
-    intermediateIRC = fopen("intermediateIRC.ir", "a");
+void IREmission(struct AST* leaf) {
 
-    fprintf(intermediateIRC, "load t1,%s\n", id1);
-    fprintf(intermediateIRC, "load t2,%s\n", id2);
-    fprintf(intermediateIRC, "load t2, t1\n");
-
-    fclose(intermediateIRC);
-}
-
-void emitintermediateIRConstantIntAssignment (int id1, char id2[50]){
-    intermediateIRC = fopen("intermediateIRC.ir", "a");
-
-    fprintf(intermediateIRC, "load t%d,%s\n", id1, id2);
-
-    fclose(intermediateIRC);
-}
-
-void emitIRWriteInt(int n){
-    intermediateIRC = fopen("intermediateIRC.ir", "a");
-
-    fprintf(intermediateIRC, "load v0, 1\n");
-    fprintf(intermediateIRC, "load a0, %d\n", n);
-    fprintf(intermediateIRC, "system call\n");
-
-    fclose(intermediateIRC);
-}
-
-void emitIRWriteId(char id[50], char type[5]){
-    intermediateIRC = fopen("intermediateIRC.ir", "a");
-
-    if (strcmp(type, "INT") == 0) {
-        fprintf(intermediateIRC, "load v0, 1\n");
-        fprintf(intermediateIRC, "load word a0, %s\n", id);
-    } 
-    else { 
-        fprintf(intermediateIRC, "load v0, 4\n");
-        fprintf(intermediateIRC, "load address a0, %s\n", id);
-    }
-    fprintf(intermediateIRC, "system call\n");    
-
-    fclose(intermediateIRC);
-}
-
-void emitintermediateIRCharDecl (char id[50], char c) {
-    IRC = fopen("IRC.ir", "a");
-
-    fprintf(IRC, "%s byte \'%c\'", id, c);
-
-    fclose(IRC);
-}
-
-void emitEndOfAssemblyCodeIR(){
-    intermediateIRC = fopen("intermediateIRC.ir", "a ");
-
-    fprintf(intermediateIRC, "load v0, 10\n");
-    fprintf(intermediateIRC, "system call\n");
-
-    fclose(intermediateIRC);    
-}
-
-void emitIntVarIR(char id[50], int val) {
-
-    IRC = fopen("IRC.ir", "a ");
-
-    fprintf(IRC, "%s: word  %d\n", id, val);
-
-    fclose(IRC); 
-
-}
-
-void addMainToDataIR() {
-
-    IRC = fopen("IRC.ir", "a+");
-    intermediateIRC = fopen("intermediateIRC.ir", "a+");
-    //funcs = fopen("funcs.ir", "a+");
- 
-    // If file is not found then return.
-    if (!IRC || !intermediateIRC) {
-        printf("Error: IRC or intermediateIRC never initialized!");
+    if(leaf == NULL) {
         return;
     }
- 
+
+    switch(leaf->nodeType){
+        case T_EQUALS:
+            if(SymbolTableGetSymbolUsed(leaf->LHS)){
+                IRCData = fopen("IRCData.ir", "a");
+                fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
+                fclose(IRCData);
+            }
+            break;
+        case T_WRITE:
+            IRCMain = fopen("IRCMain.ir", "a");
+            fprintf(IRCMain, "write %s\n", leaf->RHS);
+            fclose(IRCMain);
+            
+    }
+
+    IREmission(leaf->left);
+    IREmission(leaf->right);
+  
+}
+
+void IREmissionCleanUp() {
+
+    IRCData = fopen("IRCData.ir", "r");
+    IRCMain = fopen("IRCMain.ir", "r");
+    IRC = fopen("IRC.ir", "w");
+
+    if(!IRC || !IRCMain || !IRCData) {
+        perror("Failed to open one or more files for IR Emission CleanUp !");
+    }
+
     char buf[100];
 
+    while (fgets(buf, sizeof(buf), IRCData)) {
+        fprintf(IRC, "%s", buf);
+
+    }
+
     fprintf(IRC, "\n");
- 
-    while (!feof(intermediateIRC)) {
-        fgets(buf, sizeof(buf), intermediateIRC);
+
+    while(fgets(buf, sizeof(buf), IRCMain)) {
         fprintf(IRC, "%s", buf);
     }
 
-    fprintf(IRC, "\n");
-
+    fclose(IRCData);
+    fclose(IRCMain);
     fclose(IRC);
 
-    //remove(intermediateIRC);
-    
-}  
+}
+
