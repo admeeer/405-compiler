@@ -3,5 +3,6 @@ parser
 parser.output
 parser.tab.c
 parser.tab.h
+IRCMain.ir
+IRCData.ir
 IRC.ir
-IntermediateIRC.ir
