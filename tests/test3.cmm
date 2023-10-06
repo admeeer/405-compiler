@@ -2,8 +2,11 @@ int x;
 int y;
 int z;
 
-x = 1;
-y = 2;
-z = x + y;
+x = 1 + 2 + 5 + 17;
+
+write x;
+
+y = 2 + x;
+z = x - 23 + y + 116;
 
 write z;
