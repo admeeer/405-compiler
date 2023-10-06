@@ -82,7 +82,7 @@ int SymbolTableGetSymbolUsed(char identifier[50]) {
         Node = Node->Adjacent;
 
    }
-   
+
 }
 
 int SymbolTableExists(char identifier[50]) {

@@ -76,6 +76,7 @@ void IREmissionCleanUp() {
 
     while (fgets(buf, sizeof(buf), IRCData)) {
         fprintf(IRC, "%s", buf);
+
     }
 
     fprintf(IRC, "\n");
@@ -89,3 +90,4 @@ void IREmissionCleanUp() {
     fclose(IRC);
 
 }
+
