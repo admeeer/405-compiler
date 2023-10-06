@@ -4,4 +4,4 @@ parser.output
 parser.tab.c
 parser.tab.h
 IRC.ir
-intermediateIRC.ir
+IntermediateIRC.ir
