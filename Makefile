@@ -12,5 +12,5 @@ parser: lex.yy.c parser.tab.c parser.tab.h AST.h
 
 clean:
 	clear
-	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output IRC.ir intermediateIRC.ir
+	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output IRCMain.ir IRCData.ir
 	ls -l

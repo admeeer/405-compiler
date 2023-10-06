@@ -1,152 +1,91 @@
 
 // CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
 
-FILE * IntermediateRepresentationCode;
-FILE * IntermediateRepresentationCodeData;
+FILE * IRCMain;
+FILE * IRCData;
+FILE * IRC;
 
 
 void IRInitializeFile() {
 
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "w");
+    IRCMain = fopen("IRCMain.ir", "w");
 
-    if(IntermediateRepresentationCode == NULL) {
-        perror("Failed to initialize file IntermediateRepresentationCode !");
+    if(IRCMain == NULL) {
+        perror("Failed to initialize file IRCMain !");
     }
 
-    IntermediateRepresentationCodeData = fopen("IntermediateRepresentationCodeData.ir", "w");
+    IRCData = fopen("IRCData.ir", "w");
 
-    if(IntermediateRepresentationCodeData == NULL) {
-        perror("Failed to initialize file IntermediateRepresentationCodeData !");
+    if(IRCData == NULL) {
+        perror("Failed to initialize file IRCData !");
     }
 
-    fprintf(IntermediateRepresentationCode, "main\n\n");
+    IRC = fopen("IRC.ir", "w");
 
-    fprintf(IntermediateRepresentationCodeData, "data\n\n");
+    if(IRC == NULL) {
+        perror("Failed to initialize file IRC !");
+    }
 
-    fclose(IntermediateRepresentationCode);
+    fprintf(IRCMain, "main:\n\n");
 
-    fclose(IntermediateRepresentationCodeData);
+    fprintf(IRCData, "data:\n\n");
+
+    fclose(IRCMain);
+
+    fclose(IRCData);
     
 }
 
-void  IR_initFile() {
+void IREmission(struct AST* leaf) {
 
-    
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "w");
-    IntermediateRepresentationCodeData = fopen("IntermediateRepresentationCodeData.ir", "w");
-    
-    if(IntermediateRepresentationCode == NULL) {
-        perror("Failed to initialize IntermediateRepresentationCode file!");
-    }
-
-    if(IntermediateRepresentationCodeData == NULL) {
-        perror("Failed to initialize IntermediateRepresentationCodeData file!");
-    }
-    
-    fprintf(IntermediateRepresentationCode, "main\n\n");
-
-    fprintf(IntermediateRepresentationCodeData, "data\n\n");
-
-    fclose(IntermediateRepresentationCode);
-
-}
-
-void emitIRAssignment(char * id1, char * id2){
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "a");
-
-    fprintf(IntermediateRepresentationCode, "load t1,%s\n", id1);
-    fprintf(IntermediateRepresentationCode, "load t2,%s\n", id2);
-    fprintf(IntermediateRepresentationCode, "load t2, t1\n");
-
-    fclose(IntermediateRepresentationCode);
-}
-
-void emitIntermediateRepresentationCodeonstantIntAssignment (int id1, char id2[50]){
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "a");
-
-    fprintf(IntermediateRepresentationCode, "load t%d,%s\n", id1, id2);
-
-    fclose(IntermediateRepresentationCode);
-}
-
-void emitIRWriteInt(int n){
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "a");
-
-    fprintf(IntermediateRepresentationCode, "load v0, 1\n");
-    fprintf(IntermediateRepresentationCode, "load a0, %d\n", n);
-    fprintf(IntermediateRepresentationCode, "system call\n");
-
-    fclose(IntermediateRepresentationCode);
-}
-
-void emitIRWriteId(char id[50], char type[5]){
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "a");
-
-    if (strcmp(type, "INT") == 0) {
-        fprintf(IntermediateRepresentationCode, "load v0, 1\n");
-        fprintf(IntermediateRepresentationCode, "load word a0, %s\n", id);
-    } 
-    else { 
-        fprintf(IntermediateRepresentationCode, "load v0, 4\n");
-        fprintf(IntermediateRepresentationCode, "load address a0, %s\n", id);
-    }
-    fprintf(IntermediateRepresentationCode, "system call\n");    
-
-    fclose(IntermediateRepresentationCode);
-}
-
-void emitIntermediateRepresentationCodeharDecl (char id[50], char c) {
-    IntermediateRepresentationCodeData = fopen("IntermediateRepresentationCodeData.ir", "a");
-
-    fprintf(IntermediateRepresentationCodeData, "%s byte \'%c\'", id, c);
-
-    fclose(IntermediateRepresentationCodeData);
-}
-
-void emitEndOfAssemblyCodeIR(){
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "a ");
-
-    fprintf(IntermediateRepresentationCode, "load v0, 10\n");
-    fprintf(IntermediateRepresentationCode, "system call\n");
-
-    fclose(IntermediateRepresentationCode);    
-}
-
-void emitIntVarIR(char id[50], int val) {
-
-    IntermediateRepresentationCodeData = fopen("IntermediateRepresentationCodeData.ir", "a ");
-
-    fprintf(IntermediateRepresentationCodeData, "%s: word  %d\n", id, val);
-
-    fclose(IntermediateRepresentationCodeData); 
-
-}
-
-void addMainToDataIR() {
-
-    IntermediateRepresentationCodeData = fopen("IntermediateRepresentationCodeData.ir", "a+");
-    IntermediateRepresentationCode = fopen("IntermediateRepresentationCode.ir", "a+");
-    //funcs = fopen("funcs.ir", "a+");
- 
-    // If file is not found then return.
-    if (!IntermediateRepresentationCodeData || !IntermediateRepresentationCode) {
-        printf("Error: IntermediateRepresentationCodeData or IntermediateRepresentationCode never initialized!");
+    if(leaf == NULL) {
         return;
     }
- 
-    char buf[100];
 
-    fprintf(IntermediateRepresentationCodeData, "\n");
- 
-    while (!feof(IntermediateRepresentationCode)) {
-        fgets(buf, sizeof(buf), IntermediateRepresentationCode);
-        fprintf(IntermediateRepresentationCodeData, "%s", buf);
+    switch(leaf->nodeType){
+        case T_EQUALS:
+            if(SymbolTableGetSymbolUsed(leaf->LHS)){
+                IRCData = fopen("IRCData.ir", "a");
+                fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
+                fclose(IRCData);
+            }
+            break;
+        case T_WRITE:
+            IRCMain = fopen("IRCMain.ir", "a");
+            fprintf(IRCMain, "write %s\n", leaf->RHS);
+            fclose(IRCMain);
+            
     }
 
-    fprintf(IntermediateRepresentationCodeData, "\n");
+    IREmission(leaf->left);
+    IREmission(leaf->right);
+  
+}
 
-    fclose(IntermediateRepresentationCodeData);
+void IREmissionCleanUp() {
 
-    //remove(IntermediateRepresentationCode);
-    
-}  
+    IRCData = fopen("IRCData.ir", "r");
+    IRCMain = fopen("IRCMain.ir", "r");
+    IRC = fopen("IRC.ir", "w");
+
+    if(!IRC || !IRCMain || !IRCData) {
+        perror("Failed to open one or more files for IR Emission CleanUp !");
+    }
+
+    char buf[100];
+
+    while (fgets(buf, sizeof(buf), IRCData)) {
+        fprintf(IRC, "%s", buf);
+    }
+
+    fprintf(IRC, "\n");
+
+    while(fgets(buf, sizeof(buf), IRCMain)) {
+        fprintf(IRC, "%s", buf);
+    }
+
+    fclose(IRCData);
+    fclose(IRCMain);
+    fclose(IRC);
+
+}

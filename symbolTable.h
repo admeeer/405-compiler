@@ -20,6 +20,7 @@ typedef struct Symbol {
     NodeType SymbolNodeType;
     char SymbolValue[25];
     struct Symbol* Adjacent;
+    int IsSymbolUsed;
 } Symbol;
 
 Symbol* GlobalSymbolTable = NULL;
@@ -32,8 +33,56 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
     Node->SymbolType = symbolType;
     Node->SymbolNodeType = symbolNodeType;
     Node->Adjacent = GlobalSymbolTable;
+    Node->IsSymbolUsed = 0;
 
     GlobalSymbolTable = Node;
+}
+
+void SymbolTableSetSymbolUsed(char identifier[50]) {
+
+   if(!SymbolTableExists(identifier)){
+    perror("SymbolTable Error! Tried setting a value of a symbol that doesn't exist!");
+    
+    return NULL;
+
+   }
+
+   Symbol* Node = GlobalSymbolTable;
+
+   while (Node) {
+
+        if (!strcmp(Node->SymbolIdentifier, identifier)) {
+            Node->IsSymbolUsed = 1;
+            return;
+        }
+
+        Node = Node->Adjacent;
+
+   }
+    
+}
+
+int SymbolTableGetSymbolUsed(char identifier[50]) {
+
+   if(!SymbolTableExists(identifier)){
+    perror("SymbolTable Error! Tried setting a value of a symbol that doesn't exist!");
+    
+    return NULL;
+
+   }
+
+   Symbol* Node = GlobalSymbolTable;
+
+   while (Node) {
+
+        if (!strcmp(Node->SymbolIdentifier, identifier)) {
+            return Node->IsSymbolUsed;
+        }
+
+        Node = Node->Adjacent;
+
+   }
+   
 }
 
 int SymbolTableExists(char identifier[50]) {
@@ -109,7 +158,7 @@ void SymbolTableSetValue(char identifier[50], char value[25]) {
 
         if (!strcmp(Node->SymbolIdentifier, identifier)) {
             strcpy(Node->SymbolValue, value);
-            SymbolTablePrint();
+            //SymbolTablePrint();
             return;
         }
 
