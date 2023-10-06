@@ -8,7 +8,7 @@ lex.yy.c: lexer.l parser.tab.h
 
 parser: lex.yy.c parser.tab.c parser.tab.h AST.h
 	gcc -o parser parser.tab.c lex.yy.c
-	./parser tests/test2.cmm
+	./parser tests/test4.cmm
 
 clean:
 	clear
