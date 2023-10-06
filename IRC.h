@@ -79,7 +79,7 @@ void IREmissionCleanUp() {
 
     }
 
-    fprintf(IRC, "\n");
+    //fprintf(IRC, "\n");
 
     while(fgets(buf, sizeof(buf), IRCMain)) {
         fprintf(IRC, "%s", buf);
@@ -88,6 +88,8 @@ void IREmissionCleanUp() {
     fclose(IRCData);
     fclose(IRCMain);
     fclose(IRC);
+
+    MIPSEmission();
 
 }
 

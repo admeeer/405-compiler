@@ -14,7 +14,7 @@
 #include "IRC.h"
 
 
-//#include "MIPSc.h"
+#include "MIPSC.h"
 
 extern int yylex();
 extern int yyparse();
@@ -138,7 +138,7 @@ VariableDeclaration:
 
         if(!SymbolTableExists($2)){
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
-            //SymbolTablePrint();
+            SymbolTablePrint();
         }
 
     }
@@ -217,10 +217,13 @@ Expression:
 
         if(!SymbolTableExists($1)) {
             perror("Parser Semantic Error! Tried setting an undeclared variable to a value!");
+            exit(EXIT_FAILURE);
         }
 
         if(SymbolTableGetNodeType($1) != $3->nodeType) {
+            printf("%s and %s also %s and %s", nodeTypeToString(SymbolTableGetNodeType($1)), nodeTypeToString($3->nodeType), $3->LHS, $3->RHS);
             perror("Parser Type Mismatch Error! Attempted to assign a type to a different type!");
+            //exit(EXIT_FAILURE);
         } 
 
         SymbolTableSetValue($1, $3->RHS);
@@ -234,7 +237,7 @@ BuildingBlock:
 
     IDENTIFIER {
 
-        $$ = insertIntoAST(T_IDENTIFIER, "", $1);
+        $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1));
 
     }
     
@@ -380,6 +383,8 @@ int main(int argc, char**argv)
     printf("Initializing Intermediate Code Representation Files ...\n\n");
 
     IRInitializeFile();
+
+    MIPSInitializeFile();
 
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))
