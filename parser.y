@@ -14,7 +14,7 @@
 #include "IRC.h"
 
 
-//#include "MIPSc.h"
+#include "MIPSC.h"
 
 extern int yylex();
 extern int yyparse();
@@ -383,6 +383,8 @@ int main(int argc, char**argv)
     printf("Initializing Intermediate Code Representation Files ...\n\n");
 
     IRInitializeFile();
+
+    MIPSInitializeFile();
 
 	if (argc > 1){
 	  if(!(yyin = fopen(argv[1], "r")))

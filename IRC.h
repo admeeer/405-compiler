@@ -89,5 +89,7 @@ void IREmissionCleanUp() {
     fclose(IRCMain);
     fclose(IRC);
 
+    MIPSEmission();
+
 }
 

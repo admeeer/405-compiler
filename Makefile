@@ -8,9 +8,9 @@ lex.yy.c: lexer.l parser.tab.h
 
 parser: lex.yy.c parser.tab.c parser.tab.h AST.h
 	gcc -o parser parser.tab.c lex.yy.c
-	./parser tests/test2.cmm
+	./parser tests/test3.cmm
 
 clean:
 	clear
-	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output IRCMain.ir IRCData.ir IRC.ir
+	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output IRCMain.ir IRCData.ir IRC.ir MIPS.asm
 	ls -l
