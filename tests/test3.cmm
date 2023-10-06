@@ -6,7 +6,7 @@ x = 1 + 2 + 5 + 17;
 
 write x;
 
-y = 2 + x;
+y = 5 + x;
 z = x - 23 + y + 116;
 
 write z;
