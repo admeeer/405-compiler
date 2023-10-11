@@ -1,10 +1,13 @@
 
 // CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
 
+/* 
+We initialize two files, IRCMain & IRCData that merge into IRC
+We did this so we can write to .data and .text concurrently
+*/
 FILE * IRCMain;
 FILE * IRCData;
 FILE * IRC;
-
 
 void IRInitializeFile() {
 
@@ -35,7 +38,10 @@ void IRInitializeFile() {
     fclose(IRCData);
     
 }
-
+/*
+Create IR code based on the AST and SymbolTables
+This function should use the AST NodeType and SymbolTable SymbolType to correctly emit IR code
+*/
 void IREmission(struct AST* leaf) {
 
     if(leaf == NULL) {

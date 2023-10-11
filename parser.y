@@ -92,9 +92,8 @@ Program:
 
     DeclarationList {
         $$ = $1;
-        printAST($$, 3);
+        // We call IREmission here since this is the top of the program
         IREmission($$);
-        //generateIR($$);
     }
 ;
 DeclarationList:
@@ -131,11 +130,12 @@ VariableDeclaration:
 
     TYPE IDENTIFIER SEMICOLON {
         
-        //printf("the LHS and RHS respectively are %s and %s", $1->LHS, $1->RHS);
-        //printf("The node type of $1 is %s", nodeTypeToString($1->nodeType));
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
-        //$$ = insertIntoAST(T_TYPE,"INT", $2);
 
+        /*
+        If the variable doesn't exist, put it in the SymbolTable
+        TO-DO, add error handling
+        */
         if(!SymbolTableExists($2)){
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
             SymbolTablePrint();
