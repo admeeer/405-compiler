@@ -21,6 +21,8 @@ extern int yyparse();
 extern int yydebug;
 extern int yylineno;
 
+int ErrorFlag = 0;
+
 extern FILE* yyin;
 
 int computeEquation(struct AST* num1, struct AST* num2, char operator);
@@ -373,6 +375,7 @@ BinOp: ADD {}
 void yyerror(const char *str)
 {
     fprintf(stderr,"Error | Line: %d\n%s\n",yylineno,str);
+    ErrorFlag = 1;
 }
 
 int main(int argc, char**argv)
@@ -398,11 +401,14 @@ int main(int argc, char**argv)
 
 	yyparse();
 
-    printf("\nCalling for Emission to Intermediate Code Representation Files ...\n\n");
 
-    IREmissionCleanUp();
+    if(!ErrorFlag) {
+        printf("\nCalling for Emission to Intermediate Code Representation Files ...\n\n");
 
-
+        IREmissionCleanUp();       
+    } else {
+        printf("Aborting\n");
+    }
 
 }
 
