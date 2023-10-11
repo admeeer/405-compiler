@@ -21,16 +21,16 @@ int lines = 0;
 /* this pattern matches a string that starts and ends with a double quote and may contain */
 /* any characters in between, except for unescaped double-quotes or newlines. It also supports */
 /* escape sequences that begin with a backslash followed by any character or a newline */
-string		"\"([^\"\n]|(\\.))*\"" 
+STRING		"\"([^\"\n]|(\\.))*\"" 
 
-letter      [a-zA-Z]
-word        [a-zA-Z_][a-zA-Z0-9_]*
-digit       [0-9]
-IDENTIFIER  {letter}({letter}|{digit})*
-delim       [ \t\n]
-INTEGER     {digit}+
-FLOAT_T      {digit}+(\.{digit}+)?(E[+\-]?(digit)+)?     
-CHARACTER  ["'"]({letter}|{digit})["'"]
+LETTER      [a-zA-Z]
+WORD        [a-zA-Z_][a-zA-Z0-9_]*
+DIGIT       [0-9]
+IDENTIFIER  {LETTER}({LETTER}|{DIGIT})*
+DELIM       [ \t\n]
+INTEGER     {DIGIT}+
+FLOAT_T      {DIGIT}+(\.{DIGIT}+)?(E[+\-]?(DIGIT)+)?     
+CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
 
 
 %% 
@@ -126,10 +126,10 @@ CHARACTER  ["'"]({letter}|{digit})["'"]
                 return FLOAT_T;
             }
 
-{string}    {words++; chars+= strlen(yytext);
+{STRING}    {words++; chars+= strlen(yytext);
                 printf("%s : STRING\n", yytext);
                 yylval.character = strdup(yytext);
-                return string;
+                return STRING;
             }
 
 {CHARACTER} {words++; chars+= strlen(yytext);
