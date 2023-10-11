@@ -1,8 +1,9 @@
 ## CST 405 - Principle of Compiler Design Lecture & Lab
 #### Made by Alexander Peltier, Matthew Powers, and Parker Spaan
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A compiler for the `C--` language made using Bison & Flex 
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ### Prerequisites
 
