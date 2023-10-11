@@ -42,7 +42,7 @@ void yyerror(const char* s);
 %token <string> IDENTIFIER;
 %token <number> INTEGER
 %token <floatValue> FLOAT_T
-%token <string> string
+%token <string> STRING
 
 %token <string> SEMICOLON
 %token <string> Equals
