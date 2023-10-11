@@ -193,7 +193,9 @@ Statement:
 
     | WRITE Expression SEMICOLON {
         
-        SymbolTableSetSymbolUsed($2->RHS);
+        if(nodeTypeToString($2->nodeType) == T_IDENTIFIER){
+            SymbolTableSetSymbolUsed($2->RHS);
+        }
 
         $$ = insertIntoAST(T_WRITE, "", $2->RHS);
     }
