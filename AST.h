@@ -2,6 +2,10 @@
 
 #include <string.h>
 
+/*
+We want to capture what type of AST node we are creating so we can later reference it easily.
+Each AST node should contain a value, ASTValue, which is a struct based on rules (NodeTypes)
+*/
 typedef enum {
     T_ASSIGNMENT,
     T_TYPE,
@@ -78,15 +82,4 @@ void printNode(struct AST* node) {
     printDots(3);
     printf("%s %s\n\n", node->LHS, node->RHS);
 
-}
-
-void generateIR(struct AST* node) {
-    if(node == NULL) return;
-
-    if(strcmp(nodeTypeToString(node->nodeType), "UNDEFINED")) {
-        printf("type is %s left is %s and right is %s\n\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
-    }
-
-    generateIR(node->left);
-    generateIR(node->right);
 }
