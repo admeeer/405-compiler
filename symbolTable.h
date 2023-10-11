@@ -43,7 +43,7 @@ void SymbolTableSetSymbolUsed(char identifier[50]) {
    if(!SymbolTableExists(identifier)){
     perror("SymbolTable Error! Tried setting a value of a symbol that doesn't exist!");
     
-    return NULL;
+    return;
 
    }
 
@@ -67,7 +67,7 @@ int SymbolTableGetSymbolUsed(char identifier[50]) {
    if(!SymbolTableExists(identifier)){
     perror("SymbolTable Error! Tried setting a value of a symbol that doesn't exist!");
     
-    return NULL;
+    return -1;
 
    }
 
@@ -124,7 +124,7 @@ char* SymbolTableGetValue(char identifier[50]) {
    if(!SymbolTableExists(identifier)){
     perror("SymbolTable Error! Tried getting a value of a symbol that doesn't exist!");
     
-    return NULL;
+    return '\0';
 
    }
 
@@ -148,7 +148,7 @@ void SymbolTableSetValue(char identifier[50], char value[25]) {
    if(!SymbolTableExists(identifier)){
     perror("SymbolTable Error! Tried getting a value of a symbol that doesn't exist!");
     
-    return NULL;
+    return;
 
    }
 

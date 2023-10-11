@@ -33,7 +33,7 @@ void yyerror(const char* s);
 
     int number;
     float floatValue;
-    char character;
+    char* character;
     char* string;
     struct AST* ast;
 
@@ -138,7 +138,7 @@ VariableDeclaration:
         */
         if(!SymbolTableExists($2)){
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
-            SymbolTablePrint();
+            //SymbolTablePrint();
         }
 
     }
@@ -193,7 +193,7 @@ Statement:
 
     | WRITE Expression SEMICOLON {
         
-        if(nodeTypeToString($2->nodeType) == T_IDENTIFIER){
+        if($2->nodeType == T_IDENTIFIER){
             SymbolTableSetSymbolUsed($2->RHS);
         }
 
