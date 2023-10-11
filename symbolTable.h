@@ -39,7 +39,7 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
 }
 
 void SymbolTableSetSymbolUsed(char identifier[50]) {
-
+ 
    if(!SymbolTableExists(identifier)){
     perror("SymbolTable Error! Tried setting a value of a symbol that doesn't exist!");
     
