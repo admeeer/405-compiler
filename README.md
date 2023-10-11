@@ -6,8 +6,8 @@ A compiler for the `C--` language made using Bison & Flex
 ### Prerequisites
 
 This project requires `flex` and `bison`. 
-Get Flex: https://github.com/westes/flex/releases
-Get Bison: https://ftp.gnu.org/gnu/bison/
+- Get Flex: https://github.com/westes/flex/releases
+- Get Bison: https://ftp.gnu.org/gnu/bison/
 
 `flex` and `bison` are also available to download via package manager (Debian/Ubuntu, CentOS, MacOS)
 
