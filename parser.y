@@ -130,7 +130,14 @@ VariableDeclarationList:
 
 VariableDeclaration:
 
-    TYPE IDENTIFIER SEMICOLON {
+
+    TYPE IDENTIFIER Equals Expression SEMICOLON {
+        
+        //$$ = insertIntoAST(T_TYPE, )
+
+    }
+
+    | TYPE IDENTIFIER SEMICOLON {
         
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
 
