@@ -1,0 +1,37 @@
+name: build-and-test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: setup
+      run: make setup
+
+    - name: build
+      run: make all
+
+    - name: upload-build-file-as-artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifacts-all
+        path: build/
+
+    - name: upload-emission-as-artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: emission-artifacts-all
+        path: build/output
+
