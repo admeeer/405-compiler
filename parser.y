@@ -137,7 +137,7 @@ VariableDeclaration:
         SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
         printf("Value is %s", $4->RHS);
         SymbolTableSetValue($2, $4->RHS);
-        SymbolTablePrint();
+        //SymbolTablePrint();
 
 
 
@@ -247,7 +247,7 @@ Expression:
 
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
 
-        SymbolTablePrint();
+        //SymbolTablePrint();
     }
 
 ;
