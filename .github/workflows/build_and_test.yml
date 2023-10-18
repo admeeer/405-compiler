@@ -35,3 +35,5 @@ jobs:
         name: emission-artifacts-all
         path: build/output
 
+    - name: cleanup
+      run: make clean
