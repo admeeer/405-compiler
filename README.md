@@ -1,4 +1,4 @@
-## CST 405 - Principle of Compiler Design Lecture & Lab
+## ~~CST 405 - Principle of Compiler Design Lecture & Lab~~
 #### Made by Alexander Peltier, Matthew Powers, and Parker Spaan
 
 A compiler for the `C--` language made using Bison & Flex 
