@@ -19,6 +19,5 @@ setup:
 	mkdir -p $(BUILD_DIR)/output/asm
 
 clean:
-	clear
 	rm -rf $(BUILD_DIR)
 	ls -l
