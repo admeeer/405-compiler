@@ -8,13 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "AST.h"
+#include "../AST.h"
 #include "parser.tab.h"
-#include "symbolTable.h"
-#include "IRC.h"
-
-
-#include "MIPSC.h"
+#include "../symbolTable.h"
+#include "../IRC.h"
+#include "../MIPSC.h"
 
 extern int yylex();
 extern int yyparse();
@@ -22,6 +20,8 @@ extern int yydebug;
 extern int yylineno;
 
 int ErrorFlag = 0;
+
+char* BuildDirectory = "build/";
 
 extern FILE* yyin;
 

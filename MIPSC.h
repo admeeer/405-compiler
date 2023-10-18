@@ -1,26 +1,36 @@
+FILE* MIPS;
 
-FILE * MIPS;
+extern char* BuildDirectory;
 
 void MIPSInitializeFile() {
+    char MIPSAbsolutePath[256];
+    snprintf(MIPSAbsolutePath, sizeof(MIPSAbsolutePath), "%s/output/asm/MIPS.asm", BuildDirectory);
 
-    MIPS = fopen("MIPS.asm", "w");
+    MIPS = fopen(MIPSAbsolutePath, "w");
 
-    if(MIPS == NULL) {
+    if (MIPS == NULL) {
         perror("Failed to initialize file MIPS.asm!");
     }
 
     fclose(MIPS);
-    
 }
 
 void MIPSEmission() {
-    FILE* IRCFile = fopen("IRC.ir", "r");
+
+    char IRCAbsolutePath[256];
+
+     snprintf(IRCAbsolutePath, sizeof(IRCAbsolutePath), "%s/output/irc/IRC.ir", BuildDirectory);
+
+    FILE* IRCFile = fopen(IRCAbsolutePath, "r");
     if (!IRCFile) {
         perror("Failed to open IRC.ir for reading!");
         return;
     }
 
-    MIPS = fopen("MIPS.asm", "w");
+    char MIPSAbsolutePath[256];
+    snprintf(MIPSAbsolutePath, sizeof(MIPSAbsolutePath), "%s/output/asm/MIPS.asm", BuildDirectory);
+
+    MIPS = fopen(MIPSAbsolutePath, "w");
     if (MIPS == NULL) {
         perror("Failed to initialize file MIPS.asm!");
         return;
