@@ -130,7 +130,20 @@ VariableDeclarationList:
 
 VariableDeclaration:
 
-    TYPE IDENTIFIER SEMICOLON {
+
+    TYPE IDENTIFIER Equals AddSubtractExpression SEMICOLON {
+        
+        $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+        SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
+        printf("Value is %s", $4->RHS);
+        SymbolTableSetValue($2, $4->RHS);
+        //SymbolTablePrint();
+
+
+
+    }
+
+    | TYPE IDENTIFIER SEMICOLON {
         
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
 
@@ -233,6 +246,8 @@ Expression:
         SymbolTableSetValue($1, $3->RHS);
 
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
+
+        //SymbolTablePrint();
     }
 
 ;
