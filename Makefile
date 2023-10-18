@@ -1,16 +1,24 @@
-all: parser
+BUILD_DIR := build
 
-parser.tab.c parser.tab.h:	parser.y
-	bison -t -v -d parser.y
+.PHONY: all clean setup
 
-lex.yy.c: lexer.l parser.tab.h
-	flex lexer.l
+all: $(BUILD_DIR)/parser
 
-parser: lex.yy.c parser.tab.c parser.tab.h AST.h
-	gcc -o parser parser.tab.c lex.yy.c
-	./parser tests/test2.cmm
+$(BUILD_DIR)/parser.tab.c $(BUILD_DIR)/parser.tab.h: parser.y
+	bison -t -v -d -o $(BUILD_DIR)/parser.tab.c parser.y
+
+$(BUILD_DIR)/lex.yy.c: lexer.l $(BUILD_DIR)/parser.tab.h
+	flex -o $(BUILD_DIR)/lex.yy.c lexer.l
+
+$(BUILD_DIR)/parser: $(BUILD_DIR)/parser.tab.c $(BUILD_DIR)/lex.yy.c AST.h
+	gcc -o $(BUILD_DIR)/parser $(BUILD_DIR)/parser.tab.c $(BUILD_DIR)/lex.yy.c
+	./$(BUILD_DIR)/parser tests/test5.cmm
+
+setup:
+	mkdir -p $(BUILD_DIR)/output/irc
+	mkdir -p $(BUILD_DIR)/output/asm
 
 clean:
 	clear
-	rm -f parser lexer parser.tab.c lex.yy.c parser.tab.h parser.output IRCMain.ir IRCData.ir IRC.ir MIPS.asm
+	rm -rf $(BUILD_DIR)
 	ls -l

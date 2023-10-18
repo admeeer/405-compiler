@@ -16,7 +16,7 @@ This project requires `flex` and `bison`.
 ### Compiling
 
 1. Clone the repository to your local machine `git clone https://github.com/admeeer/405-compiler.git`
-2. To compile, run `make`
+2. To compile, run `make setup` and then `make all`
 3. To clean, run `make clean`
 
 
