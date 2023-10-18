@@ -3,7 +3,7 @@
 
 A compiler for the `C--` language made using Bison & Flex 
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Workflow](https://github.com/admeeer/405-compiler/actions/workflows/build_and_test.yml/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ### Prerequisites
 
