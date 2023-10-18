@@ -20,8 +20,8 @@ jobs:
     - name: setup
       run: make setup
 
-    - name: build
-      run: make all
+    - name: build-and-test
+      run: make test
 
     - name: upload-build-file-as-artifacts
       uses: actions/upload-artifact@v2
