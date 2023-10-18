@@ -1,7 +1,2 @@
-int x;
-int y;
-int z;
-x = 3 + 12;
-y = 1 + x;
-z = x + 125 + y - 54;
-write z;
+int x = 1;
+write x;
