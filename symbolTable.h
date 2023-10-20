@@ -47,8 +47,6 @@ typedef struct Symbol {
             struct Symbol* SymbolValueChild;
         } SymbolValue;
     } SymbolValueWrapper;
-
-    char SymbolValue[25];
     struct Symbol* Adjacent;
     int IsSymbolUsed;
 } Symbol;
@@ -146,8 +144,19 @@ void SymbolTablePrint() {
 char* SymbolTableGetValue(const char* identifier) {
 
    Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get a value of a Symbol that doesn't exist in the table!");
+    char buffer[100];
 
-   return Node->SymbolValue;
+    switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
+        case S_INT: 
+            snprintf(buffer, sizeof(buffer), "%d", Node->SymbolValueWrapper.SymbolValue.SymbolValueInt);
+            break;
+        case S_FLOAT: 
+            snprintf(buffer, sizeof(buffer), "%f", Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat);
+            break;
+        case S_CHAR: 
+            return Node->SymbolValueWrapper.SymbolValue.SymbolValueChar;
+    }
+    return strdup(buffer);
 
 }
 
@@ -157,14 +166,14 @@ void SymbolTableSetValue(const char* identifier, void* value) {
    // set symbol value based on symbol value node type
    switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
     case S_INT:
-        Node->SymbolValueWrapper.SymbolValue.SymbolValueInt = *(int)*value;
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueInt = *(int*)value;
         break;
     case S_FLOAT:
-        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = *(float)*value;
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = *(float*)value;
         break;
     case S_CHAR:
         char* buf = (char*)value;
-        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = strdup(buf);
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueChar = strdup(buf);
         break;
     case S_FUNCTION_CHILD:
         break;
