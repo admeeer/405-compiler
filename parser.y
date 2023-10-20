@@ -82,7 +82,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration FunctionDeclarationList CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -98,6 +98,7 @@ Program:
         IREmission($$);
     }
 ;
+
 DeclarationList:
 
     Declaration DeclarationList {
@@ -108,7 +109,10 @@ DeclarationList:
     | Declaration {
         $$ = $1;
     }
+
+    | FunctionDeclarationList
 ;
+
 Declaration:
 
     VariableDeclaration {}
@@ -129,7 +133,6 @@ VariableDeclarationList:
 ;
 
 VariableDeclaration:
-
 
     TYPE IDENTIFIER Equals AddSubtractExpression SEMICOLON {
         
@@ -156,6 +159,38 @@ VariableDeclaration:
             //SymbolTablePrint();
         }
 
+    }
+
+;
+
+FunctionDeclaration:
+
+    FUNCTION TYPE IDENTIFIER LPAREN {
+
+    }
+
+    ParameterDeclarationList RPAREN CodeBlock {
+
+    }
+;
+
+FunctionDeclarationList:
+
+    FunctionDeclaration
+
+    | FunctionDeclaration FunctionDeclarationList {
+
+    }
+;
+
+ParameterDeclarationList:
+
+;
+
+CodeBlock:
+
+    LCURLY DeclarationList RCURLY {
+        $$ = $2;
     }
 
 ;
@@ -192,12 +227,13 @@ StatementList:
 Statement:
 
     SEMICOLON {
-        //printf("\nRULE RECOGNIZED: SEMICOLON \n");
+
     }
 
     | Expression SEMICOLON {
-        //printf("\nRULE RECOGNIZED: STATEMENT DECLARATION \n");
+
         $$ = $1;
+
     }
 
     | RETURN Expression SEMICOLON {
@@ -247,7 +283,6 @@ Expression:
 
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
 
-        //SymbolTablePrint();
     }
 
 ;
