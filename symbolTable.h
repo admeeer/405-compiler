@@ -55,8 +55,8 @@ SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
     switch (node->SymbolNodeType) {
         case T_INT: return S_INT;
         case T_FLOAT: return S_FLOAT;
-        case T_CHAR: return T_CHAR;
-        case T_FUNCTION: return T_FUNCTION;    
+        case T_CHAR: return S_CHAR;
+        case T_FUNCTION: return S_FUNCTION_CHILD;    
     }
 }
 
