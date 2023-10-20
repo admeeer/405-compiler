@@ -82,7 +82,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -130,7 +130,6 @@ VariableDeclarationList:
 
 VariableDeclaration:
 
-
     TYPE IDENTIFIER Equals AddSubtractExpression SEMICOLON {
         
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
@@ -159,6 +158,26 @@ VariableDeclaration:
     }
 
 ;
+
+FunctionDeclaration:
+
+    FUNCTION TYPE IDENTIFIER LPAREN {
+
+    }
+
+    ParameterDeclarationList RPAREN CodeBlock {
+
+    }
+;
+
+ParameterDeclarationList:
+
+;
+
+CodeBlock:
+
+;
+
 
 TYPE: 
 
