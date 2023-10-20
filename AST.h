@@ -16,7 +16,8 @@ typedef enum {
     T_INT,
     T_IDENTIFIER,
     T_FLOAT,
-    T_CHAR
+    T_CHAR,
+    T_FUNCTION
 } NodeType;
 
 const char* nodeTypeToString(NodeType type) {
@@ -31,6 +32,7 @@ const char* nodeTypeToString(NodeType type) {
         case T_IDENTIFIER: return "IDENTIFIER";
         case T_FLOAT: return "FLOAT";
         case T_CHAR: return "CHARACTER";
+        case T_FUNCTION: return "FUNCTION";
         default: return "UNDEFINED";
     }
 }
