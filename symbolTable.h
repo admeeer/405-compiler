@@ -123,24 +123,6 @@ int SymbolTableGetSymbolUsed(const char* identifier) {
 
 }
 
-void SymbolTablePrint() {
-
-    printf("\nidentifier    SymbolValue  SymbolType  SymbolNodeType\n");
-    printf("-                                               -\n");
-
-    Symbol* Node = GlobalSymbolTable;
-
-    while (Node) {
-
-        printf("%10s %10s %10s %10s\n", Node->SymbolIdentifier, Node->SymbolValue, SymbolTypeToString(Node->SymbolType), nodeTypeToString(Node->SymbolNodeType));
-
-        Node = Node->Adjacent;
-
-    }
-
-    printf("-                                               -\n\n");
-}
-
 char* SymbolTableGetValue(const char* identifier) {
 
    Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get a value of a Symbol that doesn't exist in the table!");
@@ -158,6 +140,24 @@ char* SymbolTableGetValue(const char* identifier) {
     }
     return strdup(buffer);
 
+}
+
+void SymbolTablePrint() {
+
+    printf("\nidentifier    SymbolValue  SymbolType  SymbolNodeType\n");
+    printf("-                                               -\n");
+
+    Symbol* Node = GlobalSymbolTable;
+
+    while (Node) {
+
+        printf("%10s %10s %10s %10s\n", Node->SymbolIdentifier, SymbolTableGetValue(Node->SymbolIdentifier), SymbolTypeToString(Node->SymbolType), nodeTypeToString(Node->SymbolNodeType));
+
+        Node = Node->Adjacent;
+
+    }
+
+    printf("-                                               -\n\n");
 }
 
 void SymbolTableSetValue(const char* identifier, void* value) {
