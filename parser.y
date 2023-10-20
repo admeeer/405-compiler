@@ -98,6 +98,7 @@ Program:
         IREmission($$);
     }
 ;
+
 DeclarationList:
 
     Declaration DeclarationList {
@@ -108,7 +109,10 @@ DeclarationList:
     | Declaration {
         $$ = $1;
     }
+
+    | FunctionDeclarationList
 ;
+
 Declaration:
 
     VariableDeclaration {}
@@ -163,6 +167,8 @@ FunctionDeclaration:
 
     FUNCTION TYPE IDENTIFIER LPAREN {
 
+
+
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
@@ -175,6 +181,10 @@ ParameterDeclarationList:
 ;
 
 CodeBlock:
+
+    LCURLY DeclarationList RCURLY {
+        $$ = $2;
+    }
 
 ;
 
