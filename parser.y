@@ -167,11 +167,18 @@ FunctionDeclaration:
 
     FUNCTION TYPE IDENTIFIER LPAREN {
 
-
-
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
+
+    }
+;
+
+FunctionDeclarationList:
+
+    FunctionDeclaration
+
+    | FunctionDeclaration FunctionDeclarationList {
 
     }
 ;
@@ -187,7 +194,6 @@ CodeBlock:
     }
 
 ;
-
 
 TYPE: 
 
@@ -221,12 +227,13 @@ StatementList:
 Statement:
 
     SEMICOLON {
-        //printf("\nRULE RECOGNIZED: SEMICOLON \n");
+
     }
 
     | Expression SEMICOLON {
-        //printf("\nRULE RECOGNIZED: STATEMENT DECLARATION \n");
+
         $$ = $1;
+
     }
 
     | RETURN Expression SEMICOLON {
@@ -276,7 +283,6 @@ Expression:
 
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
 
-        //SymbolTablePrint();
     }
 
 ;
