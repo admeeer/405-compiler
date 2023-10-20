@@ -28,7 +28,7 @@ const char* SymbolValueTypeToString(SymbolValueType type) {
         case S_INT: return "INT";
         case S_FLOAT: return "FLOAT";
         case S_CHAR: return "CHAR";
-        case S_FUNCTION: return "FUNCTION";
+        case S_FUNCTION_CHILD: return "FUNCTION";
         default: return "UNDEFINED";
     }
 }
@@ -53,7 +53,14 @@ typedef struct Symbol {
     int IsSymbolUsed;
 } Symbol;
 
-
+SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
+    switch (node->SymbolNodeType) {
+        case T_INT: return S_INT;
+        case T_FLOAT: return S_FLOAT;
+        case T_CHAR: return T_CHAR;
+        case T_FUNCTION: return T_FUNCTION;    
+    }
+}
 
 Symbol* GlobalSymbolTable = NULL;
 
@@ -94,6 +101,7 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
     strcpy(Node->SymbolIdentifier, identifier);
     Node->SymbolType = symbolType;
     Node->SymbolNodeType = symbolNodeType;
+    Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = SymbolTableMatchSymbolValueType(Node);
     Node->Adjacent = GlobalSymbolTable;
     Node->IsSymbolUsed = 0;
 
@@ -148,27 +156,10 @@ void SymbolTableSetValue(const char* identifier, void* value) {
    Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to set a value of a Symbol that doesn't exist in the table!");
    // get symbol NodeType, set symbol value SymbolType, set symbol value
 
+   
+
+
 }
-
-void SymbolTableSetSymbolValueType(Symbol* node) {
-    switch (node->SymbolNodeType) {
-        case T_INT:
-            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_INT;
-            break;
-        case T_FLOAT:
-            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_FLOAT;
-            break;
-        case T_CHAR:
-            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_CHAR;
-            break;
-        case T_FUNCTION:
-            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_FUNCTION;
-            break;
-        
-    }
-}
-
-
 
 NodeType SymbolTableGetNodeType(const char* identifier) {
 
