@@ -154,8 +154,21 @@ char* SymbolTableGetValue(const char* identifier) {
 void SymbolTableSetValue(const char* identifier, void* value) {
 
    Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to set a value of a Symbol that doesn't exist in the table!");
-   // get symbol NodeType, set symbol value SymbolType, set symbol value
-
+   // set symbol value based on symbol value node type
+   switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
+    case S_INT:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueInt = *(int)*value;
+        break;
+    case S_FLOAT:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = *(float)*value;
+        break;
+    case S_CHAR:
+        char* buf = (char*)value;
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = strdup(buf);
+        break;
+    case S_FUNCTION_CHILD:
+        break;
+   }
    
 
 
