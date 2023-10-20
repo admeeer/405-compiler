@@ -8,9 +8,26 @@ typedef enum {
     S_FUNCTION
 } SymbolType;
 
+typedef enum {
+    S_INT,
+    S_FLOAT,
+    S_CHAR,
+    S_FUNCTION_CHILD
+} SymbolValueType;
+
 const char* SymbolTypeToString(SymbolType type) {
     switch (type) {
         case S_VARIABLE: return "VARIABLE";
+        case S_FUNCTION: return "FUNCTION";
+        default: return "UNDEFINED";
+    }
+}
+
+const char* SymbolValueTypeToString(SymbolValueType type) {
+    switch (type) {
+        case S_INT: return "INT";
+        case S_FLOAT: return "FLOAT";
+        case S_CHAR: return "CHAR";
         case S_FUNCTION: return "FUNCTION";
         default: return "UNDEFINED";
     }
@@ -21,40 +38,53 @@ typedef struct Symbol {
     SymbolType SymbolType;
     NodeType SymbolNodeType;
 
-    union SymbolValue {
-        int SymbolValueInt;
-        float SymbolValueFloat;
-        char* SymbolValueChar;
-        struct Symbol* SymbolValueChild;
-    };
+    struct symbolValueWrapper {
+        SymbolValueType SymbolValueWrapperSymbolValueType;
+        union symbolValue {
+            int SymbolValueInt;
+            float SymbolValueFloat;
+            char* SymbolValueChar;
+            struct Symbol* SymbolValueChild;
+        } SymbolValue;
+    } SymbolValueWrapper;
+
     char SymbolValue[25];
     struct Symbol* Adjacent;
     int IsSymbolUsed;
 } Symbol;
 
+
+
 Symbol* GlobalSymbolTable = NULL;
 
-int SymbolTableExists(const char* identifier) {
+Symbol* SymbolTableExists(const char* identifier) {
 
     Symbol* Node = GlobalSymbolTable;
 
     while (Node) {
 
         if (strcmp(Node->SymbolIdentifier, identifier) == 0) {
-            return 1;
+            return Node;
         }
 
         Node = Node->Adjacent;
 
     }
-    return 0;
+    return NULL;
 }
 
-void SymbolTableExistsHandler(const char* identifier, const char* errorDescription) {
-    if(!SymbolTableExists(identifier)) {
+Symbol* SymbolTableExistsHandler(const char* identifier, const char* errorDescription) {
+
+    Symbol* Node = SymbolTableExists(identifier);
+
+    if(Node){
+        return Node;
+    } else {
         fprintf(stderr, "Symbol Table Error: %s\n", errorDescription);
         exit(EXIT_FAILURE);
+        return NULL; // clarity  
     }
+
 }
 
 void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType symbolNodeType) {
@@ -72,38 +102,18 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
 
 void SymbolTableSetSymbolUsed(const char* identifier) {
 
-   SymbolTableExistsHandler(identifier, "Trying to set a Symbol as used that doesn't exist in the table!");
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to set a Symbol as used that doesn't exist in the table!");
 
-   Symbol* Node = GlobalSymbolTable;
+    Node->IsSymbolUsed = 1;
+    return;
 
-   while (Node) {
-
-        if (!strcmp(Node->SymbolIdentifier, identifier)) {
-            Node->IsSymbolUsed = 1;
-            return;
-        }
-
-        Node = Node->Adjacent;
-
-   }
-    
 }
 
 int SymbolTableGetSymbolUsed(const char* identifier) {
 
-   SymbolTableExistsHandler(identifier, "Trying to get whether a Symbol is used that doesn't exist in the table!");
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get whether a Symbol is used that doesn't exist in the table!");
 
-   Symbol* Node = GlobalSymbolTable;
-
-   while (Node) {
-
-        if (!strcmp(Node->SymbolIdentifier, identifier)) {
-            return Node->IsSymbolUsed;
-        }
-
-        Node = Node->Adjacent;
-
-   }
+    return Node->IsSymbolUsed;
 
 }
 
@@ -127,58 +137,44 @@ void SymbolTablePrint() {
 
 char* SymbolTableGetValue(const char* identifier) {
 
-   SymbolTableExistsHandler(identifier, "Trying to get a value of a Symbol that doesn't exist in the table!");
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get a value of a Symbol that doesn't exist in the table!");
 
-   Symbol* Node = GlobalSymbolTable;
-
-   while (Node) {
-
-        if (!strcmp(Node->SymbolIdentifier, identifier)) {
-            return Node->SymbolValue;
-        }
-
-        Node = Node->Adjacent;
-
-   }
-
+   return Node->SymbolValue;
 
 }
 
-void SymbolTableSetValue(const char* identifier, char value[25]) {
+void SymbolTableSetValue(const char* identifier, void* value) {
 
-   SymbolTableExistsHandler(identifier, "Trying to set a value of a Symbol that doesn't exist in the table!");
-
-   Symbol* Node = GlobalSymbolTable;
-
-   while (Node) {
-
-        if (!strcmp(Node->SymbolIdentifier, identifier)) {
-            strcpy(Node->SymbolValue, value);
-            //SymbolTablePrint();
-            return;
-        }
-
-        Node = Node->Adjacent;
-
-   }
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to set a value of a Symbol that doesn't exist in the table!");
+   // get symbol NodeType, set symbol value SymbolType, set symbol value
 
 }
+
+void SymbolTableSetSymbolValueType(Symbol* node) {
+    switch (node->SymbolNodeType) {
+        case T_INT:
+            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_INT;
+            break;
+        case T_FLOAT:
+            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_FLOAT;
+            break;
+        case T_CHAR:
+            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_CHAR;
+            break;
+        case T_FUNCTION:
+            node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType = S_FUNCTION;
+            break;
+        
+    }
+}
+
+
 
 NodeType SymbolTableGetNodeType(const char* identifier) {
 
-   SymbolTableExistsHandler(identifier, "Trying to get the NodeType of a Symbol that doesn't exist in the table!");
-
-   Symbol* Node = GlobalSymbolTable;
-
-   while (Node) {
-
-        if (!strcmp(Node->SymbolIdentifier, identifier)) {
-            return Node->SymbolNodeType;
-        }
-
-        Node = Node->Adjacent;
-
-   }
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get the NodeType of a Symbol that doesn't exist in the table!");
+   
+   return Node->SymbolNodeType;
 
 }
 
