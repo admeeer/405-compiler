@@ -82,7 +82,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration FunctionDeclarationList CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
