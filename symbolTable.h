@@ -117,7 +117,7 @@ void SymbolTableSetSymbolUsed(const char* identifier) {
 
 int SymbolTableGetSymbolUsed(const char* identifier) {
 
-   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get whether a Symbol is used that doesn't exist in the table!");
+    Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get whether a Symbol is used that doesn't exist in the table!");
 
     return Node->IsSymbolUsed;
 
@@ -125,7 +125,7 @@ int SymbolTableGetSymbolUsed(const char* identifier) {
 
 char* SymbolTableGetValue(const char* identifier) {
 
-   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get a value of a Symbol that doesn't exist in the table!");
+    Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get a value of a Symbol that doesn't exist in the table!");
     char buffer[100];
 
     switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
@@ -139,6 +139,36 @@ char* SymbolTableGetValue(const char* identifier) {
             return Node->SymbolValueWrapper.SymbolValue.SymbolValueChar;
     }
     return strdup(buffer);
+
+}
+
+void SymbolTableSetValue(const char* identifier, char* value) {
+
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to set a value of a Symbol that doesn't exist in the table!");
+
+   // set symbol value based on symbol value node type
+   switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
+    case S_INT:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueInt = atoi(value);
+        break;
+    case S_FLOAT:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = atof(value);
+        break;
+    case S_CHAR:
+        char* buf = (char*)value;
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueChar = strdup(buf);
+        break;
+    case S_FUNCTION_CHILD:
+        break;
+   }
+}
+
+
+NodeType SymbolTableGetNodeType(const char* identifier) {
+
+   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get the NodeType of a Symbol that doesn't exist in the table!");
+   
+   return Node->SymbolNodeType;
 
 }
 
@@ -159,37 +189,5 @@ void SymbolTablePrint() {
 
     printf("-                                               -\n\n");
 }
-
-void SymbolTableSetValue(const char* identifier, void* value) {
-
-   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to set a value of a Symbol that doesn't exist in the table!");
-   // set symbol value based on symbol value node type
-   switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
-    case S_INT:
-        Node->SymbolValueWrapper.SymbolValue.SymbolValueInt = *(int*)value;
-        break;
-    case S_FLOAT:
-        Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = *(float*)value;
-        break;
-    case S_CHAR:
-        char* buf = (char*)value;
-        Node->SymbolValueWrapper.SymbolValue.SymbolValueChar = strdup(buf);
-        break;
-    case S_FUNCTION_CHILD:
-        break;
-   }
-   
-
-
-}
-
-NodeType SymbolTableGetNodeType(const char* identifier) {
-
-   Symbol* Node = SymbolTableExistsHandler(identifier, "Trying to get the NodeType of a Symbol that doesn't exist in the table!");
-   
-   return Node->SymbolNodeType;
-
-}
-
 
 #endif // SYMBOL_TABLE_H
