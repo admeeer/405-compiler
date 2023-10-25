@@ -21,6 +21,8 @@ extern int yylineno;
 
 int ErrorFlag = 0;
 
+int Scope = 0;
+
 char* BuildDirectory = "build/";
 
 extern FILE* yyin;
@@ -118,11 +120,13 @@ DeclarationList:
 
 Declaration:
 
-    VariableDeclaration {}
+    VariableDeclaration { Scope = 0; }
 
-    | StatementList {}
 
-    | FunctionDeclaration {}
+    | StatementList { Scope = 0; }
+
+    | FunctionDeclaration { Scope = 0; }
+
 ;
 
 VariableDeclarationList: 
@@ -139,27 +143,40 @@ VariableDeclaration:
 
     TYPE IDENTIFIER Equals AddSubtractExpression SEMICOLON {
         
-        $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
-        SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
-        //printf("Value is %s", $4->RHS);
-        SymbolTableSetValue($2, $4->RHS);
-        //SymbolTablePrint();
+
+        if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+
+            SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType, Scope);
 
 
+            SymbolTableSetValue($2, $4->RHS, Scope);
+
+            $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
 
     }
 
     | TYPE IDENTIFIER SEMICOLON {
-        
-        $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
 
-        /*
-        If the variable doesn't exist, put it in the SymbolTable
-        TO-DO, add error handling
-        */
-        if(!SymbolTableExists($2)){
-            SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
-            //SymbolTablePrint();
+        if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+
+            SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType, Scope);
+
+            $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
         }
 
     }
@@ -180,7 +197,21 @@ FunctionDeclaration:
     FUNCTION TYPE IDENTIFIER LPAREN {
 
 
-        SymbolTableInsertInto($3, S_FUNCTION, $2->nodeType);
+        int FunctionScope = SymbolTableDefineScopeValue();
+        Scope = FunctionScope;
+
+        if(!SymbolTableExistsExternalFunctionCall($3, Scope)) {
+
+            SymbolTableInsertInto($3, S_FUNCTION, $2->nodeType, Scope);
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
+
+
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
@@ -190,9 +221,11 @@ FunctionDeclaration:
 
 ParameterDeclarationList:
 
+
     | ParameterDeclarationListTail {
 
     }
+
 
 ParameterDeclarationListTail:
     ParameterDeclaration {
@@ -208,8 +241,20 @@ ParameterDeclarationListTail:
 ParameterDeclaration:
 
     TYPE IDENTIFIER {
-        SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType);
-        printf("Got to the end of ParameterDeclaration!\n");
+
+
+        if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+
+            SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType, Scope);
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
+
+
     }
 
 CodeBlock:
@@ -265,14 +310,23 @@ Statement:
 
     | RETURN Expression SEMICOLON {
         
-        $$ = insertIntoAST(T_RETURN, "", $2->RHS);
+        if(nodeTypeToString($2->nodeType) == SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) {
+
+            $$ = insertIntoAST(T_RETURN, "", $2->RHS);
+        
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s Return type of %s != function declaration type of %s\n", nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope)));
+            exit(EXIT_FAILURE);
+
+        }
 
     }
 
     | WRITE Expression SEMICOLON {
         
         if($2->nodeType == T_IDENTIFIER){
-            SymbolTableSetSymbolUsed($2->RHS);
+            SymbolTableSetSymbolUsed($2->RHS, Scope);
         }
 
         $$ = insertIntoAST(T_WRITE, "", $2->RHS);
@@ -295,18 +349,18 @@ Expression:
         
         //printf("IDENTIFIER Equals Expression $1 = %s and $3 = %s\n", $1, $3->RHS);
 
-        if(!SymbolTableExists($1)) {
-            perror("Parser Semantic Error! Tried setting an undeclared variable to a value!");
+        if(!SymbolTableExistsExternalFunctionCall($1, Scope)) {
+            fprintf(stderr, "Semantic Error: Tried setting %s at scope %d to a value, but %s is undeclared", $1, Scope, $1);
             exit(EXIT_FAILURE);
         }
 
-        if(SymbolTableGetNodeType($1) != $3->nodeType) {
-            printf("%s and %s also %s and %s", nodeTypeToString(SymbolTableGetNodeType($1)), nodeTypeToString($3->nodeType), $3->LHS, $3->RHS);
-            perror("Parser Type Mismatch Error! Attempted to assign a type to a different type!");
-            //exit(EXIT_FAILURE);
+        if(SymbolTableGetNodeType($1, Scope) != $3->nodeType) {
+            //printf("%s and %s also %s and %s", nodeTypeToString(SymbolTableGetNodeType($1)), nodeTypeToString($3->nodeType), $3->LHS, $3->RHS);
+            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to sign type %s to type %s", SymbolTableGetNodeType($1, Scope), $3->nodeType);
+            exit(EXIT_FAILURE);
         } 
 
-        SymbolTableSetValue($1, $3->RHS);
+        SymbolTableSetValue($1, $3->RHS, Scope);
 
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
 
@@ -314,11 +368,16 @@ Expression:
 
 ;
 
+FunctionCall:
+    IDENTIFIER LPAREN ParameterDeclarationList RPAREN {
+
+    }
+
 BuildingBlock:
 
     IDENTIFIER {
 
-        $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1));
+        $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
 
     }
     
@@ -420,7 +479,7 @@ Operand:
 
     IDENTIFIER {
 
-        $$ = insertIntoAST(T_IDENTIFIER, $1, SymbolTableGetValue($1));
+        $$ = insertIntoAST(T_IDENTIFIER, $1, SymbolTableGetValue($1, Scope));
 
     }
 
