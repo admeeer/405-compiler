@@ -171,7 +171,9 @@ void SymbolTableSetSymbolUsed(const char* identifier, int scope) {
 
 int SymbolTableGetSymbolUsed(const char* identifier, int scope) {
 
+
     Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get whether a Symbol is used that doesn't exist in the table!");
+
 
     return Node->IsSymbolUsed;
 
@@ -179,7 +181,9 @@ int SymbolTableGetSymbolUsed(const char* identifier, int scope) {
 
 char* SymbolTableGetValue(const char* identifier, int scope) {
 
+
     Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get a value of a Symbol that doesn't exist in the table!");
+
     char buffer[100];
 
     switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
@@ -196,9 +200,11 @@ char* SymbolTableGetValue(const char* identifier, int scope) {
 
 }
 
+
 void SymbolTableSetValue(const char* identifier, char* value, int scope) {
 
    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to set a value of a Symbol that doesn't exist in the table!");
+
 
    // set symbol value based on symbol value node type
    switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
@@ -212,6 +218,7 @@ void SymbolTableSetValue(const char* identifier, char* value, int scope) {
         char* buf = (char*)value;
         Node->SymbolValueWrapper.SymbolValue.SymbolValueChar = strdup(buf);
         break;
+
     default: break;
    }
 }
@@ -227,6 +234,7 @@ void SymbolTableSetValue(const char* identifier, char* value, int scope) {
 }*/
 
 
+
 NodeType SymbolTableGetNodeType(const char* identifier, int scope) {
 
    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get the NodeType of a Symbol that doesn't exist in the table!");
@@ -237,14 +245,18 @@ NodeType SymbolTableGetNodeType(const char* identifier, int scope) {
 
 void SymbolTablePrint() {
 
+
     printf("\nidentifier    SymbolValue  SymbolType  SymbolNodeType Scope\n");
+
     printf("-                                               -\n");
 
     Symbol* Node = GlobalSymbolTable;
 
     while (Node) {
 
+
         printf("%10s %10s %10s %10s %10d\n", Node->SymbolIdentifier, SymbolTableGetValue(Node->SymbolIdentifier, Node->SymbolScope), SymbolTypeToString(Node->SymbolType), nodeTypeToString(Node->SymbolNodeType), Node->SymbolScope);
+
 
         Node = Node->Adjacent;
 

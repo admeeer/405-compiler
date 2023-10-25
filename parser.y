@@ -122,9 +122,11 @@ Declaration:
 
     VariableDeclaration { Scope = 0; }
 
+
     | StatementList { Scope = 0; }
 
     | FunctionDeclaration { Scope = 0; }
+
 ;
 
 VariableDeclarationList: 
@@ -141,9 +143,11 @@ VariableDeclaration:
 
     TYPE IDENTIFIER Equals AddSubtractExpression SEMICOLON {
         
+
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
 
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType, Scope);
+
 
             SymbolTableSetValue($2, $4->RHS, Scope);
 
@@ -179,9 +183,19 @@ VariableDeclaration:
 
 ;
 
+/*FunctionDeclarationList:
+
+    FunctionDeclaration
+
+    | FunctionDeclaration FunctionDeclarationList {
+
+    }
+;*/
+
 FunctionDeclaration:
 
     FUNCTION TYPE IDENTIFIER LPAREN {
+
 
         int FunctionScope = SymbolTableDefineScopeValue();
         Scope = FunctionScope;
@@ -197,6 +211,7 @@ FunctionDeclaration:
 
         }
 
+
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
@@ -206,9 +221,11 @@ FunctionDeclaration:
 
 ParameterDeclarationList:
 
+
     | ParameterDeclarationListTail {
 
     }
+
 
 ParameterDeclarationListTail:
     ParameterDeclaration {
@@ -225,6 +242,7 @@ ParameterDeclaration:
 
     TYPE IDENTIFIER {
 
+
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
 
             SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType, Scope);
@@ -235,6 +253,7 @@ ParameterDeclaration:
             exit(EXIT_FAILURE);
 
         }
+
 
     }
 
