@@ -64,7 +64,7 @@ void IREmission(struct AST* leaf) {
 
     switch (leaf->nodeType) {
         case T_EQUALS:
-            if (SymbolTableGetSymbolUsed(leaf->LHS)) {
+            if (SymbolTableGetSymbolUsed(leaf->LHS, 0)) {
                 IRCData = fopen(IRCDataAbsolutePath, "a");
                 fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
                 fclose(IRCData);
