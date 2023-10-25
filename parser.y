@@ -98,7 +98,7 @@ Program:
     DeclarationList {
         $$ = $1;
         // We call IREmission here since this is the top of the program
-        //printAST($$, 3);
+        printAST($$, 3);
         IREmission($$);
         //printAST($$, 3);
     }
@@ -152,6 +152,7 @@ VariableDeclaration:
             SymbolTableSetValue($2, $4->RHS, Scope);
 
             $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+            //printf("%s\n\n\n", nodeTypeToString($1->nodeType));
 
 
         } else {
@@ -170,7 +171,7 @@ VariableDeclaration:
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType, Scope);
 
             $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
-
+            printf("%s\n\n\n", nodeTypeToString($1->nodeType));
 
         } else {
 
@@ -215,7 +216,9 @@ FunctionDeclaration:
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
+        printf("This should be called, because this is literally the only fucking place we do this.\n");
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+        //printf("%s\n\n\n", nodeTypeToString($2->nodeType));
     }
 ;
 

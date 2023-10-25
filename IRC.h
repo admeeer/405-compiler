@@ -74,8 +74,11 @@ void IREmission(struct AST* leaf) {
             IRCMain = fopen(IRCMainAbsolutePath, "a");
             fprintf(IRCMain, "write %s\n", leaf->RHS);
             fclose(IRCMain);
+            break;
         case T_FUNCTION:
             printf("Function call in IREmission !\n");
+
+            break;
     }
 
     IREmission(leaf->left);

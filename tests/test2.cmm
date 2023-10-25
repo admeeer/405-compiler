@@ -1,4 +1,5 @@
-int z = 1;
+int z = 5;
+int y = 4;
 write z;
 
 function int sum(int x, int y){
