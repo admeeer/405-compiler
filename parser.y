@@ -138,7 +138,7 @@ VariableDeclaration:
         
         $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
         SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType);
-        printf("Value is %s", $4->RHS);
+        //printf("Value is %s", $4->RHS);
         SymbolTableSetValue($2, $4->RHS);
         //SymbolTablePrint();
 
