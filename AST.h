@@ -1,5 +1,8 @@
 // CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
 
+#ifndef AST_H
+#define AST_H
+
 #include <string.h>
 
 /*
@@ -85,3 +88,5 @@ void printNode(struct AST* node) {
     printf("%s %s\n\n", node->LHS, node->RHS);
 
 }
+
+#endif // AST_H

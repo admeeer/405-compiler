@@ -5,30 +5,34 @@
 
 typedef enum {
     S_VARIABLE,
-    S_FUNCTION
+    S_FUNCTION,
+    S_FUNCTION_PARAMETER
 } SymbolType;
 
 typedef enum {
-    S_INT,
-    S_FLOAT,
-    S_CHAR,
-    S_FUNCTION_CHILD
+    SV_INT,
+    SV_FLOAT,
+    SV_CHAR,
+    SV_PARAMETER,
+    SV_FUNCTION
 } SymbolValueType;
 
 const char* SymbolTypeToString(SymbolType type) {
     switch (type) {
         case S_VARIABLE: return "VARIABLE";
         case S_FUNCTION: return "FUNCTION";
+        case S_FUNCTION_PARAMETER: return "PARAMETER";
         default: return "UNDEFINED";
     }
 }
 
 const char* SymbolValueTypeToString(SymbolValueType type) {
     switch (type) {
-        case S_INT: return "INT";
-        case S_FLOAT: return "FLOAT";
-        case S_CHAR: return "CHAR";
-        case S_FUNCTION_CHILD: return "FUNCTION";
+        case SV_INT: return "INT";
+        case SV_FLOAT: return "FLOAT";
+        case SV_CHAR: return "CHAR";
+        case SV_PARAMETER: return "PARAMETER";
+        case SV_FUNCTION: return "FUNCTION";
         default: return "UNDEFINED";
     }
 }
@@ -53,10 +57,10 @@ typedef struct Symbol {
 
 SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
     switch (node->SymbolNodeType) {
-        case T_INT: return S_INT;
-        case T_FLOAT: return S_FLOAT;
-        case T_CHAR: return T_CHAR;
-        case T_FUNCTION: return T_FUNCTION;    
+        case T_INT: return SV_INT;
+        case T_FLOAT: return SV_FLOAT;
+        case T_CHAR: return SV_CHAR;
+        case T_FUNCTION: return SV_FUNCTION;    
     }
 }
 
@@ -129,13 +133,13 @@ char* SymbolTableGetValue(const char* identifier) {
     char buffer[100];
 
     switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
-        case S_INT: 
+        case SV_INT: 
             snprintf(buffer, sizeof(buffer), "%d", Node->SymbolValueWrapper.SymbolValue.SymbolValueInt);
             break;
-        case S_FLOAT: 
+        case SV_FLOAT: 
             snprintf(buffer, sizeof(buffer), "%f", Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat);
             break;
-        case S_CHAR: 
+        case SV_CHAR: 
             return Node->SymbolValueWrapper.SymbolValue.SymbolValueChar;
     }
     return strdup(buffer);
@@ -148,17 +152,17 @@ void SymbolTableSetValue(const char* identifier, char* value) {
 
    // set symbol value based on symbol value node type
    switch(Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType) {
-    case S_INT:
+    case SV_INT:
         Node->SymbolValueWrapper.SymbolValue.SymbolValueInt = atoi(value);
         break;
-    case S_FLOAT:
+    case SV_FLOAT:
         Node->SymbolValueWrapper.SymbolValue.SymbolValueFloat = atof(value);
         break;
-    case S_CHAR:
+    case SV_CHAR:
         char* buf = (char*)value;
         Node->SymbolValueWrapper.SymbolValue.SymbolValueChar = strdup(buf);
         break;
-    case S_FUNCTION_CHILD:
+    case SV_FUNCTION:
         break;
    }
 }

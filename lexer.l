@@ -138,6 +138,13 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
                 return CHARACTER;
             }
 
+
+","			{chars++;
+			printf("%s : COMMA\n", yytext);
+			yylval.string = strdup(yytext);
+			return COMMA;
+		}
+
 ";"			{chars++;
 			printf("%s : SEMICOLON\n", yytext);
 			yylval.string = strdup(yytext); 

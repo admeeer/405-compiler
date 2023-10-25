@@ -1,3 +1,8 @@
+// CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
+
+#ifndef MIPSC_H
+#define MIPSC_H
+
 FILE* MIPS;
 
 extern char* BuildDirectory;
@@ -71,3 +76,5 @@ void MIPSEmission() {
     fclose(IRCFile);
     fclose(MIPS);
 }
+
+#endif // MIPSC_H

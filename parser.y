@@ -46,6 +46,7 @@ void yyerror(const char* s);
 %token <floatValue> FLOAT_T
 %token <string> STRING
 
+%token <string> COMMA
 %token <string> SEMICOLON
 %token <string> Equals
 %token <string> WRITE
@@ -82,7 +83,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration FunctionDeclarationList CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -95,14 +96,16 @@ Program:
     DeclarationList {
         $$ = $1;
         // We call IREmission here since this is the top of the program
+        //printAST($$, 3);
         IREmission($$);
+        //printAST($$, 3);
     }
 ;
 
 DeclarationList:
 
     Declaration DeclarationList {
-        $1-> right = $2;
+        $1->right = $2;
         $$ = $1;
     }
 
@@ -110,16 +113,16 @@ DeclarationList:
         $$ = $1;
     }
 
-    | FunctionDeclarationList
+    //| FunctionDeclarationList
 ;
 
 Declaration:
 
     VariableDeclaration {}
 
-    | StatementList {
+    | StatementList {}
 
-    }
+    | FunctionDeclaration {}
 ;
 
 VariableDeclarationList: 
@@ -163,34 +166,58 @@ VariableDeclaration:
 
 ;
 
-FunctionDeclaration:
-
-    FUNCTION TYPE IDENTIFIER LPAREN {
-
-    }
-
-    ParameterDeclarationList RPAREN CodeBlock {
-
-    }
-;
-
-FunctionDeclarationList:
+/*FunctionDeclarationList:
 
     FunctionDeclaration
 
     | FunctionDeclaration FunctionDeclarationList {
 
     }
+;*/
+
+FunctionDeclaration:
+
+    FUNCTION TYPE IDENTIFIER LPAREN {
+
+
+        SymbolTableInsertInto($3, S_FUNCTION, $2->nodeType);
+    }
+
+    ParameterDeclarationList RPAREN CodeBlock {
+        $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+    }
 ;
 
 ParameterDeclarationList:
 
+    | ParameterDeclarationListTail {
+
+    }
+
+ParameterDeclarationListTail:
+    ParameterDeclaration {
+
+    }
+    
+    | ParameterDeclaration COMMA ParameterDeclarationListTail {
+        $1->right = $3;
+        $$ = $1;
+    }
 ;
+
+ParameterDeclaration:
+
+    TYPE IDENTIFIER {
+        SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType);
+        printf("Got to the end of ParameterDeclaration!\n");
+    }
 
 CodeBlock:
 
-    LCURLY DeclarationList RCURLY {
+    LBRACKET DeclarationList RBRACKET {
+        printf("Got to the code block.\n");
         $$ = $2;
+        printf("Got to the code block end.\n");
     }
 
 ;
@@ -436,7 +463,7 @@ int main(int argc, char**argv)
 	printf("\n\nLexer & Parser Initialized!\n\n");
 
     printf("Initializing Intermediate Code Representation Files ...\n\n");
-
+    
     IRInitializeFile();
 
     MIPSInitializeFile();
@@ -454,6 +481,8 @@ int main(int argc, char**argv)
 
     if(!ErrorFlag) {
         printf("\nCalling for Emission to Intermediate Code Representation Files ...\n\n");
+
+        SymbolTablePrint();
 
         IREmissionCleanUp();       
     } else {
