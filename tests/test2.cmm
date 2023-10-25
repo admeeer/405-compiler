@@ -1,2 +1,18 @@
-int x = 1;
-write x;
+int z = 1;
+write z;
+
+function int sum(int x, int y){
+    
+return x + y;
+
+}
+
+int w = 4;
+
+function int product(int a, int b){
+    
+return a * b;
+
+}
+
+int v = 1;

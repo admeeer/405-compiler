@@ -1,6 +1,9 @@
 
 // CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
 
+#ifndef IRC_H
+#define IRC_H
+
 /* 
 We initialize two files, IRCMain & IRCData that merge into IRC
 We did this so we can write to .data and .text concurrently
@@ -71,6 +74,8 @@ void IREmission(struct AST* leaf) {
             IRCMain = fopen(IRCMainAbsolutePath, "a");
             fprintf(IRCMain, "write %s\n", leaf->RHS);
             fclose(IRCMain);
+        case T_FUNCTION:
+            printf("Function call in IREmission !\n");
     }
 
     IREmission(leaf->left);
@@ -110,3 +115,5 @@ void IREmissionCleanUp() {
 
     MIPSEmission();
 }
+
+#endif // IRC_H
