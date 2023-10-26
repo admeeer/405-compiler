@@ -85,7 +85,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -102,6 +102,26 @@ Program:
         IREmission($$);
         //printAST($$, 3);
     }
+;
+
+BlockDeclarationList:
+    
+    BlockDeclaration BlockDeclarationList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+    | BlockDeclaration {
+        $$ = $1;
+    }
+;
+
+BlockDeclaration:
+
+    VariableDeclaration {}
+
+    | StatementList {}
+
 ;
 
 DeclarationList:
@@ -122,10 +142,9 @@ Declaration:
 
     VariableDeclaration { Scope = 0; }
 
-
     | StatementList { Scope = 0; }
 
-    | FunctionDeclaration { Scope = 0; }
+    | FunctionDeclaration { Scope = 0;}
 
 ;
 
@@ -195,7 +214,7 @@ VariableDeclaration:
 
 FunctionDeclaration:
 
-    FUNCTION TYPE IDENTIFIER LPAREN ParameterDeclarationList RPAREN CodeBlock {
+    FUNCTION TYPE IDENTIFIER LPAREN {
 
 
         int FunctionScope = SymbolTableDefineScopeValue();
@@ -213,8 +232,14 @@ FunctionDeclaration:
 
         }
 
-        $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+        //$$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
 
+
+    }
+
+    ParameterDeclarationList RPAREN CodeBlock {
+
+        $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
 
     }
 ;
@@ -259,7 +284,7 @@ ParameterDeclaration:
 ;
 CodeBlock:
 
-    LBRACKET DeclarationList RBRACKET {
+    LBRACKET BlockDeclarationList RBRACKET {
         $$ = $2;
         printAST($2, 3);
     }

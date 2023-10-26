@@ -3,7 +3,7 @@ int a = 1;
 int b = 2;
 
 function int sum(int x, int y, int z){
-    x = x + 4;
+    int m = 3;
     return x + y + z;
 }
 
