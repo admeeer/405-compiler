@@ -85,7 +85,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -216,7 +216,6 @@ FunctionDeclaration:
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
-        printf("This should be called, because this is literally the only fucking place we do this.\n");
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
         //printf("%s\n\n\n", nodeTypeToString($2->nodeType));
     }
@@ -259,13 +258,11 @@ ParameterDeclaration:
 
 
     }
-
+;
 CodeBlock:
 
     LBRACKET DeclarationList RBRACKET {
-        printf("Got to the code block.\n");
         $$ = $2;
-        printf("Got to the code block end.\n");
     }
 
 ;
@@ -348,6 +345,8 @@ Expression:
 
     | AddSubtractExpression
 
+    | FunctionCall
+
     | IDENTIFIER Equals Expression {
         
         //printf("IDENTIFIER Equals Expression $1 = %s and $3 = %s\n", $1, $3->RHS);
@@ -372,14 +371,27 @@ Expression:
 ;
 
 FunctionCall:
-    IDENTIFIER LPAREN ParameterDeclarationList RPAREN {
+    IDENTIFIER LPAREN FunctionCallList RPAREN {
+        printf("Recognized rule: Function Call \n");
+        $$ = insertIntoAST(T_FUNCTIONCALL, nodeTypeToString($3->nodeType), "0");
+    }
+;
+
+FunctionCallList: {}
+    | BuildingBlock {
 
     }
+
+    | BuildingBlock COMMA FunctionCallList {}
+
+;
+
 
 BuildingBlock:
 
     IDENTIFIER {
-
+        printf("Uh oh raggy!\n");
+        printf("Value of identifier %s at Scope %d is %s\n", $1, Scope, SymbolTableGetValue($1, Scope));
         $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
 
     }

@@ -1,19 +1,24 @@
-int z = 5;
-int y = 4;
-write z;
+int a = 1;
 
-function int sum(int x, int y){
-    
-return x + y;
+int b = 2;
 
+function int sum(int x, int y, int z){
+
+    return x + y + z;
 }
 
-int w = 4;
+int c = 3;
 
-function int product(int a, int b){
-    
-return a * b;
+function int product(int v, int w){
 
+    return v * w;
 }
 
-int v = 1;
+int d = 4;
+
+write a;
+write b;
+write c;
+write d;
+
+product(a, b);

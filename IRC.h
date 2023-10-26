@@ -76,6 +76,57 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
             break;
         case T_FUNCTION:
+            //printf("This was called. Leaf left is %s and right is %s, type is %s\n", leaf->LHS, leaf->RHS, nodeTypeToString(leaf->nodeType));
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "function %s %s (", leaf->LHS, leaf->RHS);
+            
+            if(SymbolTableSymbolValueSymbolExists(leaf->RHS, SymbolTableGetSymbolScope(leaf->RHS))){
+
+                int FunctionScope = SymbolTableGetSymbolScope(leaf->RHS);
+
+                if(SymbolTableSymbolValueSymbolExists(leaf->RHS, FunctionScope)){
+                    //char* Parameter = SymbolTableGetSymbolValueSymbol(leaf->RHS, FunctionScope);
+                    Symbol* Parameter = SymbolTableGetSymbolValueSymbol(leaf->RHS, FunctionScope);
+                    //fprintf(IRCMain, "%s %s", SymbolValueTypeToString(SymbolTableGetSymbolValueType(Parameter, FunctionScope)), Parameter);
+
+                    while(1) {
+                        //fprintf(IRCMain, "%s %s", SymbolValueTypeToString(SymbolTableGetSymbolValueType(Parameter, FunctionScope)), Parameter);
+                        fprintf(IRCMain, "%s %s", SymbolValueTypeToString(Parameter->SymbolValueWrapper.SymbolValueWrapperSymbolValueType), Parameter->SymbolIdentifier);
+                        if(Parameter->Adjacent){
+                            fprintf(IRCMain, ", ");
+                            Parameter = Parameter->Adjacent;
+                        }else {
+                            break;
+                        }
+                    }
+                    
+                    //printf("Parameter is %s\n", Parameter);
+                    /*while(1) {
+
+                        fprintf(IRCMain, "%s %s", SymbolValueTypeToString(SymbolTableGetSymbolValueType(Parameter, FunctionScope)), Parameter);
+
+                        if(SymbolTableSymbolValueAdjacentExists(Parameter, FunctionScope)) {
+                            Parameter = SymbolTableGetSymbolValueAdjacent(Parameter, FunctionScope);
+                        } else {
+                            break;
+                        }
+
+                    }*/                  
+                } else {
+                    printf("Doesn't exist?\n");
+                }
+
+                fprintf(IRCMain, ") {\n");
+
+                fprintf(IRCMain, "}\n");
+
+                fclose(IRCMain);
+
+                break;
+            }
+
+            fclose(IRCMain);
+
             printf("Function call in IREmission !\n");
 
             break;
