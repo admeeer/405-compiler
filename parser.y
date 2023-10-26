@@ -195,7 +195,7 @@ VariableDeclaration:
 
 FunctionDeclaration:
 
-    FUNCTION TYPE IDENTIFIER LPAREN {
+    FUNCTION TYPE IDENTIFIER LPAREN ParameterDeclarationList RPAREN CodeBlock {
 
 
         int FunctionScope = SymbolTableDefineScopeValue();
@@ -204,6 +204,7 @@ FunctionDeclaration:
         if(!SymbolTableExistsExternalFunctionCall($3, Scope)) {
 
             SymbolTableInsertInto($3, S_FUNCTION, $2->nodeType, Scope);
+            //$$ = insertIntoAST(T_FUNCTION, $2, $3);
 
         } else {
 
@@ -212,12 +213,9 @@ FunctionDeclaration:
 
         }
 
-
-    }
-
-    ParameterDeclarationList RPAREN CodeBlock {
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
-        //printf("%s\n\n\n", nodeTypeToString($2->nodeType));
+
+
     }
 ;
 
@@ -263,6 +261,7 @@ CodeBlock:
 
     LBRACKET DeclarationList RBRACKET {
         $$ = $2;
+        printAST($2, 3);
     }
 
 ;
@@ -310,9 +309,11 @@ Statement:
 
     | RETURN Expression SEMICOLON {
         
-        if(nodeTypeToString($2->nodeType) == SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) {
-
+        //rintf("RETURN statement accessed!\n");
+        if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) == 0) {
+            //printf("Return statement got here, too!\n");
             $$ = insertIntoAST(T_RETURN, "", $2->RHS);
+            
         
         } else {
 
@@ -372,7 +373,7 @@ Expression:
 
 FunctionCall:
     IDENTIFIER LPAREN FunctionCallList RPAREN {
-        printf("Recognized rule: Function Call \n");
+        //printf("Recognized rule: Function Call \n");
         $$ = insertIntoAST(T_FUNCTIONCALL, nodeTypeToString($3->nodeType), "0");
     }
 ;
@@ -390,8 +391,8 @@ FunctionCallList: {}
 BuildingBlock:
 
     IDENTIFIER {
-        printf("Uh oh raggy!\n");
-        printf("Value of identifier %s at Scope %d is %s\n", $1, Scope, SymbolTableGetValue($1, Scope));
+        //printf("Uh oh raggy!\n");
+        //printf("Value of identifier %s at Scope %d is %s\n", $1, Scope, SymbolTableGetValue($1, Scope));
         $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
 
     }

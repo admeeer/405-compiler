@@ -61,8 +61,11 @@ void IREmission(struct AST* leaf) {
 
     snprintf(IRCDataAbsolutePath, sizeof(IRCDataAbsolutePath), "%s/output/irc/IRCData.ir", BuildDirectory);
     snprintf(IRCMainAbsolutePath, sizeof(IRCMainAbsolutePath), "%s/output/irc/IRCMain.ir", BuildDirectory);
-
+    //printf("Loop through IR emission\n");
     switch (leaf->nodeType) {
+        case T_RETURN:
+            //printf("IRC processed an AST node with type RETURN\n");
+            break;
         case T_EQUALS:
             if (SymbolTableGetSymbolUsed(leaf->LHS, 0)) {
                 IRCData = fopen(IRCDataAbsolutePath, "a");

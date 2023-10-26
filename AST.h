@@ -60,6 +60,7 @@ struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
     node->nodeType = nodeType;
     node->LHS = strdup(LHS);
     node->RHS = strdup(RHS);
+    //printf("Node with type %s and LHS %s and RHS %s inserted into tree\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
 
     return node;
 }
@@ -76,6 +77,12 @@ void printAST(struct AST* tree, int level){
     printf("%s\n", nodeTypeToString(tree->nodeType));
     printDots(level);
     printf("%s %s\n", tree->LHS, tree->RHS);
+    if(tree->left) {
+        printf("AST test, tree is currently %s and %s, left is %s and %s\n", tree->LHS, tree->RHS, tree->left->LHS, tree->left->RHS);
+    }
+    if(tree->right) {
+        printf("AST test, tree is currently %s and %s, and right is %s and %s\n", tree->LHS, tree->RHS,tree->right->LHS, tree->right->RHS);
+    }
     if(tree->right != NULL) printAST(tree->right, level+1); else return;
     if(tree->left != NULL) printAST(tree->left, level+1); else return;
     
