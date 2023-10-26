@@ -85,7 +85,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration DeclarationList VariableDeclarationList VariableDeclaration FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -98,10 +98,30 @@ Program:
     DeclarationList {
         $$ = $1;
         // We call IREmission here since this is the top of the program
-        //printAST($$, 3);
+        printAST($$, 3);
         IREmission($$);
         //printAST($$, 3);
     }
+;
+
+BlockDeclarationList:
+    
+    BlockDeclaration BlockDeclarationList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+    | BlockDeclaration {
+        $$ = $1;
+    }
+;
+
+BlockDeclaration:
+
+    VariableDeclaration {}
+
+    | StatementList {}
+
 ;
 
 DeclarationList:
@@ -122,10 +142,9 @@ Declaration:
 
     VariableDeclaration { Scope = 0; }
 
-
     | StatementList { Scope = 0; }
 
-    | FunctionDeclaration { Scope = 0; }
+    | FunctionDeclaration { Scope = 0;}
 
 ;
 
@@ -152,6 +171,7 @@ VariableDeclaration:
             SymbolTableSetValue($2, $4->RHS, Scope);
 
             $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+            //printf("%s\n\n\n", nodeTypeToString($1->nodeType));
 
 
         } else {
@@ -170,7 +190,7 @@ VariableDeclaration:
             SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType, Scope);
 
             $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
-
+            printf("%s\n\n\n", nodeTypeToString($1->nodeType));
 
         } else {
 
@@ -203,6 +223,7 @@ FunctionDeclaration:
         if(!SymbolTableExistsExternalFunctionCall($3, Scope)) {
 
             SymbolTableInsertInto($3, S_FUNCTION, $2->nodeType, Scope);
+            //$$ = insertIntoAST(T_FUNCTION, $2, $3);
 
         } else {
 
@@ -211,11 +232,15 @@ FunctionDeclaration:
 
         }
 
+        //$$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+
 
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
+
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+
     }
 ;
 
@@ -256,13 +281,12 @@ ParameterDeclaration:
 
 
     }
-
+;
 CodeBlock:
 
-    LBRACKET DeclarationList RBRACKET {
-        printf("Got to the code block.\n");
+    LBRACKET BlockDeclarationList RBRACKET {
         $$ = $2;
-        printf("Got to the code block end.\n");
+        printAST($2, 3);
     }
 
 ;
@@ -310,9 +334,11 @@ Statement:
 
     | RETURN Expression SEMICOLON {
         
-        if(nodeTypeToString($2->nodeType) == SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) {
-
+        //rintf("RETURN statement accessed!\n");
+        if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) == 0) {
+            //printf("Return statement got here, too!\n");
             $$ = insertIntoAST(T_RETURN, "", $2->RHS);
+            
         
         } else {
 
@@ -345,6 +371,8 @@ Expression:
 
     | AddSubtractExpression
 
+    | FunctionCall
+
     | IDENTIFIER Equals Expression {
         
         //printf("IDENTIFIER Equals Expression $1 = %s and $3 = %s\n", $1, $3->RHS);
@@ -369,14 +397,27 @@ Expression:
 ;
 
 FunctionCall:
-    IDENTIFIER LPAREN ParameterDeclarationList RPAREN {
+    IDENTIFIER LPAREN FunctionCallList RPAREN {
+        //printf("Recognized rule: Function Call \n");
+        $$ = insertIntoAST(T_FUNCTIONCALL, nodeTypeToString($3->nodeType), "0");
+    }
+;
+
+FunctionCallList: {}
+    | BuildingBlock {
 
     }
+
+    | BuildingBlock COMMA FunctionCallList {}
+
+;
+
 
 BuildingBlock:
 
     IDENTIFIER {
-
+        //printf("Uh oh raggy!\n");
+        //printf("Value of identifier %s at Scope %d is %s\n", $1, Scope, SymbolTableGetValue($1, Scope));
         $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
 
     }
