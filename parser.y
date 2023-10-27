@@ -144,7 +144,7 @@ Declaration:
 
     | StatementList { Scope = 0; }
 
-    | FunctionDeclaration { Scope = 0;}
+    | FunctionDeclaration { Scope = 0; }
 
 ;
 
@@ -240,7 +240,7 @@ FunctionDeclaration:
     ParameterDeclarationList RPAREN CodeBlock {
 
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
-
+        $$->left = $8;
     }
 ;
 
