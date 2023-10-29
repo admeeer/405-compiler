@@ -222,13 +222,13 @@ int SymbolTableGetSymbolScope(const char* identifier) {
 
 }
 
-SymbolValueType SymbolTableGetSymbolValueTypeFromScope(int scope) {
+SymbolValueType SymbolTableGetSymbolValueTypeFromFunctionScope(int scope) {
 
     Symbol* Node = GlobalSymbolTable;
 
     while (Node) {
 
-        if(Node->SymbolScope == scope) {
+        if(Node->SymbolScope == scope && Node->SymbolType == S_FUNCTION) {
             return Node->SymbolValueWrapper.SymbolValueWrapperSymbolValueType;
         }
 

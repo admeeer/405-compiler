@@ -343,14 +343,14 @@ Statement:
         // Does the return type match the function type?
 
 
-        if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) == 0) {
+        if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromFunctionScope(Scope))) == 0) {
             //printf("Return statement got here, too!\n");
             $$ = insertIntoAST(T_RETURN, "", $2->RHS);
             
         
         } else {
 
-            fprintf(stderr, "Semantic Error: %s Return type of %s != function declaration type of %s\n", nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope)));
+            fprintf(stderr, "Semantic Error: %s Return type of %s != function declaration type of %s\n", nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromFunctionScope(Scope)));
             exit(EXIT_FAILURE);
 
         }
@@ -424,7 +424,6 @@ FunctionCallList: {}
 BuildingBlock:
 
     IDENTIFIER {
-
         
         // Are we in a function?
         if(Scope != 0){
@@ -448,6 +447,7 @@ BuildingBlock:
             }
 
            }
+
         } else {
 
             $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
