@@ -99,7 +99,9 @@ Program:
         $$ = $1;
         // We call IREmission here since this is the top of the program
         printAST($$, 3);
+
         Scope = 0;
+
         IREmission($$);
         //printAST($$, 3);
     }
@@ -145,7 +147,7 @@ Declaration:
 
     | StatementList { Scope = 0; }
 
-    | FunctionDeclaration { Scope = 0; }
+    | FunctionDeclaration { Scope = 0;}
 
 ;
 
@@ -241,7 +243,9 @@ FunctionDeclaration:
     ParameterDeclarationList RPAREN CodeBlock {
 
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+
         $$->left = $8;
+
     }
 ;
 
@@ -335,7 +339,9 @@ Statement:
 
     | RETURN Expression SEMICOLON {
         
+
         // Does the return type match the function type?
+
 
         if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) == 0) {
             //printf("Return statement got here, too!\n");
@@ -418,6 +424,7 @@ FunctionCallList: {}
 BuildingBlock:
 
     IDENTIFIER {
+
         
         // Are we in a function?
         if(Scope != 0){
@@ -446,6 +453,7 @@ BuildingBlock:
             $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
 
         }
+
 
     }
     

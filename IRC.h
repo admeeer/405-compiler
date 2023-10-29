@@ -81,6 +81,7 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
             break;
         case T_FUNCTION:
+
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
             Scope = SymbolTableGetSymbolScope(leaf->RHS);
@@ -97,6 +98,7 @@ void IREmission(struct AST* leaf) {
                     Symbol* Parameter = SymbolTableGetSymbolValueSymbol(leaf->RHS, FunctionScope);
 
                     while(1) {
+
                         fprintf(IRCMain, "%s %s", SymbolValueTypeToString(Parameter->SymbolValueWrapper.SymbolValueWrapperSymbolValueType), Parameter->SymbolIdentifier);
                         if(Parameter->Adjacent){
                             fprintf(IRCMain, ", ");
@@ -104,6 +106,7 @@ void IREmission(struct AST* leaf) {
                         }else {
                             break;
                         }
+
                     }               
                 } else {
 
@@ -128,6 +131,7 @@ void IREmission(struct AST* leaf) {
 
             Scope = 0;
             //printf("Function call in IREmission !\n");
+
 
             break;
     }
