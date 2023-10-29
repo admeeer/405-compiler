@@ -3,7 +3,12 @@ int a = 1;
 int b = 2;
 
 function int sum(int x, int y, int z){
-    int m = 3;
+
+    x = x + a;
+    y = y + b;
+    z = x + y;
+    write z;
+
     return x + y + z;
 }
 

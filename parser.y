@@ -99,6 +99,9 @@ Program:
         $$ = $1;
         // We call IREmission here since this is the top of the program
         printAST($$, 3);
+
+        Scope = 0;
+
         IREmission($$);
         //printAST($$, 3);
     }
@@ -241,6 +244,8 @@ FunctionDeclaration:
 
         $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
 
+        $$->left = $8;
+
     }
 ;
 
@@ -334,7 +339,10 @@ Statement:
 
     | RETURN Expression SEMICOLON {
         
-        //rintf("RETURN statement accessed!\n");
+
+        // Does the return type match the function type?
+
+
         if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromScope(Scope))) == 0) {
             //printf("Return statement got here, too!\n");
             $$ = insertIntoAST(T_RETURN, "", $2->RHS);
@@ -416,9 +424,36 @@ FunctionCallList: {}
 BuildingBlock:
 
     IDENTIFIER {
-        //printf("Uh oh raggy!\n");
-        //printf("Value of identifier %s at Scope %d is %s\n", $1, Scope, SymbolTableGetValue($1, Scope));
-        $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+
+        
+        // Are we in a function?
+        if(Scope != 0){
+            // Is the variable whose value we are trying to extract declared in the function?
+           if(SymbolTableExistsExternalFunctionCall($1, Scope)){
+
+            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+
+           } else {
+
+            // It doesn't, so the variable must be declared in the global scope.
+            if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
+
+            } else {
+                // The variable doesn't exist in the function or global scope, meaning it doesn't exist, or we are accessing something we shouldn't. Failure!
+            fprintf(stderr, "Parser Error: Variable %s does not exist in the function or global scope.", $1);
+            exit(EXIT_FAILURE);
+
+            }
+
+           }
+        } else {
+
+            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+
+        }
+
 
     }
     
@@ -519,8 +554,34 @@ MultiplyDivideExpression:
 Operand:
 
     IDENTIFIER {
+        
+        // Are we in a function?
+        if(Scope != 0){
+            // Is the variable whose value we are trying to extract declared in the function?
+           if(SymbolTableExistsExternalFunctionCall($1, Scope)){
 
-        $$ = insertIntoAST(T_IDENTIFIER, $1, SymbolTableGetValue($1, Scope));
+            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+
+           } else {
+
+            // It doesn't, so the variable must be declared in the global scope.
+            if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
+
+            } else {
+                // The variable doesn't exist in the function or global scope, meaning it doesn't exist, or we are accessing something we shouldn't. Failure!
+            fprintf(stderr, "Parser Error: Variable %s does not exist in the function or global scope.", $1);
+            exit(EXIT_FAILURE);
+
+            }
+
+           }
+        } else {
+
+            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+
+        }
 
     }
 

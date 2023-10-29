@@ -384,9 +384,9 @@ SymbolValueType SymbolTableGetSymbolValueType(const char* identifier, int scope)
 void SymbolTablePrint() {
 
 
-    printf("\nidentifier    SymbolValue  SymbolType  SymbolNodeType Scope\n");
+    printf("\nIdentifier SymbolValue SymbolType  SymbolNodeType  Scope\n");
 
-    printf("-                                               -\n");
+    printf("-                                                       -\n");
 
     Symbol* Node = GlobalSymbolTable;
 
@@ -400,7 +400,7 @@ void SymbolTablePrint() {
 
     }
 
-    printf("-                                               -\n\n");
+    printf("-                                                       -\n\n");
 }
 
 #endif // SYMBOL_TABLE_H

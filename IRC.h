@@ -12,6 +12,8 @@ FILE * IRCMain;
 FILE * IRCData;
 FILE * IRC;
 
+extern int Scope;
+
 extern char* BuildDirectory;
 
 void IRInitializeFile() {
@@ -67,7 +69,7 @@ void IREmission(struct AST* leaf) {
             //printf("IRC processed an AST node with type RETURN\n");
             break;
         case T_EQUALS:
-            if (SymbolTableGetSymbolUsed(leaf->LHS, 0)) {
+            if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
                 IRCData = fopen(IRCDataAbsolutePath, "a");
                 fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
                 fclose(IRCData);
@@ -79,21 +81,24 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
             break;
         case T_FUNCTION:
-            //printf("This was called. Leaf left is %s and right is %s, type is %s\n", leaf->LHS, leaf->RHS, nodeTypeToString(leaf->nodeType));
+
             IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            Scope = SymbolTableGetSymbolScope(leaf->RHS);
+
             fprintf(IRCMain, "function %s %s (", leaf->LHS, leaf->RHS);
             
+            // If the function has any parameters
             if(SymbolTableSymbolValueSymbolExists(leaf->RHS, SymbolTableGetSymbolScope(leaf->RHS))){
-
+                // Get the scope value of the function
                 int FunctionScope = SymbolTableGetSymbolScope(leaf->RHS);
 
                 if(SymbolTableSymbolValueSymbolExists(leaf->RHS, FunctionScope)){
-                    //char* Parameter = SymbolTableGetSymbolValueSymbol(leaf->RHS, FunctionScope);
+
                     Symbol* Parameter = SymbolTableGetSymbolValueSymbol(leaf->RHS, FunctionScope);
-                    //fprintf(IRCMain, "%s %s", SymbolValueTypeToString(SymbolTableGetSymbolValueType(Parameter, FunctionScope)), Parameter);
 
                     while(1) {
-                        //fprintf(IRCMain, "%s %s", SymbolValueTypeToString(SymbolTableGetSymbolValueType(Parameter, FunctionScope)), Parameter);
+
                         fprintf(IRCMain, "%s %s", SymbolValueTypeToString(Parameter->SymbolValueWrapper.SymbolValueWrapperSymbolValueType), Parameter->SymbolIdentifier);
                         if(Parameter->Adjacent){
                             fprintf(IRCMain, ", ");
@@ -101,41 +106,37 @@ void IREmission(struct AST* leaf) {
                         }else {
                             break;
                         }
-                    }
-                    
-                    //printf("Parameter is %s\n", Parameter);
-                    /*while(1) {
 
-                        fprintf(IRCMain, "%s %s", SymbolValueTypeToString(SymbolTableGetSymbolValueType(Parameter, FunctionScope)), Parameter);
-
-                        if(SymbolTableSymbolValueAdjacentExists(Parameter, FunctionScope)) {
-                            Parameter = SymbolTableGetSymbolValueAdjacent(Parameter, FunctionScope);
-                        } else {
-                            break;
-                        }
-
-                    }*/                  
+                    }               
                 } else {
-                    printf("Doesn't exist?\n");
+
+                    //TO-DO ... something
                 }
 
-                fprintf(IRCMain, ") {\n");
-
-                fprintf(IRCMain, "}\n");
-
-                fclose(IRCMain);
-
-                break;
             }
+
+            fprintf(IRCMain, ") {\n");
 
             fclose(IRCMain);
 
-            printf("Function call in IREmission !\n");
+            if(leaf->left){
+                IREmission(leaf->left);
+            }
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, "}\n");
+
+            fclose(IRCMain);
+
+            Scope = 0;
+            //printf("Function call in IREmission !\n");
+
 
             break;
     }
 
-    IREmission(leaf->left);
+    //IREmission(leaf->left);
     IREmission(leaf->right);
 }
 
