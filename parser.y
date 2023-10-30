@@ -235,9 +235,6 @@ FunctionDeclaration:
 
         }
 
-        //$$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
-
-
     }
 
     ParameterDeclarationList RPAREN CodeBlock {
@@ -272,10 +269,11 @@ ParameterDeclaration:
 
     TYPE IDENTIFIER {
 
-
+        // If the parameter doesn't exist
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
 
             SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType, Scope);
+            SymbolTableSetSymbolUsed($2, Scope);
 
         } else {
 
@@ -397,7 +395,8 @@ Expression:
         } 
 
         SymbolTableSetValue($1, $3->RHS, Scope);
-
+        //printf("Identifier equals expression called, expression is %s and %s\n", $3->LHS, $3->RHS);
+        //printf("Identifier equals expression called, expression is %s\n", $3);
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
 
     }
@@ -430,7 +429,15 @@ BuildingBlock:
             // Is the variable whose value we are trying to extract declared in the function?
            if(SymbolTableExistsExternalFunctionCall($1, Scope)){
 
-            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+            // Is the variable a parameter?
+            if(SymbolTableGetSymbolType($1, Scope) == S_FUNCTION_PARAMETER) {
+                $$ = insertIntoAST(T_INT, "", $1);
+                break;
+            } else {
+
+                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+                
+            }
 
            } else {
 
@@ -492,28 +499,48 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        //printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
-        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+        if( Scope != 0) {
 
-        $$ = insertIntoAST(T_INT, "", value);
+            char Expression[100];
+
+            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+
+            $$ = insertIntoAST(T_INT, "", Expression);
+
+        } else {
+
+            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+            $$ = insertIntoAST(T_INT, "", value);
+
+        }
 
     }
 
     | AddSubtractExpression ADD MultiplyDivideExpression {
 
+        printf("AddSubtractExpression called, $1 is %s and $3 is %s\n", $1, $3);
         char value[5];
 
         char operatorArray[3];
 
         sprintf(operatorArray, "%s", $2);
 
-        //printf("$1 = %s and $3 = %s\n", $1->RHS, $3->RHS);
-        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+        if( Scope != 0) {
 
+            char Expression[100];
 
-        //printf("the value of compute equation is %d and the value of value is %s\n", computeEquation($1, $3, operatorArray[0]), value);
+            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-        $$ = insertIntoAST(T_INT, "", value);
+            $$ = insertIntoAST(T_INT, "", Expression);
+            
+        } else {
+
+            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+            $$ = insertIntoAST(T_INT, "", value);
+
+        }
 
     }
 ;
@@ -530,9 +557,21 @@ MultiplyDivideExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+        if( Scope != 0) {
 
-        $$ = insertIntoAST(T_INT, "", value);
+            char Expression[100];
+
+            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+
+            $$ = insertIntoAST(T_INT, "", Expression);
+            
+        } else {
+
+            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+            $$ = insertIntoAST(T_INT, "", value);
+
+        }
 
     }
 
@@ -544,9 +583,21 @@ MultiplyDivideExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+        if( Scope != 0) {
 
-        $$ = insertIntoAST(T_INT, "", value);
+            char Expression[100];
+
+            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+
+            $$ = insertIntoAST(T_INT, "", Expression);
+            
+        } else {
+
+            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+
+            $$ = insertIntoAST(T_INT, "", value);
+
+        }
 
     }
 ;
@@ -560,7 +611,15 @@ Operand:
             // Is the variable whose value we are trying to extract declared in the function?
            if(SymbolTableExistsExternalFunctionCall($1, Scope)){
 
-            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+            // Is the variable a parameter?
+            if(SymbolTableGetSymbolType($1, Scope) == S_FUNCTION_PARAMETER) {
+                $$ = insertIntoAST(T_INT, "", $1);
+                break;
+            } else {
+
+                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+                
+            }
 
            } else {
 

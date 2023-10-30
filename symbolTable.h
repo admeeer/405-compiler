@@ -1,4 +1,4 @@
-// CST 405 Alexander Peltier, Matthew Powers, Parker Spaan
+// CST 405 Alexander Peltier, Matthew Powers, Parker SpaanymbolValueType
 
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
@@ -20,7 +20,8 @@ typedef enum {
     SV_FLOAT,
     SV_CHAR,
     SV_PARAMETER,
-    SV_FUNCTION
+    SV_FUNCTION,
+    SV_UNDEFINED
 } SymbolValueType;
 
 const char* SymbolTypeToString(SymbolType type) {
@@ -68,6 +69,7 @@ SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
         case T_FLOAT: return SV_FLOAT;
         case T_CHAR: return SV_CHAR;
         case T_FUNCTION: return SV_FUNCTION;    
+        default: return SV_UNDEFINED;
     }
 }
 
@@ -118,6 +120,13 @@ Symbol* SymbolTableExistsHandler(const char* identifier, int scope, const char* 
         return NULL; // clarity  
     }
 
+}
+
+SymbolType SymbolTableGetSymbolType(const char* identifier, int scope) {
+    
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get the Symbol Type of a symbol that doesn't exist in the SymbolTable! \n");
+
+    return Node->SymbolType;
 }
 
 // TO-DO error handling
@@ -323,6 +332,8 @@ char* SymbolTableGetValue(const char* identifier, int scope) {
             return strdup(buffer);
         case SV_CHAR: 
             return Node->SymbolValueWrapper.SymbolValue.SymbolValueChar;
+        default:
+            return;
     }
 
     return strdup(buffer);
