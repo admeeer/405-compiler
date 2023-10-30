@@ -74,6 +74,7 @@ void IREmission(struct AST* leaf) {
 
             break;
         case T_EQUALS:
+
             printf("Got here!, leaf->LHS is %s\n", leaf->LHS);
             if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
 
@@ -90,6 +91,7 @@ void IREmission(struct AST* leaf) {
                     fclose(IRCMain);
 
                 }
+
 
             }
             break;
@@ -138,7 +140,9 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
 
             if(leaf->left){
+
                 //printf("Hey, we got here!\n");
+
                 IREmission(leaf->left);
             }
 
@@ -154,6 +158,8 @@ void IREmission(struct AST* leaf) {
 
             break;
     }
+
+
 
     IREmission(leaf->right);
 }

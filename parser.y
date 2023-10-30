@@ -342,6 +342,7 @@ Statement:
 
 
         if(strcmp(nodeTypeToString($2->nodeType), SymbolValueTypeToString(SymbolTableGetSymbolValueTypeFromFunctionScope(Scope))) == 0) {
+
             //printf("Return statement got here, too!\n");
             $$ = insertIntoAST(T_RETURN, "", $2->RHS);
             
@@ -423,11 +424,14 @@ FunctionCallList: {}
 BuildingBlock:
 
     IDENTIFIER {
+
+
         
         // Are we in a function?
         if(Scope != 0){
             // Is the variable whose value we are trying to extract declared in the function?
            if(SymbolTableExistsExternalFunctionCall($1, Scope)){
+
 
             // Is the variable a parameter?
             if(SymbolTableGetSymbolType($1, Scope) == S_FUNCTION_PARAMETER) {
@@ -438,6 +442,7 @@ BuildingBlock:
                 $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
                 
             }
+
 
            } else {
 
@@ -454,6 +459,8 @@ BuildingBlock:
             }
 
            }
+
+
 
         } else {
 
@@ -611,6 +618,7 @@ Operand:
             // Is the variable whose value we are trying to extract declared in the function?
            if(SymbolTableExistsExternalFunctionCall($1, Scope)){
 
+
             // Is the variable a parameter?
             if(SymbolTableGetSymbolType($1, Scope) == S_FUNCTION_PARAMETER) {
                 $$ = insertIntoAST(T_INT, "", $1);
@@ -625,6 +633,7 @@ Operand:
 
             // It doesn't, so the variable must be declared in the global scope.
             if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+
 
                 $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
 
