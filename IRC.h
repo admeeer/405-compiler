@@ -54,6 +54,7 @@ Create IR code based on the AST and SymbolTables
 This function should use the AST NodeType and SymbolTable SymbolType to correctly emit IR code
 */
 void IREmission(struct AST* leaf) {
+
     if (leaf == NULL) {
         return;
     }
@@ -67,12 +68,31 @@ void IREmission(struct AST* leaf) {
     switch (leaf->nodeType) {
         case T_RETURN:
             //printf("IRC processed an AST node with type RETURN\n");
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "return %s\n", leaf->RHS);
+            fclose(IRCMain);
+
             break;
         case T_EQUALS:
+
+            printf("Got here!, leaf->LHS is %s\n", leaf->LHS);
             if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
-                IRCData = fopen(IRCDataAbsolutePath, "a");
-                fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
-                fclose(IRCData);
+
+                if(Scope == 0) {
+
+                    IRCData = fopen(IRCDataAbsolutePath, "a");
+                    fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
+                    fclose(IRCData);
+
+                } else {
+
+                    IRCMain = fopen(IRCMainAbsolutePath, "a");
+                    fprintf(IRCMain, "%s = %s\n", leaf->LHS, leaf->RHS);
+                    fclose(IRCMain);
+
+                }
+
+
             }
             break;
         case T_WRITE:
@@ -120,6 +140,9 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
 
             if(leaf->left){
+
+                //printf("Hey, we got here!\n");
+
                 IREmission(leaf->left);
             }
 
@@ -136,7 +159,8 @@ void IREmission(struct AST* leaf) {
             break;
     }
 
-    //IREmission(leaf->left);
+
+
     IREmission(leaf->right);
 }
 
