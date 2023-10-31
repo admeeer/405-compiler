@@ -28,4 +28,6 @@ write b;
 write c;
 write d;
 
-product(a, b);
+d = product(a, b);
+
+write d;
