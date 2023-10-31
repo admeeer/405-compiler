@@ -85,7 +85,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
 
 %start Program
 
@@ -255,6 +255,7 @@ ParameterDeclarationList:
 
 
 ParameterDeclarationListTail:
+
     ParameterDeclaration {
 
     }
@@ -378,7 +379,7 @@ Expression:
 
     | AddSubtractExpression
 
-    | FunctionCall
+    //| FunctionCall
 
     | IDENTIFIER Equals Expression {
         
@@ -391,7 +392,7 @@ Expression:
 
         if(SymbolTableGetNodeType($1, Scope) != $3->nodeType) {
             //printf("%s and %s also %s and %s", nodeTypeToString(SymbolTableGetNodeType($1)), nodeTypeToString($3->nodeType), $3->LHS, $3->RHS);
-            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to sign type %s to type %s", SymbolTableGetNodeType($1, Scope), $3->nodeType);
+            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s", SymbolTableGetNodeType($1, Scope), $3->nodeType);
             exit(EXIT_FAILURE);
         } 
 
@@ -402,31 +403,49 @@ Expression:
 
     }
 
+    | IDENTIFIER Equals IDENTIFIER FunctionCall {
+
+        int FunctionCallScope = SymbolTableGetSymbolScope($3);
+
+        if(SymbolTableGetNodeType($1, Scope) == SymbolTableGetNodeType($3, FunctionCallScope)) {
+            $$ = insertIntoAST(T_EQUALS_FUNCTION, $1, $3);
+            $$->left = $4;
+            printf("$4 is %s\n", $4->RHS);
+            //printAST($4, 3);
+        } else {
+
+            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s", nodeTypeToString(SymbolTableGetNodeType($1, Scope)), nodeTypeToString(SymbolTableGetNodeType($3, FunctionCallScope)));
+        }
+
+    }
+
 ;
 
 FunctionCall:
-    IDENTIFIER LPAREN FunctionCallList RPAREN {
-        //printf("Recognized rule: Function Call \n");
-        $$ = insertIntoAST(T_FUNCTIONCALL, nodeTypeToString($3->nodeType), "0");
+
+    LPAREN FunctionCallParameterList RPAREN {
+        $$ = $2;
+        printAST($2, 3);
     }
+
 ;
 
-FunctionCallList: {}
+FunctionCallParameterList: 
+
+    BuildingBlock COMMA FunctionCallParameterList {
+        $1->right = $3;
+        $$ = $1;
+    }
+
     | BuildingBlock {
-
+        $$ = $1;
     }
-
-    | BuildingBlock COMMA FunctionCallList {}
-
 ;
-
 
 BuildingBlock:
 
     IDENTIFIER {
 
-
-        
         // Are we in a function?
         if(Scope != 0){
             // Is the variable whose value we are trying to extract declared in the function?

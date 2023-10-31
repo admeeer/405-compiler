@@ -15,6 +15,7 @@ typedef enum {
     T_RETURN,
     T_WRITE,
     T_WRITELN,
+    T_EQUALS_FUNCTION,
     T_EQUALS,
     T_INT,
     T_IDENTIFIER,
@@ -31,6 +32,7 @@ const char* nodeTypeToString(NodeType type) {
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
         case T_WRITELN: return "WRITELN";
+        case T_EQUALS_FUNCTION: return "EQUALSFUNCTION";
         case T_EQUALS: return "EQUALS";
         case T_INT: return "INT";
         case T_IDENTIFIER: return "IDENTIFIER";
@@ -78,7 +80,6 @@ void printAST(struct AST* tree, int level){
     printDots(level);
     printf("%s %s\n", tree->LHS, tree->RHS);
     if(tree->left) {
-
         //printf("AST test, tree is currently %s and %s, left is %s and %s\n", tree->LHS, tree->RHS, tree->left->LHS, tree->left->RHS);
     }
     if(tree->right) {

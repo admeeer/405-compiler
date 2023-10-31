@@ -73,9 +73,29 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
 
             break;
+        case T_EQUALS_FUNCTION:
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "%s = %s(", leaf->LHS, leaf->RHS);
+
+            if(leaf->left){
+                struct AST* node = malloc(sizeof(struct AST));
+                node = leaf->left;
+                //fprinft("%s", leaf->RHS);
+                while(node){
+                    fprintf(IRCMain, "%s", node->RHS);
+                    if(node->right){
+                        fprintf(IRCMain, ", ");
+                    }
+                    node = node->right;
+                }
+            }
+
+            fprintf(IRCMain, ")\n");
+            fclose(IRCMain);
+            break;
         case T_EQUALS:
 
-            printf("Got here!, leaf->LHS is %s\n", leaf->LHS);
             if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
 
                 if(Scope == 0) {
