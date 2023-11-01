@@ -100,14 +100,12 @@ void MIPSEmission() {
             if (strncmp(buf, "return", 6) == 0) {
                 char operand[200];
                 sscanf(buf, "return %[^\n]", operand);
-                printf("val: %s", operand);
                 int startReg = 0;  // Starting register number for 't'
                 
                 AssemblyOutput result = generateAssemblyMath(operand, startReg);
                 fprintf(MIPS, "%s", result.code); // how you get what the line of code is
-                // printf(result.endRegister);
-                // fprintf(MIPS, "la $a0, %s # load int\n\n", result.endRegister); // how you get what register was left off on
-            //     fprintf(MIPS, "jr $ra");
+                fprintf(MIPS, "la $a0, t%d # load int\n\n", result.endRegister); // how you get what register was left off on
+                fprintf(MIPS, "jr $ra");
             
             
             }
