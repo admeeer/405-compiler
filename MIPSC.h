@@ -3,8 +3,11 @@
 
 #ifndef MIPSC_H
 #define MIPSC_H
+
 #include "generateAssemblyMath.h"  // Include the header file
 FILE* MIPS;
+FILE* FUNC;
+
 
 typedef struct {
     char varName[50];
@@ -55,13 +58,18 @@ char* replaceWithDictValue(char* code, Dictionary dict[], int dictCount) {
 extern char* BuildDirectory;
 
 void MIPSInitializeFile() {
-    char MIPSAbsolutePath[256];
+    char MIPSAbsolutePath[256], FUNCpath[256];
     snprintf(MIPSAbsolutePath, sizeof(MIPSAbsolutePath), "%s/output/asm/MIPS.asm", BuildDirectory);
+    snprintf(FUNCpath, sizeof(FUNCpath), "%s/output/asm/FUNC.txt", BuildDirectory);
 
     MIPS = fopen(MIPSAbsolutePath, "w");
+    FUNC = fopen(FUNCpath, "w");
 
     if (MIPS == NULL) {
         perror("Failed to initialize file MIPS.asm!");
+    }
+    if(FUNC == NULL){
+        perror("Failed to initialize Func file FUNC.txt!");
     }
 
     fclose(MIPS);
@@ -79,13 +87,18 @@ void MIPSEmission() {
         return;
     }
 
-    char MIPSAbsolutePath[256];
+    char MIPSAbsolutePath[256], FUNCpath[256];
     snprintf(MIPSAbsolutePath, sizeof(MIPSAbsolutePath), "%s/output/asm/MIPS.asm", BuildDirectory);
+    snprintf(FUNCpath, sizeof(FUNCpath), "%s/output/asm/FUNC.txt", BuildDirectory);
 
     MIPS = fopen(MIPSAbsolutePath, "w");
     if (MIPS == NULL) {
         perror("Failed to initialize file MIPS.asm!");
         return;
+    }
+    FUNC = fopen(FUNCpath, "w");
+    if (FUNC == NULL){
+        perror("Failed to open FUNC.txt Bitches");
     }
 
     char buf[100];
@@ -118,7 +131,7 @@ void MIPSEmission() {
             char funcVars[50];
             
             sscanf(buf, "function %s %[^'('](%[^')']){", funcType, funcName, funcVars);
-            fprintf(MIPS, "\n%s:\n", funcName);
+            fprintf(FUNC, "\n%s:\n", funcName);
             char *tokens[50]; // Array to store split values
             int tokenCount = 0;
 
@@ -161,9 +174,9 @@ void MIPSEmission() {
 
                 char* newCode = replaceWithDictValue(operands, varDict, varDictCount);
                 AssemblyOutput result = generateAssemblyMath(newCode, startReg);
-                fprintf(MIPS, "%s", result.code); // how you get what the line of code is
-                fprintf(MIPS, "la $v0, t%d # load int\n\n", result.endRegister); // how you get what register was left off on
-                fprintf(MIPS, "jr $ra");
+                fprintf(FUNC, "%s", result.code); // how you get what the line of code is
+                fprintf(FUNC, "la $v0, t%d # load int\n\n", result.endRegister); // how you get what register was left off on
+                fprintf(FUNC, "jr $ra");
                 
             }
             else if (sscanf(buf, "%s = %s", varName, operands) == 2) {
