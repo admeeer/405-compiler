@@ -1,7 +1,33 @@
-int x;
-int y;
-int z;
-x = 3 + 12;
-y = 1 + x;
-z = x + 125 + y - 54;
-write z;
+int a = 1;
+
+int b = 2;
+
+function int sum(int x, int y, int z){
+
+    x = x - a;
+    y = y - b;
+
+    z = x + y;
+    write z;
+
+    return x + y + z;
+}
+
+int c = 3;
+
+function int product(int v, int w){
+    v = v + c;
+    w = w + c;
+    return v * w;
+}
+
+int d = 4;
+
+write a;
+write b;
+write c;
+write d;
+
+d = product(a, b);
+
+write d;

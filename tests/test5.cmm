@@ -1,20 +1,14 @@
-int a = 1;
+int x = 1;
+int y = 2;
+int z = 3;
 
-int b = 2;
+write x;
 
-write a;
-write b;
+write y;
 
-int d = 7;
-write d;
-function int product(int val, int w){
-    w = 4;
-    return val*3+2/(4-2)+w;
+write z;
+
+function int sum(int a, int b, int c, int d){
+    int e = a + b + c + d;
+    return e;
 }
-
-d = product(a, b);
-
-write d;
-
-int e = 17;
-write e;
