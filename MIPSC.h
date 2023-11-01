@@ -177,7 +177,7 @@ void MIPSEmission() {
                 char* newCode = replaceWithDictValue(operands, varDict, varDictCount);
                 AssemblyOutput result = generateAssemblyMath(newCode, startReg);
                 fprintf(MIPS, "%s", result.code); // how you get what the line of code is
-                fprintf(MIPS, "la %s, t%d # load int\n\n", getValue(varDict, varDictCount, varName), result.endRegister); // how you get what register was left off on
+                fprintf(MIPS, "la %s, t%d # load int\n", getValue(varDict, varDictCount, varName), result.endRegister); // how you get what register was left off on
                 startReg = result.endRegister + 1;
             } 
         }
