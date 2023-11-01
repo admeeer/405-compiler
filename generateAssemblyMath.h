@@ -85,7 +85,7 @@ AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
     }
 
     if (!hasOperators) {
-        sprintf(assemblyCode, "la t%d, %s\n", regCounter++, infix);
+        sprintf(assemblyCode, "li t%d, %s\n", regCounter++, infix);
     } else {
         for (int i = 0; i < strlen(postfix);) {
             if (isdigit(postfix[i]) || isalpha(postfix[i])) {
