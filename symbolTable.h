@@ -206,7 +206,7 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
     Node->Adjacent = GlobalSymbolTable;
     GlobalSymbolTable = Node;
 
-    if(Node->SymbolScope != 0 && Node->SymbolType != S_FUNCTION){
+    if(Node->SymbolScope != 0 && Node->SymbolType == S_FUNCTION_PARAMETER){
         SymbolTableSetSymbolAsChildOfParentSymbol(Node);
     }
 
