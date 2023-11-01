@@ -229,9 +229,23 @@ void MIPSEmission() {
 
         }
         }
-
     fprintf(MIPS, "\nli $v0, 10 # exit\n");
     fprintf(MIPS, "syscall\n");
+    
+    fclose(FUNC);
+    FUNC = fopen(FUNCpath, "r");
+    if (FUNC == NULL){
+        perror("Function File is empty!");
+    }
+    char c;
+    do{
+        c = getc(FUNC);
+        if(c!= EOF){
+            putc(c, MIPS);
+        }
+    }
+    while(c != EOF);
+    remove(FUNCpath);
 
     fclose(IRCFile);
     fclose(MIPS);
