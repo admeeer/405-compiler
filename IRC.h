@@ -144,6 +144,7 @@ void IREmission(struct AST* leaf) {
                         if(Parameter->Adjacent){
                             fprintf(IRCMain, ", ");
                             Parameter = Parameter->Adjacent;
+                            //printf("The parameter is %s\n", Parameter->SymbolIdentifier);
                         }else {
                             break;
                         }
