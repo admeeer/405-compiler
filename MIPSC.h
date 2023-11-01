@@ -48,6 +48,9 @@ void MIPSEmission() {
     fprintf(MIPS, ".data\n");
 
     while (fgets(buf, sizeof(buf), IRCFile)) {
+        char varName[32];
+        char funcName[32];
+        char parameters[64];
         if (strncmp(buf, "main:", 5) == 0) {
             isInDataSection = 0;
             fprintf(MIPS, "\n.text\nmain:\n");
@@ -94,13 +97,18 @@ void MIPSEmission() {
             isInFunction = 0;
         }
         else if (isInFunction) {
-            char instruction[10], operand[50];
-            if (sscanf(buf, "%s %s", instruction, operand) == 2) {
-                if (strcmp(instruction, "return") == 0) {
-                    char* output = generateAssemblyMath(operand);
-                    fprintf(MIPS, "sw $v0, %s\n", output);
-                }
+            if (strncmp(buf, "return", 6) == 0) {
+                char operand[200];
+                sscanf(buf, "return %[^\n]", operand);
+                printf("val: %s", operand);
+                int startReg = 0;  // Starting register number for 't'
                 
+                AssemblyOutput result = generateAssemblyMath(operand, startReg);
+                fprintf(MIPS, "%s", result.code); // how you get what the line of code is
+                // printf(result.endRegister);
+                // fprintf(MIPS, "la $a0, %s # load int\n\n", result.endRegister); // how you get what register was left off on
+            //     fprintf(MIPS, "jr $ra");
+            
             
             }
         }
@@ -111,25 +119,33 @@ void MIPSEmission() {
             fprintf(MIPS, "syscall\n");
             fprintf(MIPS, "li $v0, 1       # syscall to print int\n");
             }
-            
-            //      char varName[10], funcName[10], parameters[10];
-            //     if(sscanf(buf,"%s = %s(%[^)]", varName, funcName, parameters) == 3){
+        
+        else if (sscanf(buf, "%s = %[^'('](%[^')'])", varName, funcName, parameters) == 3) {
                 
-            //     char *token = strtok(parameters, ",");
-            //     int paramCount = 0;
-            //     while (token != NULL){
-            //         while (*token == ' ' || *token == '\t'){
-            //             token ++;
-            //         }
-            //         fprint(MIPS, "lw $a%d, %s\n", paramCount, token);
-            //         paramCount++;
-            //         token = strtok(NULL, ",");
+                char *token = strtok(parameters, ",");
+                int paramCount = 3;
+                fprintf(MIPS, "# saving our values before we jump.\n");
+                while (token != NULL){
+                    while (*token == ' ' || *token == '\t'){
+                        token ++;
+                    }
+                    fprintf(MIPS, "la $a%d, %s\n", paramCount, token);
+                    paramCount--;
+                    token = strtok(NULL, ",");
                     
-            //     }
-            //     fprint(MIPS, "jal %s", funcName);
-            //     fprint(MIPS, "sw $v0, %s\n", varName);
+                }
                 
-            // }
+                fprintf(MIPS, "jal %s\n", funcName);
+                fprintf(MIPS, "sw $v0, %s\n", varName);
+                
+            }
+        else{
+            printf("NO IDEA WHAT TO DO WITH THIS LINE: %s", buf);
+
+            // sscanf(buf, "%s = %s(%s)", varName, funcName, parameters);
+            // printf("got here  %s-%s-%s", varName, funcName, parameters);
+
+        }
         }
 
     fprintf(MIPS, "\nli $v0, 10 # exit\n");

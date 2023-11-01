@@ -1,12 +1,17 @@
-#ifndef generateAssemblyMath_H
-#define generateAssemblyMath_H
+#ifndef GENERATEASSEMBLYMATH_H
+#define GENERATEASSEMBLYMATH_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-char* generateAssemblyMath(const char* infix) {
+typedef struct {
+    char code[1000];
+    int endRegister;
+} AssemblyOutput;
+
+AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
     #define MAX_SIZE 100
 
     typedef struct {
@@ -14,9 +19,9 @@ char* generateAssemblyMath(const char* infix) {
         int top;
     } Stack;
 
-    static char result[1000]; // Static to allow returning it
+    AssemblyOutput output;
     char postfix[MAX_SIZE];
-    int tempCounter = 0;
+    int tempCounter = startRegister;
     int resultIndex = 0;
 
     // Stack functions
@@ -69,10 +74,10 @@ char* generateAssemblyMath(const char* infix) {
 
     void printValue(int val) {
         if (val >= 'a' && val <= 'z') {
-            result[resultIndex++] = val;
+            output.code[resultIndex++] = val;
         } else {
-            sprintf(result + resultIndex, "t%d", val - '0');
-            while (result[resultIndex] != '\0') {
+            sprintf(output.code + resultIndex, "t%d", val - '0');
+            while (output.code[resultIndex] != '\0') {
                 resultIndex++;
             }
         }
@@ -107,15 +112,15 @@ char* generateAssemblyMath(const char* infix) {
             } else if (isOperator(postfix[i])) {
                 int val2 = pop(&s);
                 int val1 = pop(&s);
-                sprintf(result + resultIndex, "%s t%d, ", opToString(postfix[i]), tempCounter);
-                while (result[resultIndex] != '\0') {
+                sprintf(output.code + resultIndex, "%s t%d, ", opToString(postfix[i]), tempCounter);
+                while (output.code[resultIndex] != '\0') {
                     resultIndex++;
                 }
                 printValue(val1);
-                result[resultIndex++] = ',';
-                result[resultIndex++] = ' ';
+                output.code[resultIndex++] = ',';
+                output.code[resultIndex++] = ' ';
                 printValue(val2);
-                result[resultIndex++] = '\n';
+                output.code[resultIndex++] = '\n';
                 push(&s, '0' + tempCounter);
                 tempCounter++;
             }
@@ -125,10 +130,10 @@ char* generateAssemblyMath(const char* infix) {
     // Main logic
     infixToPostfix(infix, postfix);
     process(postfix);
-    result[resultIndex] = '\0'; // Null-terminate the result string
+    output.code[resultIndex] = '\0'; // Null-terminate the result string
+    output.endRegister = tempCounter - 1; // Subtract 1 since tempCounter is incremented after the last use
 
-    return result;
+    return output;
 }
 
-
-#endif // generateAssemblyMath_H
+#endif // GENERATEASSEMBLYMATH_H

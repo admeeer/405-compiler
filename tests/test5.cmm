@@ -5,12 +5,15 @@ int b = 2;
 write a;
 write b;
 
-int d;
+int d = 7;
 write d;
-function int product(int v, int w){
-    return v * w;
+function int product(int v, int w, int d){
+    return v * w * d;
 }
 
 d = product(a, b);
 
 write d;
+
+int e = 17;
+write e;
