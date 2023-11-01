@@ -13,9 +13,12 @@ typedef struct {
     int endRegister;
 } AssemblyOutput;
 
-
 int isOperator(char ch) {
     return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+
+int isVariableChar(char ch) {
+    return isdigit(ch) || isalpha(ch) || ch == '$';
 }
 
 int precedence(char op) {
@@ -37,8 +40,8 @@ void infixToPostfix(const char* infix, char* postfix) {
     int top = -1;
 
     for (i = 0; i < strlen(infix); i++) {
-        if (isdigit(infix[i]) || isalpha(infix[i])) {
-            while (i < strlen(infix) && (isdigit(infix[i]) || isalpha(infix[i]))) {
+        if (isVariableChar(infix[i])) {
+            while (i < strlen(infix) && isVariableChar(infix[i])) {
                 postfix[j++] = infix[i++];
             }
             i--;  // Decrement i to account for the extra increment in the loop
@@ -85,10 +88,10 @@ AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
     }
 
     if (!hasOperators) {
-        sprintf(assemblyCode, "li t%d, %s\n", regCounter++, infix);
+        sprintf(assemblyCode, "li $t%d, %s\n", regCounter++, infix);
     } else {
         for (int i = 0; i < strlen(postfix);) {
-            if (isdigit(postfix[i]) || isalpha(postfix[i])) {
+            if (isVariableChar(postfix[i])) {
                 char temp[10];
                 int k = 0;
                 while (i < strlen(postfix) && postfix[i] != ' ' && !isOperator(postfix[i])) {
@@ -102,7 +105,7 @@ AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
                 strcpy(op2, stack[top--]);
                 strcpy(op1, stack[top--]);
                 char temp[10];
-                sprintf(temp, "t%d", regCounter++);
+                sprintf(temp, "$t%d", regCounter++);
                 strcat(assemblyCode, postfix[i] == '+' ? "add " : postfix[i] == '-' ? "sub " : postfix[i] == '*' ? "mul " : "div ");
                 strcat(assemblyCode, temp);
                 strcat(assemblyCode, ", ");
@@ -121,6 +124,5 @@ AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
     output.endRegister = regCounter - 1;
     return output;
 }
-
 
 #endif // MATH_TO_ASSEMBLY_H

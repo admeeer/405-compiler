@@ -142,11 +142,14 @@ void MIPSEmission() {
                 char* searchedVal = getValue(varDict, varDictCount, varName);
                 if (!searchedVal) {
                     strcpy(varDict[varDictCount].varName, varName);
-                    sprintf(varDict[varDictCount].value, "a%d", i);
+                    sprintf(varDict[varDictCount].value, "$a%d", i);
                     varDictCount++;
                 }
-
             }   
+            // Print dictionary
+                for (int i = 0; i < varDictCount; i++) {
+                    printf("Dictionary: %s -> %s\n", varDict[i].varName, varDict[i].value);
+                }
         }
         else if (strncmp(buf, "}", 1) == 0) {
             isInFunction = 0;
@@ -158,11 +161,13 @@ void MIPSEmission() {
             if (strncmp(buf, "return", 6) == 0) {
                 
                 sscanf(buf, "return %[^\n]", operands);
-
+                
                 char* newCode = replaceWithDictValue(operands, varDict, varDictCount);
+                
                 AssemblyOutput result = generateAssemblyMath(newCode, startReg);
+                
                 fprintf(MIPS, "%s", result.code); // how you get what the line of code is
-                fprintf(MIPS, "la $v0, t%d # load int\n\n", result.endRegister); // how you get what register was left off on
+                fprintf(MIPS, "la $v0, $t%d # load int\n\n", result.endRegister); // how you get what register was left off on
                 fprintf(MIPS, "jr $ra");
                 
             }
@@ -175,9 +180,12 @@ void MIPSEmission() {
                     varDictCount++;
                 }
                 char* newCode = replaceWithDictValue(operands, varDict, varDictCount);
+
+                printf("\nGot here: %s\n", newCode);
                 AssemblyOutput result = generateAssemblyMath(newCode, startReg);
+                
                 fprintf(MIPS, "%s", result.code); // how you get what the line of code is
-                fprintf(MIPS, "move %s, t%d # load int\n", getValue(varDict, varDictCount, varName), result.endRegister); // how you get what register was left off on
+                fprintf(MIPS, "move %s, $t%d # load int\n", getValue(varDict, varDictCount, varName), result.endRegister); // how you get what register was left off on
                 startReg = result.endRegister + 1;
             } 
         }
@@ -210,10 +218,6 @@ void MIPSEmission() {
             }
         else{
             printf("NO IDEA WHAT TO DO WITH THIS LINE: %s", buf);
-
-            // sscanf(buf, "%s = %s(%s)", varName, funcName, parameters);
-            // printf("got here  %s-%s-%s", varName, funcName, parameters);
-
         }
         }
 
