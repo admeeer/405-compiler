@@ -16,8 +16,8 @@ function int sum(int x, int y, int z){
 int c = 3;
 
 function int product(int v, int w){
-    v = v + c;
-    w = w + c;
+    v = v + a;
+    w = w + b;
     return v * w;
 }
 

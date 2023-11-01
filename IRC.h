@@ -95,7 +95,7 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
             break;
         case T_EQUALS:
-
+            printf("Checking if symbol %s is used at Scope %d\n", leaf->LHS, Scope);
             if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
 
                 if(Scope == 0) {
@@ -115,6 +115,7 @@ void IREmission(struct AST* leaf) {
 
             }
             break;
+        
         case T_WRITE:
             IRCMain = fopen(IRCMainAbsolutePath, "a");
             fprintf(IRCMain, "write %s\n", leaf->RHS);

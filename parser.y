@@ -121,9 +121,9 @@ BlockDeclarationList:
 
 BlockDeclaration:
 
-    VariableDeclaration {}
+    VariableDeclaration 
 
-    | StatementList {}
+    | Statement 
 
 ;
 
@@ -145,7 +145,7 @@ Declaration:
 
     VariableDeclaration { Scope = 0; }
 
-    | StatementList { Scope = 0; }
+    | Statement { Scope = 0; }
 
     | FunctionDeclaration { Scope = 0;}
 
@@ -173,8 +173,13 @@ VariableDeclaration:
 
             SymbolTableSetValue($2, $4->RHS, Scope);
 
-            $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+            $$ = insertIntoAST(T_EQUALS, $2, $4->RHS);
             //printf("%s\n\n\n", nodeTypeToString($1->nodeType));
+
+            if(Scope != 0) {
+                SymbolTableSetSymbolUsed($2, Scope);
+                printf("We set it %s to used at Scope %d\n", $2, Scope);
+            }
 
 
         } else {
@@ -194,6 +199,10 @@ VariableDeclaration:
 
             $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
             printf("%s\n\n\n", nodeTypeToString($1->nodeType));
+
+            if (Scope != 0) {
+                SymbolTableSetSymbolUsed($2, Scope);
+            }
 
         } else {
 
@@ -445,7 +454,7 @@ FunctionCallParameterList:
 BuildingBlock:
 
     IDENTIFIER {
-
+        printf("Checking identifier %s\n", $1);
         // Are we in a function?
         if(Scope != 0){
             // Is the variable whose value we are trying to extract declared in the function?
@@ -456,7 +465,9 @@ BuildingBlock:
             if(SymbolTableGetSymbolType($1, Scope) == S_FUNCTION_PARAMETER) {
                 $$ = insertIntoAST(T_INT, "", $1);
                 break;
-            } else {
+            } else if(SymbolTableGetSymbolUsed($1, Scope)) {
+                $$ = insertIntoAST(T_INT, "", $1);
+            }else {
 
                 $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
                 
