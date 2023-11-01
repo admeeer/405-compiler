@@ -8,7 +8,8 @@ write b;
 int d = 7;
 write d;
 function int product(int val, int w){
-    return val * w + 5 * 2 + 3;
+    w = 4;
+    return val*3+2/(4-2)+w;
 }
 
 d = product(a, b);

@@ -38,7 +38,11 @@ void infixToPostfix(const char* infix, char* postfix) {
 
     for (i = 0; i < strlen(infix); i++) {
         if (isdigit(infix[i]) || isalpha(infix[i])) {
-            postfix[j++] = infix[i];
+            while (i < strlen(infix) && (isdigit(infix[i]) || isalpha(infix[i]))) {
+                postfix[j++] = infix[i++];
+            }
+            i--;  // Decrement i to account for the extra increment in the loop
+            postfix[j++] = ' ';  // Add a space to separate variables/numbers
         } else if (infix[i] == '(') {
             stack[++top] = infix[i];
         } else if (infix[i] == ')') {
@@ -62,7 +66,7 @@ void infixToPostfix(const char* infix, char* postfix) {
 }
 
 AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
-    char postfix[strlen(infix)];
+    char postfix[strlen(infix) + 10];  // Extra space for spaces
     infixToPostfix(infix, postfix);
 
     char* assemblyCode = (char*)malloc(1000 * sizeof(char));
@@ -71,25 +75,44 @@ AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
     int top = -1;
     char stack[strlen(postfix)][10];
 
+    // Check if there are no operators in the postfix expression
+    int hasOperators = 0;
     for (int i = 0; i < strlen(postfix); i++) {
-        if (isdigit(postfix[i]) || isalpha(postfix[i])) {
-            char temp[10];
-            sprintf(temp, "%c", postfix[i]);
-            strcpy(stack[++top], temp);
-        } else {
-            char op1[10], op2[10];
-            strcpy(op2, stack[top--]);
-            strcpy(op1, stack[top--]);
-            char temp[10];
-            sprintf(temp, "t%d", regCounter++);
-            strcat(assemblyCode, postfix[i] == '+' ? "add " : postfix[i] == '-' ? "sub " : postfix[i] == '*' ? "mul " : "div ");
-            strcat(assemblyCode, temp);
-            strcat(assemblyCode, ", ");
-            strcat(assemblyCode, op1);
-            strcat(assemblyCode, ", ");
-            strcat(assemblyCode, op2);
-            strcat(assemblyCode, "\n");
-            strcpy(stack[++top], temp);
+        if (isOperator(postfix[i])) {
+            hasOperators = 1;
+            break;
+        }
+    }
+
+    if (!hasOperators) {
+        sprintf(assemblyCode, "la t%d, %s\n", regCounter++, infix);
+    } else {
+        for (int i = 0; i < strlen(postfix);) {
+            if (isdigit(postfix[i]) || isalpha(postfix[i])) {
+                char temp[10];
+                int k = 0;
+                while (i < strlen(postfix) && postfix[i] != ' ' && !isOperator(postfix[i])) {
+                    temp[k++] = postfix[i++];
+                }
+                temp[k] = '\0';
+                strcpy(stack[++top], temp);
+                if (postfix[i] == ' ') i++;  // Skip the space
+            } else {
+                char op1[10], op2[10];
+                strcpy(op2, stack[top--]);
+                strcpy(op1, stack[top--]);
+                char temp[10];
+                sprintf(temp, "t%d", regCounter++);
+                strcat(assemblyCode, postfix[i] == '+' ? "add " : postfix[i] == '-' ? "sub " : postfix[i] == '*' ? "mul " : "div ");
+                strcat(assemblyCode, temp);
+                strcat(assemblyCode, ", ");
+                strcat(assemblyCode, op1);
+                strcat(assemblyCode, ", ");
+                strcat(assemblyCode, op2);
+                strcat(assemblyCode, "\n");
+                strcpy(stack[++top], temp);
+                i++;
+            }
         }
     }
 
@@ -98,5 +121,6 @@ AssemblyOutput generateAssemblyMath(const char* infix, int startRegister) {
     output.endRegister = regCounter - 1;
     return output;
 }
+
 
 #endif // MATH_TO_ASSEMBLY_H

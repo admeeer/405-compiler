@@ -6,6 +6,52 @@
 #include "generateAssemblyMath.h"  // Include the header file
 FILE* MIPS;
 
+typedef struct {
+    char varName[50];
+    char value[50];
+} Dictionary;
+
+// Function to get the value from the dictionary based on the varName
+char* getValue(Dictionary dict[], int dictCount, char* key) {
+    for (int i = 0; i < dictCount; i++) {
+        if (strcmp(dict[i].varName, key) == 0) {
+            return dict[i].value;
+        }
+    }
+    return NULL; // Return NULL if key is not found
+}
+
+char* replaceWithDictValue(char* code, Dictionary dict[], int dictCount) {
+    static char newCode[1000]; // Static buffer to hold the result
+    char temp[50]; // Temporary buffer to hold each token
+    char* delimiters = "*+,/-()"; // Add more special characters if needed
+    char* ptr = code;
+
+    strcpy(newCode, ""); // Clear the buffer
+
+    while (*ptr) {
+        if (strchr(delimiters, *ptr)) {
+            // If the character is a delimiter, append it to the new code
+            strncat(newCode, ptr, 1);
+            ptr++;
+        } else {
+            // Extract the next token
+            int len = strcspn(ptr, delimiters);
+            strncpy(temp, ptr, len);
+            temp[len] = '\0';
+            char* replacement = getValue(dict, dictCount, temp);
+            if (replacement) {
+                strcat(newCode, replacement);
+            } else {
+                strcat(newCode, temp);
+            }
+            ptr += len;
+        }
+    }
+
+    return newCode;
+}
+
 extern char* BuildDirectory;
 
 void MIPSInitializeFile() {
@@ -47,6 +93,9 @@ void MIPSEmission() {
     int isInFunction = 0;
     fprintf(MIPS, ".data\n");
 
+    Dictionary varDict[10];
+    int varDictCount = 0;
+    int startReg = 0;  // Starting register number for 't'
     while (fgets(buf, sizeof(buf), IRCFile)) {
         char varName[32];
         char funcName[32];
@@ -68,9 +117,8 @@ void MIPSEmission() {
             char funcName[50];
             char funcVars[50];
             
-            sscanf(buf, "function %s %s (%s){", funcType, funcName, funcVars);
+            sscanf(buf, "function %s %[^'('](%[^')']){", funcType, funcName, funcVars);
             fprintf(MIPS, "\n%s:\n", funcName);
-            
             char *tokens[50]; // Array to store split values
             int tokenCount = 0;
 
@@ -84,31 +132,54 @@ void MIPSEmission() {
                 tokens[tokenCount++] = token;
                 token = strtok(NULL, ",");
             }
-            // Process each value in the array
-            // for (int i = 0; i < tokenCount; i++) {
-            //     char varType[50];
-            //     char varName[50];
-            //     sscanf("%s %s", varType, varName);
-            // }
-            // continue;
             
+            // Process each value in the array
+            for (int i = 0; i < tokenCount; i++) {
+                char varType[50];
+                char varName[50];
+                sscanf(tokens[i], "%s %s", varType, varName);
+                // Add to dictionary if not existant
+                char* searchedVal = getValue(varDict, varDictCount, varName);
+                if (!searchedVal) {
+                    strcpy(varDict[varDictCount].varName, varName);
+                    sprintf(varDict[varDictCount].value, "a%d", i);
+                    varDictCount++;
+                }
+
+            }   
         }
         else if (strncmp(buf, "}", 1) == 0) {
             isInFunction = 0;
+            startReg = 0;
         }
         else if (isInFunction) {
+            char varName[20];
+            char operands[100];
             if (strncmp(buf, "return", 6) == 0) {
-                char operand[200];
-                sscanf(buf, "return %[^\n]", operand);
-                int startReg = 0;  // Starting register number for 't'
                 
-                AssemblyOutput result = generateAssemblyMath(operand, startReg);
+                sscanf(buf, "return %[^\n]", operands);
+
+                char* newCode = replaceWithDictValue(operands, varDict, varDictCount);
+                AssemblyOutput result = generateAssemblyMath(newCode, startReg);
                 fprintf(MIPS, "%s", result.code); // how you get what the line of code is
-                fprintf(MIPS, "la $a0, t%d # load int\n\n", result.endRegister); // how you get what register was left off on
+                fprintf(MIPS, "la $v0, t%d # load int\n\n", result.endRegister); // how you get what register was left off on
                 fprintf(MIPS, "jr $ra");
-            
-            
+                
             }
+            else if (sscanf(buf, "%s = %s", varName, operands) == 2) {
+                char* searchedVal = getValue(varDict, varDictCount, varName);
+                if (!searchedVal) {
+                    strcpy(varDict[varDictCount].varName, varName);
+                    sprintf(varDict[varDictCount].value, "$t%d", startReg);
+                    startReg = startReg + 1;
+                    varDictCount++;
+                }
+                char* newCode = replaceWithDictValue(operands, varDict, varDictCount);
+                AssemblyOutput result = generateAssemblyMath(newCode, startReg);
+                fprintf(MIPS, "%s", result.code); // how you get what the line of code is
+                fprintf(MIPS, "la %s, t%d # load int\n\n", getValue(varDict, varDictCount, varName), result.endRegister); // how you get what register was left off on
+                startReg = result.endRegister + 1;
+            } 
         }
         else if (strncmp(buf, "write", 5) == 0) {
             char operand[50];
