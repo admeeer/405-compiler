@@ -104,34 +104,33 @@ void MIPSEmission() {
             
             }
         }
-        else {
-            char instruction[10], operand[50];
-            if (sscanf(buf, "%s %s", instruction, operand) == 2) {
-                if (strcmp(instruction, "write") == 0) {
-                    fprintf(MIPS, "la $a0, %s # load int\n", operand);
-                    fprintf(MIPS, "syscall\n");
-                    fprintf(MIPS, "li $v0, 1       # syscall to print int\n");
-                }
-                // chat is the God send for (%[^)] code
-                if(sscanf(buf,"%s = %s(%[^)]", varName, funcName, parameters) == 3){
+        else if (strncmp(buf, "write", 5) == 0) {
+            char operand[50];
+            sscanf(buf, "write %s", operand);
+            fprintf(MIPS, "la $a0, %s # load int\n", operand);
+            fprintf(MIPS, "syscall\n");
+            fprintf(MIPS, "li $v0, 1       # syscall to print int\n");
+            }
+            
+            //      char varName[10], funcName[10], parameters[10];
+            //     if(sscanf(buf,"%s = %s(%[^)]", varName, funcName, parameters) == 3){
                 
-                char *token = strtok(parameters, ",");
-                while (token != NULL){
-                    while (*token == ' ' || *token == '\t'){
-                        token ++;
-                    }
-                    fprint(MIPS, "lw $a%d, %s\n", paramCount, token);
-                    paramCount++;
-                    token = strtok(NULL, ",");
+            //     char *token = strtok(parameters, ",");
+            //     int paramCount = 0;
+            //     while (token != NULL){
+            //         while (*token == ' ' || *token == '\t'){
+            //             token ++;
+            //         }
+            //         fprint(MIPS, "lw $a%d, %s\n", paramCount, token);
+            //         paramCount++;
+            //         token = strtok(NULL, ",");
                     
-                }
-                fprint(MIPS, "jal %s", funcName);
-                fprint(MIPS, "sw" $v0, %s\n", varName);
+            //     }
+            //     fprint(MIPS, "jal %s", funcName);
+            //     fprint(MIPS, "sw $v0, %s\n", varName);
                 
-            }
-            }
+            // }
         }
-    }
 
     fprintf(MIPS, "\nli $v0, 10 # exit\n");
     fprintf(MIPS, "syscall\n");
