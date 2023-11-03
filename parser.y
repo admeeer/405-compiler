@@ -85,7 +85,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array
 
 %start Program
 
@@ -212,7 +212,32 @@ VariableDeclaration:
         }
 
     }
+    
+    | TYPE IDENTIFIER LBRACKET INTEGER RBRACKET SEMICOLON {
 
+        if($4 < 0){
+            fprintf(stderr, "Parser Error: array size of %s, array size cannot be less than zero.", $4);
+            exit(EXIT_FAILURE);
+        }
+        
+       if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+
+            SymbolTableInsertInto($2, S_ARRAY, $1->nodeType, Scope);
+
+            SymbolTableSetSymbolValueArrayLength($2, Scope, $4);
+            SymbolTableSetSymbolValueArrayElementType($2, Scope);
+
+            char length[3];
+            sprintf(length, "%d", $4);
+            //printf("hi xd\n");
+            $$ = insertIntoAST(T_ARRAY, $2, length);
+       } else {
+
+        fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+        exit(EXIT_FAILURE);
+       }
+
+    }
 ;
 
 /*FunctionDeclarationList:
@@ -382,13 +407,73 @@ Statement:
     }
 ;
 
+Array:
+
+    IDENTIFIER LBRACKET INTEGER RBRACKET Equals BuildingBlock {
+
+        if(SymbolTableExistsExternalFunctionCall($1, Scope)) {
+
+            if(SymbolTableGetNodeType($1, Scope) == $6->nodeType) {
+
+                switch($6->nodeType) {
+                    case T_INT:
+                        SymbolTableSetSymbolValueArrayElementInt($1, Scope, $3, $6->RHS);
+                    break;
+                    case T_FLOAT:
+                        SymbolTableSetSymbolValueArrayElementFloat($1, Scope, $3, $6->RHS);
+                    break;  
+                    case T_CHAR:
+                        SymbolTableSetSymbolValueArrayElementChar($1, Scope, $3, $6->RHS);
+                    break;
+                } else {
+                    fprintf("Semantic Error: Tried to set an array element to primitive with different type\n");
+                    exit(EXIT_FAILURE);
+                }
+
+            }
+
+        } else if (SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+            if(SymbolTableGetNodeType($1, 0) == $6->nodeType) {
+                
+                    switch($6->nodeType) {
+                    case T_INT:
+                        SymbolTableSetSymbolValueArrayElementInt($1, 0, $3, $6->RHS);
+                    break;
+                    case T_FLOAT:
+                        SymbolTableSetSymbolValueArrayElementFloat($1, 0, $3, $6->RHS);
+                    break;  
+                    case T_CHAR:
+                        SymbolTableSetSymbolValueArrayElementChar($1, 0, $3, $6->RHS);
+                    break;
+                }
+
+            } else {
+                    fprintf("Semantic Error: Tried to set an array element to primitive with different type\n");
+                    exit(EXIT_FAILURE);
+                }
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
+
+    }
+
+    | IDENTIFIER Equals IDENTIFIER LBRACKET INTEGER RBRACKET {
+
+    }
+
+
 Expression:
 
     BuildingBlock
 
     | AddSubtractExpression
 
-    //| FunctionCall
+    | Array
 
     | IDENTIFIER Equals Expression {
         
@@ -454,7 +539,7 @@ FunctionCallParameterList:
 BuildingBlock:
 
     IDENTIFIER {
-        printf("Checking identifier %s\n", $1);
+        //printf("Checking identifier %s\n", $1);
         // Are we in a function?
         if(Scope != 0){
             // Is the variable whose value we are trying to extract declared in the function?

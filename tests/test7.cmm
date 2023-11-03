@@ -1,0 +1,13 @@
+
+int a = 1;
+write a;
+
+int foo[7];
+
+int bar[14];
+
+bar[3] = a;
+
+int b = 2;
+
+write b;

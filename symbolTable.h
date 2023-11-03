@@ -11,6 +11,7 @@ int SymbolTableDefineScopeValue() {
 
 typedef enum {
     S_VARIABLE,
+    S_ARRAY,
     S_FUNCTION,
     S_FUNCTION_PARAMETER
 } SymbolType;
@@ -19,6 +20,7 @@ typedef enum {
     SV_INT,
     SV_FLOAT,
     SV_CHAR,
+    SV_ARRAY,
     SV_PARAMETER,
     SV_FUNCTION,
     SV_UNDEFINED
@@ -28,6 +30,7 @@ const char* SymbolTypeToString(SymbolType type) {
     switch (type) {
         case S_VARIABLE: return "VARIABLE";
         case S_FUNCTION: return "FUNCTION";
+        case S_ARRAY: return "ARRAY";
         case S_FUNCTION_PARAMETER: return "PARAMETER";
         default: return "UNDEFINED";
     }
@@ -40,6 +43,7 @@ const char* SymbolValueTypeToString(SymbolValueType type) {
         case SV_CHAR: return "CHAR";
         case SV_PARAMETER: return "PARAMETER";
         case SV_FUNCTION: return "FUNCTION";
+        case SV_ARRAY: return "ARRAY";
         default: return "UNDEFINED";
     }
 }
@@ -56,6 +60,14 @@ typedef struct Symbol {
             float SymbolValueFloat;
             char* SymbolValueChar;
             struct Symbol* SymbolValueSymbol;
+            struct symbolValueArray {
+                int Length;
+                union element {
+                    int *intElement;
+                    char *charElement;
+                    float *floatElement;
+                } Element;
+            } SymbolValueArray;
         } SymbolValue;
     } SymbolValueWrapper;
     struct Symbol* Adjacent;
@@ -68,6 +80,7 @@ SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
         case T_INT: return SV_INT;
         case T_FLOAT: return SV_FLOAT;
         case T_CHAR: return SV_CHAR;
+        case T_ARRAY: return SV_ARRAY;
         case T_FUNCTION: return SV_FUNCTION;    
         default: return SV_UNDEFINED;
     }
@@ -119,6 +132,39 @@ Symbol* SymbolTableExistsHandler(const char* identifier, int scope, const char* 
         exit(EXIT_FAILURE);
         return NULL; // clarity  
     }
+
+}
+
+void SymbolTableSetSymbolValueArrayLength(const char* identifier, int scope, int length) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Tried to set the SymbolValueArray Length, but was null \n");
+
+    Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length = length;
+    return;
+
+    //fprintf(stderr, "Symbol Table Error: %s | %d , Tried to set the SymbolValueArray Length of %s at scope %d, but was null.\n", identifier, scope);
+
+}
+
+/*Symbol* SymbolTableGetSymbolValueArrayElement(const char* identifier, int scope) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get the SymbolValueArray Element of a symbol that doesn't exist in the SymbolTable! \n");
+
+    if(Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element){
+
+        return Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element;
+
+    }
+
+    fprintf(stderr, "Symbol Table Error: %s | %d , Tried to get the SymbolValueArray Element of a Symbol but Element is null!\n", identifier, scope);
+
+}*/
+
+int SymbolTableGetSymbolValueArrayLength(const char* identifier, int scope) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope,  "Trying to get the SymbolValueArray Length of a symbol that doesn't exist in the SymbolTable! \n");
+
+    return Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length;
 
 }
 
@@ -210,6 +256,71 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
         SymbolTableSetSymbolAsChildOfParentSymbol(Node);
     }
 
+}
+
+void SymbolTableSetSymbolValueArrayElementType(const char* identifier, int scope) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to set the SymbolValueArray ElementType of a symbol that doesn't exist in the SymbolTable!\n");
+
+    switch(Node->SymbolNodeType) {
+        case T_INT:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.intElement = (int *) malloc(Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length * sizeof(int));
+        break;
+        case T_FLOAT:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.floatElement = (float *) malloc(Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length * sizeof(float));
+        break;
+        case T_CHAR:
+        Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.charElement = (char *) malloc(Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length * sizeof(char));
+        break;
+
+    }
+
+}
+
+//void SymbolTableSetSymbolValueArrayElement(const char* identifier, int scope, in)
+
+int SymbolTableGetSymbolValueArrayElementInt(const char* identifier, int scope, int index) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get the SymbolValueArrayElementInt but Symbol doesn't exist!\n");
+
+    return Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.intElement[index];
+
+}
+
+void SymbolTableSetSymbolValueArrayElementInt(const char* identifier, int scope, int index, int value) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to set the SymbolValueArrayElementInt but Symbol doesn't exist!\n");
+
+    Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.intElement[index] = value;
+}
+
+float SymbolTableGetSymbolValueArrayElementFloat(const char* identifier, int scope, int index) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get the SymbolValueArrayElementFloat but Symbol doesn't exist!\n");
+
+    return Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.floatElement[index];
+}
+
+void SymbolTableSetSymbolValueArrayElementFloat(const char* identifier, int scope, int index, float value) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to set the SymbolValueArrayElementFloat but Symbol doesn't exist!\n");
+
+    Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.floatElement[index] = value;
+
+}
+
+char SymbolTableGetSymbolValueArrayElementChar(const char* identifier, int scope, int index) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to get the SymbolValueArrayElementChar but Symbol doesn't exist!\n");
+
+    return Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.charElement[index];
+}
+
+void SymbolTableSetSymbolValueArrayElementChar(const char* identifier, int scope, int index, char value) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Trying to set the SymbolValueArrayElementChar but Symbol doesn't exist!\n");
+
+    Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Element.charElement[index] = value;
 }
 
 int SymbolTableGetSymbolScope(const char* identifier) {

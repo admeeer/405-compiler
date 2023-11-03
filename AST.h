@@ -11,6 +11,7 @@ Each AST node should contain a value, ASTValue, which is a struct based on rules
 */
 typedef enum {
     T_ASSIGNMENT,
+    T_ARRAY,
     T_TYPE,
     T_RETURN,
     T_WRITE,
@@ -28,6 +29,7 @@ typedef enum {
 const char* nodeTypeToString(NodeType type) {
     switch (type) {
         case T_ASSIGNMENT: return "ASSIGNMENT";
+        case T_ARRAY: return "ARRAY";
         case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
