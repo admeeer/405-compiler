@@ -225,7 +225,7 @@ VariableDeclaration:
             SymbolTableInsertInto($2, S_ARRAY, $1->nodeType, Scope);
 
             SymbolTableSetSymbolValueArrayLength($2, Scope, $4);
-            SymbolTableSetSymbolValueArrayElementType($2, Scope);
+            //SymbolTableSetSymbolValueArrayElementType($2, Scope);
 
             char length[3];
             sprintf(length, "%d", $4);
@@ -415,47 +415,32 @@ Array:
 
             if(SymbolTableGetNodeType($1, Scope) == $6->nodeType) {
 
-                switch($6->nodeType) {
-                    case T_INT:
-                        SymbolTableSetSymbolValueArrayElementInt($1, Scope, $3, $6->RHS);
-                    break;
-                    case T_FLOAT:
-                        SymbolTableSetSymbolValueArrayElementFloat($1, Scope, $3, $6->RHS);
-                    break;  
-                    case T_CHAR:
-                        SymbolTableSetSymbolValueArrayElementChar($1, Scope, $3, $6->RHS);
-                    break;
-                } else {
-                    fprintf("Semantic Error: Tried to set an array element to primitive with different type\n");
-                    exit(EXIT_FAILURE);
-                }
+                $$ = insertSyntaxTreeArrayAssignment(T_ARRAY_ELEMENT_EQUALS, $1, $6->RHS, $3);
+
+            } else {
+                
+                fprintf(stderr, "Parser Error: Type Mismatch\n");
+                exit(EXIT_FAILURE);
+                //fprintf("Parser Error: Type mismatch, tried setting array element with type %s to primitive with type %s", nodeTypeToString(SymbolTableGetNodeType($1, Scope)), nodeTypeToString($6->nodeType));
 
             }
 
         } else if (SymbolTableExistsExternalFunctionCall($1, 0)) {
 
-            if(SymbolTableGetNodeType($1, 0) == $6->nodeType) {
-                
-                    switch($6->nodeType) {
-                    case T_INT:
-                        SymbolTableSetSymbolValueArrayElementInt($1, 0, $3, $6->RHS);
-                    break;
-                    case T_FLOAT:
-                        SymbolTableSetSymbolValueArrayElementFloat($1, 0, $3, $6->RHS);
-                    break;  
-                    case T_CHAR:
-                        SymbolTableSetSymbolValueArrayElementChar($1, 0, $3, $6->RHS);
-                    break;
-                }
+        if(SymbolTableGetNodeType($1, Scope) == $6->nodeType) {
+
+                 $$ = insertSyntaxTreeArrayAssignment(T_ARRAY_ELEMENT_EQUALS, $1, $6->RHS, $3);
 
             } else {
-                    fprintf("Semantic Error: Tried to set an array element to primitive with different type\n");
-                    exit(EXIT_FAILURE);
-                }
+
+                ///fprintf("Parser Error: Type mismatch, tried setting array element with type %s to primitive with type %s", nodeTypeToString(SymbolTableGetNodeType($1, 0)), nodeTypeToString($6->nodeType));
+                fprintf(stderr, "Parser Error: Type Mismatch\n");
+                exit(EXIT_FAILURE);
+            }
 
         } else {
 
-            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            fprintf(stderr, "Semantic Error: %s does not exist in this scope!\n", $1);
             exit(EXIT_FAILURE);
 
         }
@@ -463,6 +448,38 @@ Array:
     }
 
     | IDENTIFIER Equals IDENTIFIER LBRACKET INTEGER RBRACKET {
+
+        int VariableScope;
+        int ArrayScope;
+
+        if(SymbolTableExistsExternalFunctionCall($1, Scope)) {
+            VariableScope = Scope;
+        } else if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+            VariableScope = 0;
+        } else {
+            // left hand side variable doesn't exist ... TO-DO ERROR
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $1);
+            exit(EXIT_FAILURE);
+        }
+
+        if(SymbolTableExistsExternalFunctionCall($3, Scope)) {
+            ArrayScope = Scope;
+        } else if(SymbolTableExistsExternalFunctionCall($3, 0)) {
+            ArrayScope = 0;
+        } else {
+            // right hand side variable doesn't exist ... TO-DO ERROR
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $3);
+            exit(EXIT_FAILURE);
+        }
+
+        int ArraySize = SymbolTableGetSymbolValueArrayLength($3, ArrayScope);
+
+        if($5 > ArraySize) {
+            fprintf(stderr, "Semantic Error: %d out of bounds of Array, array size is only %d", $5, ArraySize);
+            exit(EXIT_FAILURE);
+        }
+
+        $$ = insertSyntaxTreeArrayAssignment(T_EQUALS_ARRAY_ELEMENT, $1, $3, $5);
 
     }
 

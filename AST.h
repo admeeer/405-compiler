@@ -12,6 +12,8 @@ Each AST node should contain a value, ASTValue, which is a struct based on rules
 typedef enum {
     T_ASSIGNMENT,
     T_ARRAY,
+    T_ARRAY_ELEMENT_EQUALS,
+    T_EQUALS_ARRAY_ELEMENT,
     T_TYPE,
     T_RETURN,
     T_WRITE,
@@ -30,6 +32,8 @@ const char* nodeTypeToString(NodeType type) {
     switch (type) {
         case T_ASSIGNMENT: return "ASSIGNMENT";
         case T_ARRAY: return "ARRAY";
+        case T_ARRAY_ELEMENT_EQUALS: return "ARRAY ELEMENT EQUALS";
+        case T_EQUALS_ARRAY_ELEMENT: return "EQUALS ARRAY ELEMENT";
         case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
@@ -53,6 +57,14 @@ struct AST{
     char *LHS;
     char *RHS;
     
+    union structType {
+
+        struct array {
+            int *index;
+        } ArrayEquals;
+
+    } StructType;
+
     struct AST* left;
     struct AST* right;
 
@@ -64,10 +76,24 @@ struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
     node->nodeType = nodeType;
     node->LHS = strdup(LHS);
     node->RHS = strdup(RHS);
+
     //printf("Node with type %s and LHS %s and RHS %s inserted into tree\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
 
     return node;
 }
+
+struct AST* insertSyntaxTreeArrayAssignment(NodeType nodeType, const char *LHS, const char *RHS, int index) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+
+    node->StructType.ArrayEquals.index = index;
+
+}
+
+//struct AST* insertSyntaxTreeEqualsElementArray
 
 void printDots(int num)
 {
