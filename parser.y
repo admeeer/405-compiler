@@ -47,6 +47,7 @@ void yyerror(const char* s);
 %token <number> INTEGER
 %token <floatValue> FLOAT_T
 %token <string> STRING
+%token <string> ssstruct
 
 %token <string> COMMA
 %token <string> SEMICOLON
@@ -149,7 +150,23 @@ Declaration:
 
     | FunctionDeclaration { Scope = 0;}
 
+    | Struct { Scope = 0; }
+
 ;
+
+
+Struct:
+
+    ssstruct IDENTIFIER LBRACKET {
+
+    }
+
+    VariableDeclarationList RBRACKET {
+
+    }
+
+;
+
 
 VariableDeclarationList: 
     
@@ -163,6 +180,7 @@ VariableDeclarationList:
 
 VariableDeclaration:
 
+    // Primitive var with assignment
     TYPE IDENTIFIER Equals AddSubtractExpression SEMICOLON {
         
 
@@ -190,7 +208,7 @@ VariableDeclaration:
         }
 
     }
-
+    // Primitive var
     | TYPE IDENTIFIER SEMICOLON {
 
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
@@ -212,7 +230,7 @@ VariableDeclaration:
         }
 
     }
-    
+    // Array 
     | TYPE IDENTIFIER LBRACKET INTEGER RBRACKET SEMICOLON {
 
         if($4 < 0){
