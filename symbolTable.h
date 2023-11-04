@@ -11,6 +11,7 @@ int SymbolTableDefineScopeValue() {
 
 typedef enum {
     S_VARIABLE,
+    S_ARRAY,
     S_FUNCTION,
     S_FUNCTION_PARAMETER
 } SymbolType;
@@ -19,6 +20,7 @@ typedef enum {
     SV_INT,
     SV_FLOAT,
     SV_CHAR,
+    SV_ARRAY,
     SV_PARAMETER,
     SV_FUNCTION,
     SV_UNDEFINED
@@ -28,6 +30,7 @@ const char* SymbolTypeToString(SymbolType type) {
     switch (type) {
         case S_VARIABLE: return "VARIABLE";
         case S_FUNCTION: return "FUNCTION";
+        case S_ARRAY: return "ARRAY";
         case S_FUNCTION_PARAMETER: return "PARAMETER";
         default: return "UNDEFINED";
     }
@@ -40,6 +43,7 @@ const char* SymbolValueTypeToString(SymbolValueType type) {
         case SV_CHAR: return "CHAR";
         case SV_PARAMETER: return "PARAMETER";
         case SV_FUNCTION: return "FUNCTION";
+        case SV_ARRAY: return "ARRAY";
         default: return "UNDEFINED";
     }
 }
@@ -56,6 +60,9 @@ typedef struct Symbol {
             float SymbolValueFloat;
             char* SymbolValueChar;
             struct Symbol* SymbolValueSymbol;
+            struct symbolValueArray {
+                int Length;
+            } SymbolValueArray;
         } SymbolValue;
     } SymbolValueWrapper;
     struct Symbol* Adjacent;
@@ -68,6 +75,7 @@ SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
         case T_INT: return SV_INT;
         case T_FLOAT: return SV_FLOAT;
         case T_CHAR: return SV_CHAR;
+        case T_ARRAY: return SV_ARRAY;
         case T_FUNCTION: return SV_FUNCTION;    
         default: return SV_UNDEFINED;
     }
@@ -119,6 +127,25 @@ Symbol* SymbolTableExistsHandler(const char* identifier, int scope, const char* 
         exit(EXIT_FAILURE);
         return NULL; // clarity  
     }
+
+}
+
+void SymbolTableSetSymbolValueArrayLength(const char* identifier, int scope, int length) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope, "Tried to set the SymbolValueArray Length, but was null \n");
+
+    Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length = length;
+    return;
+
+    //fprintf(stderr, "Symbol Table Error: %s | %d , Tried to set the SymbolValueArray Length of %s at scope %d, but was null.\n", identifier, scope);
+
+}
+
+int SymbolTableGetSymbolValueArrayLength(const char* identifier, int scope) {
+
+    Symbol* Node = SymbolTableExistsHandler(identifier, scope,  "Trying to get the SymbolValueArray Length of a symbol that doesn't exist in the SymbolTable! \n");
+
+    return Node->SymbolValueWrapper.SymbolValue.SymbolValueArray.Length;
 
 }
 

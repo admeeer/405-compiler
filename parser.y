@@ -85,7 +85,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array
 
 %start Program
 
@@ -212,7 +212,32 @@ VariableDeclaration:
         }
 
     }
+    
+    | TYPE IDENTIFIER LBRACKET INTEGER RBRACKET SEMICOLON {
 
+        if($4 < 0){
+            fprintf(stderr, "Parser Error: array size of %s, array size cannot be less than zero.", $4);
+            exit(EXIT_FAILURE);
+        }
+        
+       if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+
+            SymbolTableInsertInto($2, S_ARRAY, $1->nodeType, Scope);
+
+            SymbolTableSetSymbolValueArrayLength($2, Scope, $4);
+            //SymbolTableSetSymbolValueArrayElementType($2, Scope);
+
+            char length[3];
+            sprintf(length, "%d", $4);
+            //printf("hi xd\n");
+            $$ = insertIntoAST(T_ARRAY, $2, length);
+       } else {
+
+        fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+        exit(EXIT_FAILURE);
+       }
+
+    }
 ;
 
 /*FunctionDeclarationList:
@@ -382,13 +407,90 @@ Statement:
     }
 ;
 
+Array:
+
+    IDENTIFIER LBRACKET INTEGER RBRACKET Equals BuildingBlock {
+
+        if(SymbolTableExistsExternalFunctionCall($1, Scope)) {
+
+            if(SymbolTableGetNodeType($1, Scope) == $6->nodeType) {
+
+                $$ = insertSyntaxTreeArrayAssignment(T_ARRAY_ELEMENT_EQUALS, $1, $6->RHS, $3);
+
+            } else {
+                
+                fprintf(stderr, "Parser Error: Type Mismatch\n");
+                exit(EXIT_FAILURE);
+                //fprintf("Parser Error: Type mismatch, tried setting array element with type %s to primitive with type %s", nodeTypeToString(SymbolTableGetNodeType($1, Scope)), nodeTypeToString($6->nodeType));
+
+            }
+
+        } else if (SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+        if(SymbolTableGetNodeType($1, Scope) == $6->nodeType) {
+
+                 $$ = insertSyntaxTreeArrayAssignment(T_ARRAY_ELEMENT_EQUALS, $1, $6->RHS, $3);
+
+            } else {
+
+                ///fprintf("Parser Error: Type mismatch, tried setting array element with type %s to primitive with type %s", nodeTypeToString(SymbolTableGetNodeType($1, 0)), nodeTypeToString($6->nodeType));
+                fprintf(stderr, "Parser Error: Type Mismatch\n");
+                exit(EXIT_FAILURE);
+            }
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s does not exist in this scope!\n", $1);
+            exit(EXIT_FAILURE);
+
+        }
+
+    }
+
+    | IDENTIFIER Equals IDENTIFIER LBRACKET INTEGER RBRACKET {
+
+        int VariableScope;
+        int ArrayScope;
+
+        if(SymbolTableExistsExternalFunctionCall($1, Scope)) {
+            VariableScope = Scope;
+        } else if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+            VariableScope = 0;
+        } else {
+            // left hand side variable doesn't exist ... TO-DO ERROR
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $1);
+            exit(EXIT_FAILURE);
+        }
+
+        if(SymbolTableExistsExternalFunctionCall($3, Scope)) {
+            ArrayScope = Scope;
+        } else if(SymbolTableExistsExternalFunctionCall($3, 0)) {
+            ArrayScope = 0;
+        } else {
+            // right hand side variable doesn't exist ... TO-DO ERROR
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $3);
+            exit(EXIT_FAILURE);
+        }
+
+        int ArraySize = SymbolTableGetSymbolValueArrayLength($3, ArrayScope);
+
+        if($5 > ArraySize) {
+            fprintf(stderr, "Semantic Error: %d out of bounds of Array, array size is only %d", $5, ArraySize);
+            exit(EXIT_FAILURE);
+        }
+
+        $$ = insertSyntaxTreeArrayAssignment(T_EQUALS_ARRAY_ELEMENT, $1, $3, $5);
+
+    }
+
+
 Expression:
 
     BuildingBlock
 
     | AddSubtractExpression
 
-    //| FunctionCall
+    | Array
 
     | IDENTIFIER Equals Expression {
         
@@ -454,7 +556,7 @@ FunctionCallParameterList:
 BuildingBlock:
 
     IDENTIFIER {
-        printf("Checking identifier %s\n", $1);
+        //printf("Checking identifier %s\n", $1);
         // Are we in a function?
         if(Scope != 0){
             // Is the variable whose value we are trying to extract declared in the function?
