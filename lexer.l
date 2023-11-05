@@ -89,6 +89,12 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
          return FUNCTION;
 		}
 
+"ssstruct" {words++; chars += strlen(yytext);
+		 printf("%s : ssstruct\n", yytext);
+		 yylval.string = strdup(yytext);
+		 return ssstruct;
+		}
+
 "if"  {words++; chars += strlen(yytext);
 		 printf("%s : IF\n", yytext);
          yylval.string = strdup(yytext);
@@ -137,6 +143,12 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
                 yylval.character = strdup(yytext);
                 return CHARACTER;
             }
+
+"."		    {chars++;
+			printf("%s : DOT \n", yytext);
+			yylval.string = strdup(yytext);
+			return DOT;
+		}
 
 
 ","			{chars++;

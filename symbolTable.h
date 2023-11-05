@@ -10,10 +10,12 @@ int SymbolTableDefineScopeValue() {
 }
 
 typedef enum {
+    S_STRUCT_VARIABLE,
     S_VARIABLE,
     S_ARRAY,
     S_FUNCTION,
-    S_FUNCTION_PARAMETER
+    S_FUNCTION_PARAMETER,
+    S_STRUCT
 } SymbolType;
 
 typedef enum {
@@ -23,13 +25,16 @@ typedef enum {
     SV_ARRAY,
     SV_PARAMETER,
     SV_FUNCTION,
-    SV_UNDEFINED
+    SV_UNDEFINED,
+    SV_STRUCT
 } SymbolValueType;
 
 const char* SymbolTypeToString(SymbolType type) {
     switch (type) {
         case S_VARIABLE: return "VARIABLE";
         case S_FUNCTION: return "FUNCTION";
+        case S_STRUCT: return "STRUCT";
+        case S_STRUCT_VARIABLE: return "STRUCT VARIABLE";
         case S_ARRAY: return "ARRAY";
         case S_FUNCTION_PARAMETER: return "PARAMETER";
         default: return "UNDEFINED";
@@ -44,6 +49,7 @@ const char* SymbolValueTypeToString(SymbolValueType type) {
         case SV_PARAMETER: return "PARAMETER";
         case SV_FUNCTION: return "FUNCTION";
         case SV_ARRAY: return "ARRAY";
+        case SV_STRUCT: return "STRUCT";
         default: return "UNDEFINED";
     }
 }
@@ -77,6 +83,7 @@ SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
         case T_CHAR: return SV_CHAR;
         case T_ARRAY: return SV_ARRAY;
         case T_FUNCTION: return SV_FUNCTION;    
+        case T_STRUCT: return SV_STRUCT;
         default: return SV_UNDEFINED;
     }
 }
@@ -157,7 +164,7 @@ SymbolType SymbolTableGetSymbolType(const char* identifier, int scope) {
 }
 
 // TO-DO error handling
-void SymbolTableSetSymbolAsChildOfParentSymbol(Symbol* node) {
+void SymbolTableSetSymbolAsChildOfParentSymbol(Symbol* node, SymbolType type) {
 
     Symbol* Parent = GlobalSymbolTable;
 
@@ -172,7 +179,7 @@ void SymbolTableSetSymbolAsChildOfParentSymbol(Symbol* node) {
 
     while (Parent) {
 
-        if(Parent->SymbolType == S_FUNCTION && Parent->SymbolScope == child->SymbolScope) {
+        if(Parent->SymbolType == type && Parent->SymbolScope == child->SymbolScope) {
             
             if(Parent->SymbolValueWrapper.SymbolValue.SymbolValueSymbol){
 
@@ -187,25 +194,12 @@ void SymbolTableSetSymbolAsChildOfParentSymbol(Symbol* node) {
                 }
 
                 Parent->Adjacent = child;
+                printf("got here bro 1              1 \n");
 
                 return;
-                
-                //Symbol* itr = malloc(sizeof(Symbol));
-
-                //itr = Parent->SymbolValueWrapper.SymbolValue.SymbolValueSymbol;
-
-                //while(itr->Adjacent){
-                //    itr = itr->Adjacent;
-                //}
-
-                //i//tr->Adjacent = child;
-
-                //free(itr);
-
-                //return;
 
             } else {
-
+                printf("got here bro 2              2\n");
                 Parent->SymbolValueWrapper.SymbolValue.SymbolValueSymbol = child;
                 return;
 
@@ -224,6 +218,11 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
 
     Symbol* Node = malloc(sizeof(Symbol));
 
+    if(Node == NULL) {
+        fprintf(stderr, "Memory error");
+        exit(EXIT_FAILURE);
+    }
+
     strcpy(Node->SymbolIdentifier, identifier);
     Node->SymbolType = symbolType;
     Node->SymbolNodeType = symbolNodeType;
@@ -233,19 +232,21 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
     Node->Adjacent = GlobalSymbolTable;
     GlobalSymbolTable = Node;
 
-    if(Node->SymbolScope != 0 && Node->SymbolType == S_FUNCTION_PARAMETER){
-        SymbolTableSetSymbolAsChildOfParentSymbol(Node);
+    if(Node->SymbolScope != 0){
+        if(Node->SymbolType == S_FUNCTION_PARAMETER || Node->SymbolType == S_STRUCT_VARIABLE){
+        SymbolTableSetSymbolAsChildOfParentSymbol(Node, Node->SymbolType);
+        }
     }
 
 }
 
-int SymbolTableGetSymbolScope(const char* identifier) {
+int SymbolTableGetSymbolScope(const char* identifier, NodeType type) {
 
     Symbol* Node = GlobalSymbolTable;
 
     while (Node) {
         
-        if(strcmp(Node->SymbolIdentifier, identifier) == 0 && Node->SymbolType == S_FUNCTION) {
+        if(strcmp(Node->SymbolIdentifier, identifier) == 0 && Node->SymbolType == type) {
             return Node->SymbolScope;
         }
 
@@ -253,7 +254,7 @@ int SymbolTableGetSymbolScope(const char* identifier) {
 
     }
 
-    fprintf(stderr, "Symbol Table Error: Trying to get the SymbolScope of a Symbol with type FUNCTION that doesn't exist in the SymbolTable!\n");
+    fprintf(stderr, "Symbol Table Error: Trying to get the Scope of a Symbol %s with type %s that doesn't exist in the SymbolTable!\n", identifier, nodeTypeToString(type));
     exit(EXIT_FAILURE);
 
 }
@@ -422,7 +423,7 @@ SymbolValueType SymbolTableGetSymbolValueType(const char* identifier, int scope)
 void SymbolTablePrint() {
 
 
-    printf("\nIdentifier SymbolValue SymbolType  SymbolNodeType  Scope\n");
+    printf("\nIdentifier    SymbolType      SymbolNodeType      Scope\n");
 
     printf("-                                                       -\n");
 
@@ -430,8 +431,7 @@ void SymbolTablePrint() {
 
     while (Node) {
 
-
-        printf("%10s %10s %10s %10s %10d\n", Node->SymbolIdentifier, SymbolTableGetValue(Node->SymbolIdentifier, Node->SymbolScope), SymbolTypeToString(Node->SymbolType), nodeTypeToString(Node->SymbolNodeType), Node->SymbolScope);
+        printf("%5s %15s %15s %15d\n", Node->SymbolIdentifier, SymbolTypeToString(Node->SymbolType), nodeTypeToString(Node->SymbolNodeType), Node->SymbolScope);
 
 
         Node = Node->Adjacent;

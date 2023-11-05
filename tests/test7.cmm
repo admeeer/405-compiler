@@ -12,4 +12,14 @@ int b = 2;
 
 b = foo[4];
 
+ssstruct sum {
+    int num;
+}
+
+sum.num = 5;
+
+int c;
+
+c = sum.num;
+
 write b;

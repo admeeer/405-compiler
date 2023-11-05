@@ -125,14 +125,14 @@ void IREmission(struct AST* leaf) {
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
-            Scope = SymbolTableGetSymbolScope(leaf->RHS);
+            Scope = SymbolTableGetSymbolScope(leaf->RHS, S_FUNCTION);
 
             fprintf(IRCMain, "function %s %s (", leaf->LHS, leaf->RHS);
             
             // If the function has any parameters
-            if(SymbolTableSymbolValueSymbolExists(leaf->RHS, SymbolTableGetSymbolScope(leaf->RHS))){
+            if(SymbolTableSymbolValueSymbolExists(leaf->RHS, SymbolTableGetSymbolScope(leaf->RHS, S_FUNCTION))){
                 // Get the scope value of the function
-                int FunctionScope = SymbolTableGetSymbolScope(leaf->RHS);
+                int FunctionScope = SymbolTableGetSymbolScope(leaf->RHS, S_FUNCTION);
 
                 if(SymbolTableSymbolValueSymbolExists(leaf->RHS, FunctionScope)){
 
