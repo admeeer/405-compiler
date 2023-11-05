@@ -144,6 +144,12 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
                 return CHARACTER;
             }
 
+"."		    {chars++;
+			printf("%s : DOT \n", yytext);
+			yylval.string = strdup(yytext);
+			return DOT;
+		}
+
 
 ","			{chars++;
 			printf("%s : COMMA\n", yytext);

@@ -16,4 +16,10 @@ ssstruct sum {
     int num;
 }
 
+sum.num = 5;
+
+int c;
+
+c = sum.num;
+
 write b;

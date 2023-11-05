@@ -240,13 +240,13 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
 
 }
 
-int SymbolTableGetSymbolScope(const char* identifier) {
+int SymbolTableGetSymbolScope(const char* identifier, NodeType type) {
 
     Symbol* Node = GlobalSymbolTable;
 
     while (Node) {
         
-        if(strcmp(Node->SymbolIdentifier, identifier) == 0 && Node->SymbolType == S_FUNCTION) {
+        if(strcmp(Node->SymbolIdentifier, identifier) == 0 && Node->SymbolType == type) {
             return Node->SymbolScope;
         }
 
@@ -254,7 +254,7 @@ int SymbolTableGetSymbolScope(const char* identifier) {
 
     }
 
-    fprintf(stderr, "Symbol Table Error: Trying to get the SymbolScope of a Symbol with type FUNCTION that doesn't exist in the SymbolTable!\n");
+    fprintf(stderr, "Symbol Table Error: Trying to get the Scope of a Symbol %s with type %s that doesn't exist in the SymbolTable!\n", identifier, nodeTypeToString(type));
     exit(EXIT_FAILURE);
 
 }

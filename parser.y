@@ -59,6 +59,7 @@ void yyerror(const char* s);
 %token <string> IF
 %token <string> ELSE
 %token <string> WHILE
+%token <string> DOT
 
 %token <string> ADD
 %token <string> SUBTRACT
@@ -540,7 +541,7 @@ Array:
         int ArraySize = SymbolTableGetSymbolValueArrayLength($3, ArrayScope);
 
         if($5 > ArraySize) {
-            fprintf(stderr, "Semantic Error: %d out of bounds of Array, array size is only %d", $5, ArraySize);
+            fprintf(stderr, "Semantic Error: %d out of bounds of Array, array size is only %d\n", $5, ArraySize);
             exit(EXIT_FAILURE);
         }
 
@@ -562,13 +563,13 @@ Expression:
         //printf("IDENTIFIER Equals Expression $1 = %s and $3 = %s\n", $1, $3->RHS);
 
         if(!SymbolTableExistsExternalFunctionCall($1, Scope)) {
-            fprintf(stderr, "Semantic Error: Tried setting %s at scope %d to a value, but %s is undeclared", $1, Scope, $1);
+            fprintf(stderr, "Semantic Error: Tried setting %s at scope %d to a value, but %s is undeclared\n", $1, Scope, $1);
             exit(EXIT_FAILURE);
         }
 
         if(SymbolTableGetNodeType($1, Scope) != $3->nodeType) {
             //printf("%s and %s also %s and %s", nodeTypeToString(SymbolTableGetNodeType($1)), nodeTypeToString($3->nodeType), $3->LHS, $3->RHS);
-            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s", SymbolTableGetNodeType($1, Scope), $3->nodeType);
+            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s\n", SymbolTableGetNodeType($1, Scope), $3->nodeType);
             exit(EXIT_FAILURE);
         } 
 
@@ -581,17 +582,67 @@ Expression:
 
     | IDENTIFIER Equals IDENTIFIER FunctionCall {
 
-        int FunctionCallScope = SymbolTableGetSymbolScope($3);
+        int FunctionCallScope = SymbolTableGetSymbolScope($3, S_FUNCTION);
 
         if(SymbolTableGetNodeType($1, Scope) == SymbolTableGetNodeType($3, FunctionCallScope)) {
             $$ = insertIntoAST(T_EQUALS_FUNCTION, $1, $3);
             $$->left = $4;
-            printf("$4 is %s\n", $4->RHS);
+            //printf("$4 is %s\n", $4->RHS);
             //printAST($4, 3);
         } else {
 
-            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s", nodeTypeToString(SymbolTableGetNodeType($1, Scope)), nodeTypeToString(SymbolTableGetNodeType($3, FunctionCallScope)));
+            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s\n", nodeTypeToString(SymbolTableGetNodeType($1, Scope)), nodeTypeToString(SymbolTableGetNodeType($3, FunctionCallScope)));
+            exit(EXIT_FAILURE);
         }
+
+    }
+
+    | IDENTIFIER DOT IDENTIFIER Equals Expression {
+
+        //SymbolTablePrint();
+        int StructScope = SymbolTableGetSymbolScope($1, S_STRUCT);
+        //SymbolTablePrint();
+
+        if(SymbolTableExistsExternalFunctionCall($3, StructScope)) {
+            
+        }else {
+
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $3);
+            exit(EXIT_FAILURE);
+
+        }
+
+        if(SymbolTableGetNodeType($3, StructScope) == $5->nodeType) {
+
+            $$ = insertSyntaxTreeStructAssignment(T_STRUCT_VARIABLE_EQUALS, $1, $5->RHS, $3);
+
+        }
+
+
+
+    }
+
+    | IDENTIFIER Equals IDENTIFIER DOT IDENTIFIER {
+
+        
+        if(!SymbolTableExistsExternalFunctionCall($1, Scope) && !SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $1);
+
+        }
+        
+        int StructScope = SymbolTableGetSymbolScope($3, S_STRUCT);
+
+        if(SymbolTableExistsExternalFunctionCall($3, StructScope)) {
+            
+        }else {
+
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $3);
+            exit(EXIT_FAILURE);
+
+        }
+
+        $$ = insertSyntaxTreeStructAssignment(T_EQUALS_STRUCT_VARIABLE, $1, $3, $5);
 
     }
 

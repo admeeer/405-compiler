@@ -15,6 +15,8 @@ typedef enum {
     T_ARRAY_ELEMENT_EQUALS,
     T_EQUALS_ARRAY_ELEMENT,
     T_STRUCT,
+    T_STRUCT_VARIABLE_EQUALS,
+    T_EQUALS_STRUCT_VARIABLE,
     T_TYPE,
     T_RETURN,
     T_WRITE,
@@ -36,6 +38,8 @@ const char* nodeTypeToString(NodeType type) {
         case T_ARRAY_ELEMENT_EQUALS: return "ARRAY ELEMENT EQUALS";
         case T_EQUALS_ARRAY_ELEMENT: return "EQUALS ARRAY ELEMENT";
         case T_STRUCT: return "STRUCT";
+        case T_STRUCT_VARIABLE_EQUALS: return "STRUCT VARIABLE EQUALS";
+        case T_EQUALS_STRUCT_VARIABLE: return "EQUALS STRUCT VARIABLE";
         case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
@@ -61,9 +65,12 @@ struct AST{
     
     union structType {
 
-        struct array {
+        struct arrayEquals {
             int index;
         } ArrayEquals;
+        struct structEquals {
+            char *variable;
+        } StructEquals
 
     } StructType;
 
@@ -95,7 +102,17 @@ struct AST* insertSyntaxTreeArrayAssignment(NodeType nodeType, const char *LHS, 
 
 }
 
-//struct AST* insertSyntaxTreeEqualsElementArray
+struct AST* insertSyntaxTreeStructAssignment(NodeType nodeType, const char *LHS, const char *RHS, const char *variable) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.StructEquals.variable = variable;
+    //node->StructType.ArrayEquals.index = index;
+
+}
 
 void printDots(int num)
 {
