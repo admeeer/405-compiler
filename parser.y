@@ -86,7 +86,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclarationList VariableDeclaration FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array Struct StructBlock
 
 %start Program
 
@@ -139,7 +139,6 @@ DeclarationList:
         $$ = $1;
     }
 
-    //| FunctionDeclarationList
 ;
 
 Declaration:
@@ -157,25 +156,82 @@ Declaration:
 
 Struct:
 
-    ssstruct IDENTIFIER LBRACKET {
+    ssstruct IDENTIFIER {
+
+        int StructScope = SymbolTableDefineScopeValue();
+        Scope = StructScope;
+        printf("The identifier is %s\n", $2);
+        if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+            //SymbolTablePrint();
+            SymbolTableInsertInto($2, S_STRUCT, T_STRUCT, Scope);
+           // SymbolTablePrint();
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
 
     }
 
-    VariableDeclarationList RBRACKET {
+    StructBlock {
+
+        $$ = insertIntoAST(T_STRUCT, $2, "");
+
+        $$->left = $4;
+        //$$ = $4;
 
     }
 
 ;
 
 
-VariableDeclarationList: 
-    
-    | VariableDeclaration VariableDeclarationList {
+StructBlock: 
+
+    LBRACKET StructDeclarationList RBRACKET {
+        $$ = $2;
+        printAST($2, 3);
+    }
+
+;
+
+StructDeclarationList:
+
+    StructDeclaration StructDeclarationList {
         $1->right = $2;
         $$ = $1;
     }
 
-    | VariableDeclaration
+    | StructDeclaration {
+        $$ = $1;
+    }
+
+;
+
+StructDeclaration:
+
+    TYPE IDENTIFIER SEMICOLON {
+
+        if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+            SymbolTableInsertInto($2, S_STRUCT_VARIABLE, $1->nodeType, Scope);
+
+            $$ = insertIntoAST(T_TYPE, nodeTypeToString($1->nodeType), $2);
+            //printf("%s\n\n\n", nodeTypeToString($1->nodeType));
+
+            /*if (Scope != 0) {
+                SymbolTableSetSymbolUsed($2, Scope);
+            }*/
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
+
+    }
+
 ;
 
 VariableDeclaration:
@@ -257,15 +313,6 @@ VariableDeclaration:
 
     }
 ;
-
-/*FunctionDeclarationList:
-
-    FunctionDeclaration
-
-    | FunctionDeclaration FunctionDeclarationList {
-
-    }
-;*/
 
 FunctionDeclaration:
 

@@ -14,6 +14,7 @@ typedef enum {
     T_ARRAY,
     T_ARRAY_ELEMENT_EQUALS,
     T_EQUALS_ARRAY_ELEMENT,
+    T_STRUCT,
     T_TYPE,
     T_RETURN,
     T_WRITE,
@@ -34,6 +35,7 @@ const char* nodeTypeToString(NodeType type) {
         case T_ARRAY: return "ARRAY";
         case T_ARRAY_ELEMENT_EQUALS: return "ARRAY ELEMENT EQUALS";
         case T_EQUALS_ARRAY_ELEMENT: return "EQUALS ARRAY ELEMENT";
+        case T_STRUCT: return "STRUCT";
         case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
@@ -60,7 +62,7 @@ struct AST{
     union structType {
 
         struct array {
-            int *index;
+            int index;
         } ArrayEquals;
 
     } StructType;
