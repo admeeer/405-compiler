@@ -23,3 +23,9 @@ int c;
 c = sum.num;
 
 write b;
+
+if(sum.num > a) {
+    write sum.num;
+} else {
+    write a;
+}
