@@ -170,39 +170,39 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
 		}
 
 "=="	{chars++;
-			printf("%s : BINOP\n", yytext);
+			printf("%s : LOGICOP\n", yytext);
 			yylval.string = strdup(yytext); 
-			return BINOP;
+			return LOGICOP;
 		}
 
 "!="	{chars++;
-			printf("%s : BINOP\n", yytext);
+			printf("%s : LOGICOP\n", yytext);
 			yylval.string = strdup(yytext); 
-			return BINOP;
+			return LOGICOP;
 		}
 
 "<"	    {chars++;
-			printf("%s : BINOP\n", yytext);
+			printf("%s : LOGICOP\n", yytext);
 			yylval.string = strdup(yytext); 
-			return BINOP;
+			return LOGICOP;
 		}	
 
 ">"	{chars++;
-			printf("%s : BINOP\n", yytext);
+			printf("%s : LOGICOP\n", yytext);
 			yylval.string = strdup(yytext); 
-			return BINOP;
+			return LOGICOP;
 		}	
 
 ">="	{chars++;
-			printf("%s : BINOP\n", yytext);
+			printf("%s : LOGICOP\n", yytext);
 			yylval.string = strdup(yytext); 
-			return BINOP;
+			return LOGICOP;
 		}	
 
 "<="	{chars++;
-			printf("%s : BINOP\n", yytext);
+			printf("%s : LOGICOP\n", yytext);
 			yylval.string = strdup(yytext); 
-			return BINOP;
+			return LOGICOP;
 		}		
 	
 "+"	    {chars++;

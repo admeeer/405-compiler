@@ -4,6 +4,8 @@
 #ifndef IRC_H
 #define IRC_H
 
+#include "MIPSC.h"
+
 /* 
 We initialize two files, IRCMain & IRCData that merge into IRC
 We did this so we can write to .data and .text concurrently

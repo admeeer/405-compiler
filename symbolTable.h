@@ -194,12 +194,12 @@ void SymbolTableSetSymbolAsChildOfParentSymbol(Symbol* node, SymbolType type) {
                 }
 
                 Parent->Adjacent = child;
-                printf("got here bro 1              1 \n");
+                //printf("got here bro 1              1 \n");
 
                 return;
 
             } else {
-                printf("got here bro 2              2\n");
+                //printf("got here bro 2              2\n");
                 Parent->SymbolValueWrapper.SymbolValue.SymbolValueSymbol = child;
                 return;
 
@@ -240,7 +240,7 @@ void SymbolTableInsertInto(char identifier[50], SymbolType symbolType, NodeType 
 
 }
 
-int SymbolTableGetSymbolScope(const char* identifier, NodeType type) {
+int SymbolTableGetSymbolScope(const char* identifier, SymbolType type) {
 
     Symbol* Node = GlobalSymbolTable;
 
@@ -361,7 +361,7 @@ char* SymbolTableGetValue(const char* identifier, int scope) {
         case SV_CHAR: 
             return Node->SymbolValueWrapper.SymbolValue.SymbolValueChar;
         default:
-            return;
+            break;
     }
 
     return strdup(buffer);

@@ -17,6 +17,8 @@ typedef enum {
     T_STRUCT,
     T_STRUCT_VARIABLE_EQUALS,
     T_EQUALS_STRUCT_VARIABLE,
+    T_IF,
+    T_IF_ELSE,
     T_TYPE,
     T_RETURN,
     T_WRITE,
@@ -40,6 +42,8 @@ const char* nodeTypeToString(NodeType type) {
         case T_STRUCT: return "STRUCT";
         case T_STRUCT_VARIABLE_EQUALS: return "STRUCT VARIABLE EQUALS";
         case T_EQUALS_STRUCT_VARIABLE: return "EQUALS STRUCT VARIABLE";
+        case T_IF: return "IF";
+        case T_IF_ELSE: return "IF ELSE";
         case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
@@ -69,8 +73,15 @@ struct AST{
             int index;
         } ArrayEquals;
         struct structEquals {
-            char *variable;
-        } StructEquals
+            const char *variable;
+        } StructEquals;
+        struct ifNode {
+            struct AST* condition;
+        } IfNode;
+        struct ifElseNode {
+            struct AST* Condition;
+            struct AST* ElseCodeBlock;
+        } IfElseNode;
 
     } StructType;
 
@@ -111,6 +122,29 @@ struct AST* insertSyntaxTreeStructAssignment(NodeType nodeType, const char *LHS,
     
     node->StructType.StructEquals.variable = variable;
     //node->StructType.ArrayEquals.index = index;
+
+}
+
+struct AST* insertSyntaxTreeIfStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition){
+    
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.IfNode.condition = condition;
+
+}
+
+struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, struct AST* elseBlock){
+    
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.IfElseNode.Condition = condition;
+    node->StructType.IfElseNode.ElseCodeBlock = elseBlock;
 
 }
 

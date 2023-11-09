@@ -65,14 +65,14 @@ void yyerror(const char* s);
 %token <string> SUBTRACT
 %token <string> MULTIPLY
 %token <string> DIVIDE
-%token <string> BINOP
 
 %token <string> LBRACKET
 %token <string> RBRACKET
-%token <string> LPAREN
+%token <string> LPAREN 
 %token <string> RPAREN
 %token <string> LCURLY
 %token <string> RCURLY
+%token <string> LOGICOP
 
 %token <string> INT
 %token <string> CHAR
@@ -87,7 +87,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array Struct StructBlock
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition Else
 
 %start Program
 
@@ -471,7 +471,53 @@ Statement:
         $$ = insertIntoAST(T_WRITELN, "", "");
 
     }
+
+    | If
+
 ;
+
+If:
+
+    IF LPAREN Condition RPAREN CodeBlock {
+
+        int IfScope = SymbolTableDefineScopeValue();
+        Scope = IfScope;
+
+        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
+        $$->left = $5;
+
+    }
+
+    | IF LPAREN Condition RPAREN CodeBlock Else {
+
+        int IfScope = SymbolTableDefineScopeValue();
+        Scope = IfScope;
+
+        $$ = insertSyntaxTreeIfElseStatement(T_IF_ELSE, "", "", $3, $6);
+
+    }
+
+;
+
+Else:
+
+    ELSE CodeBlock {
+        $$ = $2;
+        //printAST($2, 3);
+    }
+
+;
+
+Condition:
+
+    BuildingBlock LOGICOP BuildingBlock {
+
+    }
+
+
+
+;
+
 
 Array:
 
@@ -624,7 +670,6 @@ Expression:
 
     | IDENTIFIER Equals IDENTIFIER DOT IDENTIFIER {
 
-        
         if(!SymbolTableExistsExternalFunctionCall($1, Scope) && !SymbolTableExistsExternalFunctionCall($1, 0)) {
 
             fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $1);
@@ -716,6 +761,23 @@ BuildingBlock:
 
         }
 
+
+    }
+
+    | IDENTIFIER DOT IDENTIFIER {
+        //SymbolTablePrint();
+        int StructScope = SymbolTableGetSymbolScope($1, S_STRUCT);
+        //SymbolTablePrint();
+        if(SymbolTableExistsExternalFunctionCall($3, StructScope)) {
+            
+        }else {
+
+            fprintf(stderr, "Semantic Error: %s does not exist in any scope!\n", $3);
+            exit(EXIT_FAILURE);
+
+        }
+
+        $$ = insertIntoAST(T_INT, "", $3);
 
     }
     
@@ -917,10 +979,10 @@ Operand:
 
 ;
 
-BinOp: ADD {}
+/*BinOp: ADD {}
     | SUBTRACT {}
     | MULTIPLY {}
-    | DIVIDE {}
+    | DIVIDE {}*/
 
 
 
