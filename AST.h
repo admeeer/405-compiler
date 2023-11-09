@@ -69,8 +69,8 @@ struct AST{
             int index;
         } ArrayEquals;
         struct structEquals {
-            char *variable;
-        } StructEquals
+            const char *variable;
+        } StructEquals;
 
     } StructType;
 

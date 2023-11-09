@@ -361,7 +361,7 @@ char* SymbolTableGetValue(const char* identifier, int scope) {
         case SV_CHAR: 
             return Node->SymbolValueWrapper.SymbolValue.SymbolValueChar;
         default:
-            return;
+            break;
     }
 
     return strdup(buffer);

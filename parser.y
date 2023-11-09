@@ -87,7 +87,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array Struct StructBlock
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock BinOp Array Struct StructBlock If Else Condition
 
 %start Program
 
@@ -471,7 +471,37 @@ Statement:
         $$ = insertIntoAST(T_WRITELN, "", "");
 
     }
+
+    | If
+
 ;
+
+If:
+
+    IF LPAREN Condition RPAREN CodeBlock {
+
+    } Else {
+
+    }
+
+;
+
+Else:
+
+    | ELSE CodeBlock {
+
+    }
+
+;
+
+Condition:
+
+    BuildingBlock BINOP BuildingBlock {
+
+    }
+
+;
+
 
 Array:
 
