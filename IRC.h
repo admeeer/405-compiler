@@ -18,6 +18,17 @@ extern int Scope;
 
 extern char* BuildDirectory;
 
+int label = 0;
+
+int GetNewLabel() {
+    label = label + 1;
+    return label;
+}
+
+int GetCurrentLabel() {
+    return label;
+}
+
 void IRInitializeFile() {
     char IRCMainAbsolutePath[256];
     char IRCDataAbsolutePath[256];
@@ -26,11 +37,13 @@ void IRInitializeFile() {
     snprintf(IRCDataAbsolutePath, sizeof(IRCDataAbsolutePath), "%s/output/irc/IRCData.ir", BuildDirectory);
 
     IRCMain = fopen(IRCMainAbsolutePath, "w");
+
     if (IRCMain == NULL) {
         perror("Failed to initialize file IRCMain !");
     }
 
     IRCData = fopen(IRCDataAbsolutePath, "w");
+
     if (IRCData == NULL) {
         perror("Failed to initialize file IRCData !");
     }
@@ -66,15 +79,116 @@ void IREmission(struct AST* leaf) {
 
     snprintf(IRCDataAbsolutePath, sizeof(IRCDataAbsolutePath), "%s/output/irc/IRCData.ir", BuildDirectory);
     snprintf(IRCMainAbsolutePath, sizeof(IRCMainAbsolutePath), "%s/output/irc/IRCMain.ir", BuildDirectory);
-    //printf("Loop through IR emission\n");
+
     switch (leaf->nodeType) {
+
+        case T_IF:
+
+            struct AST* node = malloc(sizeof(struct AST));
+            node = leaf;
+            node = node->StructType.IfNode.condition;
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            int ifBlockLabel = GetNewLabel();
+
+            fprintf(IRCMain, "if %s %s %s goto L%d\n", node->LHS, node->StructType.ConditionNode.Operator, node->RHS, ifBlockLabel);
+            
+            fprintf(IRCMain, "L%d:\n", ifBlockLabel);
+
+            fclose(IRCMain);
+
+            if(leaf->left){
+                IREmission(leaf->left);
+            }
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, ";L%d\n", ifBlockLabel);
+
+            fclose(IRCMain);
+
+            break;
+        
+        case T_IF_ELSE:
+
+            struct AST* IfElseNode = malloc(sizeof(struct AST));
+            IfElseNode = leaf;
+            IfElseNode = IfElseNode->StructType.IfElseNode.Condition;
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            int ifElseBlockLabel = GetNewLabel();
+            int ElseBlockLabel = GetNewLabel();
+
+            fprintf(IRCMain, "if %s %s %s goto L%d else goto L%d\n", IfElseNode->LHS, IfElseNode->StructType.ConditionNode.Operator, IfElseNode->RHS, ifElseBlockLabel, ElseBlockLabel);
+            
+            fprintf(IRCMain, "L%d:\n", ifElseBlockLabel);
+
+            fclose(IRCMain);
+
+            if(leaf->left){
+                IREmission(leaf->left);
+            }
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, ";L%d\nL%d:\n", ifElseBlockLabel, ElseBlockLabel);
+
+            fclose(IRCMain);
+
+            if(leaf->StructType.IfElseNode.ElseCodeBlock) {
+                IREmission(leaf->StructType.IfElseNode.ElseCodeBlock);
+            }
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, ";L%d\n", ElseBlockLabel);
+
+            fclose(IRCMain);
+
+            break;
+
+        case T_EQUALS_STRUCT_VARIABLE:
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "%s = %s.%s\n", leaf->LHS, leaf->RHS, leaf->StructType.StructEquals.variable);
+            fclose(IRCMain);
+
+            break;
+        
+        case T_STRUCT_VARIABLE_EQUALS:
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "%s.%s = %s\n", leaf->LHS, leaf->StructType.StructEquals.variable, leaf->RHS);
+            fclose(IRCMain);
+
+            break;
+        
+        case T_ARRAY_ELEMENT_EQUALS:
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "%s[%d] = %s\n", leaf->LHS, leaf->StructType.ArrayEquals.index, leaf->RHS);
+            fclose(IRCMain);
+
+            break;
+        
+        case T_EQUALS_ARRAY_ELEMENT:
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "%s = %s[%d]\n", leaf->LHS, leaf->RHS, leaf->StructType.ArrayEquals.index);
+            fclose(IRCMain);
+
+            break;
+
         case T_RETURN:
-            //printf("IRC processed an AST node with type RETURN\n");
+
             IRCMain = fopen(IRCMainAbsolutePath, "a");
             fprintf(IRCMain, "return %s\n", leaf->RHS);
             fclose(IRCMain);
 
             break;
+
         case T_EQUALS_FUNCTION:
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
@@ -113,7 +227,6 @@ void IREmission(struct AST* leaf) {
                     fclose(IRCMain);
 
                 }
-
 
             }
             break;
