@@ -19,6 +19,7 @@ typedef enum {
     T_EQUALS_STRUCT_VARIABLE,
     T_IF,
     T_IF_ELSE,
+    T_CONDITION,
     T_TYPE,
     T_RETURN,
     T_WRITE,
@@ -44,6 +45,7 @@ const char* nodeTypeToString(NodeType type) {
         case T_EQUALS_STRUCT_VARIABLE: return "EQUALS STRUCT VARIABLE";
         case T_IF: return "IF";
         case T_IF_ELSE: return "IF ELSE";
+        case T_CONDITION: return "CONDITION";
         case T_TYPE: return "TYPE";
         case T_RETURN: return "RETURN";
         case T_WRITE: return "WRITE";
@@ -82,6 +84,9 @@ struct AST{
             struct AST* Condition;
             struct AST* ElseCodeBlock;
         } IfElseNode;
+        struct conditionNode {
+            const char *Operator;
+        } ConditionNode;
 
     } StructType;
 
@@ -146,6 +151,16 @@ struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, 
     node->StructType.IfElseNode.Condition = condition;
     node->StructType.IfElseNode.ElseCodeBlock = elseBlock;
 
+}
+
+struct AST* insertSyntaxTreeCondition(NodeType nodeType, const char* LHS, const char *RHS, const char *logicop){
+    
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.ConditionNode.Operator = strdup(logicop);
 }
 
 void printDots(int num)

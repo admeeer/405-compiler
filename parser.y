@@ -494,6 +494,7 @@ If:
         Scope = IfScope;
 
         $$ = insertSyntaxTreeIfElseStatement(T_IF_ELSE, "", "", $3, $6);
+        $$->left = $5;
 
     }
 
@@ -511,6 +512,13 @@ Else:
 Condition:
 
     BuildingBlock LOGICOP BuildingBlock {
+
+        if($1->nodeType != $3->nodeType) {
+            fprintf(stderr, "Type Mismatch Error: type of %s does not match type of %s !", $1->RHS, $3->RHS);
+            exit(EXIT_FAILURE);
+        }
+
+        $$ = insertSyntaxTreeCondition(T_CONDITION, $1->RHS, $3->RHS, $2);
 
     }
 

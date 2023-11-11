@@ -29,3 +29,11 @@ if(sum.num > a) {
 } else {
     write a;
 }
+
+if(sum.num > a) {
+    write sum.num;
+}
+
+if(sum.num > b) {
+    write sum.num;
+}
