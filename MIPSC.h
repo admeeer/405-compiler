@@ -55,7 +55,7 @@ void MIPSEmission() {
 
         if (isInDataSection) {
             char varName[50], value[50];
-            if (sscanf(buf, "%[^:]: word %s", varName, value) == 2) {
+            if (sscanf(buf, "%[^:] word %s", varName, value) == 2) {
                 fprintf(MIPS, "%s: .word %s\n", varName, value);
             }
         } else {

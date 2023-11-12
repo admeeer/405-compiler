@@ -256,8 +256,9 @@ VariableDeclaration:
             //printf("%s\n\n\n", nodeTypeToString($1->nodeType));
 
             if(Scope != 0) {
+
                 SymbolTableSetSymbolUsed($2, Scope);
-                printf("We set it %s to used at Scope %d\n", $2, Scope);
+                
             }
 
 
@@ -542,7 +543,6 @@ If:
 
     IfCondition CodeBlock {
 
-        printf("SCOPE IS -------------- %d\n", Scope);
         $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $1, Scope);
         $$->left = $2;
 
@@ -551,7 +551,6 @@ If:
 
     | IfCondition CodeBlock Else {
 
-        printf("SCOPE IS -------------- %d\n", Scope);
         $$ = insertSyntaxTreeIfElseStatement(T_IF_ELSE, "", "", $1, $3, Scope);
         $$->left = $2;
 
@@ -978,7 +977,6 @@ AddSubtractExpression:
 
     | AddSubtractExpression ADD MultiplyDivideExpression {
 
-        printf("AddSubtractExpression called, $1 is %s and $3 is %s\n", $1, $3);
         char value[5];
 
         char operatorArray[3];

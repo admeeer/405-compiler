@@ -157,7 +157,6 @@ struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, 
     
     node->StructType.IfElseNode.Condition = condition;
     node->StructType.IfElseNode.ElseCodeBlock = elseBlock;
-    printf("I am setting the SCOPE to %d\n\n\n", scope);
     node->StructType.IfElseNode.Scope = scope;
 
 }
