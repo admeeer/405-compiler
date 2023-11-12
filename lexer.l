@@ -113,6 +113,23 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
          return ELSE;
 		}
 
+"break"	{words++; chars += strlen(yytext);
+		 printf("%s : BREAK\n", yytext);
+         yylval.string =strdup(yytext);
+         return BREAK;
+		}
+
+"switch"	{words++; chars += strlen(yytext);
+		 printf("%s : SWITCH\n", yytext);
+         yylval.string =strdup(yytext);
+         return SWITCH;
+		}
+
+"case"	{words++; chars += strlen(yytext);
+		 printf("%s : CASE\n", yytext);
+         yylval.string =strdup(yytext);
+         return CASE;
+		}
 
 {IDENTIFIER}	{words++; chars += strlen(yytext);
 			printf("%s : IDENTIFIER\n",yytext);
@@ -161,6 +178,12 @@ CHARACTER  ["'"]({LETTER}|{DIGIT})["'"]
 			printf("%s : SEMICOLON\n", yytext);
 			yylval.string = strdup(yytext); 
 			return SEMICOLON;
+		}
+
+":"			{chars++;
+			printf("%s : COLON\n", yytext);
+			yylval.string = strdup(yytext); 
+			return COLON;
 		}
 		
 "="			{chars++;

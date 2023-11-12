@@ -82,17 +82,23 @@ void IREmission(struct AST* leaf) {
 
     switch (leaf->nodeType) {
 
+        case T_SWITCH:
+
+        struct AST* SwitchNode = malloc(sizeof(struct AST));
+        
         case T_IF:
 
-            struct AST* node = malloc(sizeof(struct AST));
-            node = leaf;
-            node = node->StructType.IfNode.condition;
+            struct AST* IfNode = malloc(sizeof(struct AST));
+            IfNode = leaf;
+            IfNode = IfNode->StructType.IfNode.condition;
+
+            Scope = leaf->StructType.IfNode.Scope;
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
             int ifBlockLabel = GetNewLabel();
 
-            fprintf(IRCMain, "if %s %s %s goto L%d\n", node->LHS, node->StructType.ConditionNode.Operator, node->RHS, ifBlockLabel);
+            fprintf(IRCMain, "if %s %s %s goto L%d\n", IfNode->LHS, IfNode->StructType.ConditionNode.Operator, IfNode->RHS, ifBlockLabel);
             
             fprintf(IRCMain, "L%d:\n", ifBlockLabel);
 
@@ -108,6 +114,8 @@ void IREmission(struct AST* leaf) {
 
             fclose(IRCMain);
 
+            Scope = 0;
+
             break;
         
         case T_IF_ELSE:
@@ -115,6 +123,8 @@ void IREmission(struct AST* leaf) {
             struct AST* IfElseNode = malloc(sizeof(struct AST));
             IfElseNode = leaf;
             IfElseNode = IfElseNode->StructType.IfElseNode.Condition;
+
+            Scope = leaf->StructType.IfElseNode.Scope;
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
@@ -146,6 +156,8 @@ void IREmission(struct AST* leaf) {
             fprintf(IRCMain, ";L%d\n", ElseBlockLabel);
 
             fclose(IRCMain);
+
+            Scope = 0;
 
             break;
 
@@ -211,24 +223,26 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
             break;
         case T_EQUALS:
-            printf("Checking if symbol %s is used at Scope %d\n", leaf->LHS, Scope);
-            if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
+            //printf("Checking if symbol %s is used at Scope %d\n", leaf->LHS, Scope);
+            int equalsScope;
+            if(SymbolTableExistsExternalFunctionCall(leaf->LHS, 0)) {
+                equalsScope = 0;
+            } else {
+                equalsScope = Scope;
+            }
 
-                if(Scope == 0) {
+            if(Scope == 0) {
 
-                    IRCData = fopen(IRCDataAbsolutePath, "a");
-                    fprintf(IRCData, "%s: word %s\n", leaf->LHS, leaf->RHS);
-                    fclose(IRCData);
-
-                } else {
-
-                    IRCMain = fopen(IRCMainAbsolutePath, "a");
-                    fprintf(IRCMain, "%s = %s\n", leaf->LHS, leaf->RHS);
-                    fclose(IRCMain);
-
-                }
+                IRCData = fopen(IRCDataAbsolutePath, "a");
+                fprintf(IRCData, "%s word %s\n", leaf->LHS, leaf->RHS);
+                fclose(IRCData);
 
             }
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+            fprintf(IRCMain, "%s = %s\n", leaf->LHS, leaf->RHS);
+            fclose(IRCMain);
+
             break;
         
         case T_WRITE:
@@ -279,7 +293,7 @@ void IREmission(struct AST* leaf) {
             if(leaf->left){
 
                 //printf("Hey, we got here!\n");
-
+                //printf("Here. Scope is %d\n", Scope);
                 IREmission(leaf->left);
             }
 
@@ -323,6 +337,8 @@ void IREmissionCleanUp() {
     while (fgets(buf, sizeof(buf), IRCData)) {
         fprintf(IRC, "%s", buf);
     }
+    
+    fprintf(IRC, "\n");
 
     while (fgets(buf, sizeof(buf), IRCMain)) {
         fprintf(IRC, "%s", buf);
