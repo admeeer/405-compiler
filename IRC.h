@@ -88,6 +88,10 @@ void IREmission(struct AST* leaf) {
             node = leaf;
             node = node->StructType.IfNode.condition;
 
+            Scope = node->StructType.IfNode.Scope;
+            printf("Scope is HAHA %d\n", node->StructType.IfElseNode.Scope);
+            //printf("Scope is %d", Scope);
+
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
             int ifBlockLabel = GetNewLabel();
@@ -108,6 +112,8 @@ void IREmission(struct AST* leaf) {
 
             fclose(IRCMain);
 
+            Scope = 0;
+
             break;
         
         case T_IF_ELSE:
@@ -115,6 +121,9 @@ void IREmission(struct AST* leaf) {
             struct AST* IfElseNode = malloc(sizeof(struct AST));
             IfElseNode = leaf;
             IfElseNode = IfElseNode->StructType.IfElseNode.Condition;
+
+            Scope = leaf->StructType.IfElseNode.Scope;
+
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
@@ -146,6 +155,8 @@ void IREmission(struct AST* leaf) {
             fprintf(IRCMain, ";L%d\n", ElseBlockLabel);
 
             fclose(IRCMain);
+
+            Scope = 0;
 
             break;
 
@@ -211,8 +222,14 @@ void IREmission(struct AST* leaf) {
             fclose(IRCMain);
             break;
         case T_EQUALS:
-            printf("Checking if symbol %s is used at Scope %d\n", leaf->LHS, Scope);
-            if (SymbolTableGetSymbolUsed(leaf->LHS, Scope)) {
+            //printf("Checking if symbol %s is used at Scope %d\n", leaf->LHS, Scope);
+            int equalsScope;
+            if(SymbolTableExistsExternalFunctionCall(leaf->LHS, 0)) {
+                equalsScope = 0;
+            } else {
+                equalsScope = Scope;
+            }
+            if (SymbolTableGetSymbolUsed(leaf->LHS, equalsScope)) {
 
                 if(Scope == 0) {
 
@@ -279,7 +296,7 @@ void IREmission(struct AST* leaf) {
             if(leaf->left){
 
                 //printf("Hey, we got here!\n");
-
+                //printf("Here. Scope is %d\n", Scope);
                 IREmission(leaf->left);
             }
 

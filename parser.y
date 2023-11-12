@@ -79,6 +79,10 @@ void yyerror(const char* s);
 %token <string> FLOAT
 
 %token <string> RETURN
+%token <string> SWITCH
+%token <string> BREAK
+%token <string> CASE
+%token <string> COLON
 
 %token <string> CHARACTER
 
@@ -87,7 +91,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition Else
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock
 
 %start Program
 
@@ -127,6 +131,7 @@ BlockDeclaration:
 
     | Statement 
 
+
 ;
 
 DeclarationList:
@@ -163,9 +168,8 @@ Struct:
         Scope = StructScope;
         printf("The identifier is %s\n", $2);
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
-            //SymbolTablePrint();
+
             SymbolTableInsertInto($2, S_STRUCT, T_STRUCT, Scope);
-           // SymbolTablePrint();
 
         } else {
 
@@ -472,33 +476,126 @@ Statement:
 
     }
 
-    | If
+    | If 
+
+    | Switch
+
+;
+
+Switch:
+
+    SWITCH LPAREN BuildingBlock RPAREN LBRACKET CaseList RBRACKET {
+
+        $$ = insertIntoAST(T_SWITCH, nodeTypeToString($3->nodeType), $3->RHS);
+        //SymbolTableInsertInto()
+
+        $$->left = $6;
+
+    }
+
+;
+
+CaseList:
+
+    Case CaseList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+    | Case {
+        $$ = $1;
+    }
+
+;
+
+Case:
+
+    CASE BuildingBlock COLON BREAK SEMICOLON {
+
+        $$ = insertIntoAST(T_CASE, "", $2->RHS);
+
+    }
+
+    | CASE BuildingBlock COLON CaseBlock BREAK SEMICOLON {
+
+        $$ = insertIntoAST(T_CASE, "", $2->RHS);
+        $$->left = $4;
+
+    }
+
+;
+
+CaseBlock:
+
+    BlockDeclaration BlockDeclarationList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+    | BlockDeclaration {
+        $$ = $1;
+    }
 
 ;
 
 If:
 
-    IF LPAREN Condition RPAREN CodeBlock {
+    IfCondition CodeBlock {
+
+        printf("SCOPE IS -------------- %d\n", Scope);
+        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $1, Scope);
+        $$->left = $2;
+
+    }
+
+
+    | IfCondition CodeBlock Else {
+
+        printf("SCOPE IS -------------- %d\n", Scope);
+        $$ = insertSyntaxTreeIfElseStatement(T_IF_ELSE, "", "", $1, $3, Scope);
+        $$->left = $2;
+
+    }
+
+    /*IF LPAREN Condition RPAREN {
 
         int IfScope = SymbolTableDefineScopeValue();
         Scope = IfScope;
+
+    }
+
+    CodeBlock {
 
         $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
-        $$->left = $5;
+        $$->left = $6;
 
     }
 
-    | IF LPAREN Condition RPAREN CodeBlock Else {
+    | IF LPAREN Condition RPAREN {
 
         int IfScope = SymbolTableDefineScopeValue();
         Scope = IfScope;
 
-        $$ = insertSyntaxTreeIfElseStatement(T_IF_ELSE, "", "", $3, $6);
-        $$->left = $5;
-
     }
 
+    CodeBlock Else {
+
+        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
+        $$->left = $6;
+
+    }*/
+
 ;
+
+IfCondition:
+
+    IF LPAREN Condition RPAREN {
+        
+        $$ = $3;
+        int IfScope = SymbolTableDefineScopeValue();
+        Scope = IfScope;
+
+    }
 
 Else:
 
@@ -508,6 +605,9 @@ Else:
     }
 
 ;
+
+
+
 
 Condition:
 
@@ -613,21 +713,36 @@ Expression:
     | Array
 
     | IDENTIFIER Equals Expression {
-        
-        //printf("IDENTIFIER Equals Expression $1 = %s and $3 = %s\n", $1, $3->RHS);
 
-        if(!SymbolTableExistsExternalFunctionCall($1, Scope)) {
-            fprintf(stderr, "Semantic Error: Tried setting %s at scope %d to a value, but %s is undeclared\n", $1, Scope, $1);
-            exit(EXIT_FAILURE);
+        int VariableScope = 0;
+        
+        if(Scope != 0) {
+
+            if(SymbolTableExistsExternalFunctionCall($1, Scope)) {
+
+                VariableScope = Scope;
+
+            } else if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+                VariableScope = 0;
+
+            } else {
+                
+                fprintf(stderr, "Semantic Error: Tried setting %s to a value, but %s is undeclared\n", $1, $1);
+                exit(EXIT_FAILURE);
+
+            }
+
         }
 
-        if(SymbolTableGetNodeType($1, Scope) != $3->nodeType) {
+
+        if(SymbolTableGetNodeType($1, VariableScope) != $3->nodeType) {
             //printf("%s and %s also %s and %s", nodeTypeToString(SymbolTableGetNodeType($1)), nodeTypeToString($3->nodeType), $3->LHS, $3->RHS);
             fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s\n", SymbolTableGetNodeType($1, Scope), $3->nodeType);
             exit(EXIT_FAILURE);
         } 
 
-        SymbolTableSetValue($1, $3->RHS, Scope);
+        SymbolTableSetValue($1, $3->RHS, VariableScope);
         //printf("Identifier equals expression called, expression is %s and %s\n", $3->LHS, $3->RHS);
         //printf("Identifier equals expression called, expression is %s\n", $3);
         $$ = insertIntoAST(T_EQUALS, $1, $3->RHS);
@@ -636,16 +751,37 @@ Expression:
 
     | IDENTIFIER Equals IDENTIFIER FunctionCall {
 
+        int VariableScope = 0;
+        
+        if(Scope != 0) {
+
+            if(SymbolTableExistsExternalFunctionCall($1, Scope)) {
+
+                VariableScope = Scope;
+
+            } else if(SymbolTableExistsExternalFunctionCall($1, 0)) {
+
+                VariableScope = 0;
+
+            } else {
+                
+                fprintf(stderr, "Semantic Error: Tried setting %s to a value, but %s is undeclared\n", $1, $1);
+                exit(EXIT_FAILURE);
+
+            }
+
+        }
+        
         int FunctionCallScope = SymbolTableGetSymbolScope($3, S_FUNCTION);
 
-        if(SymbolTableGetNodeType($1, Scope) == SymbolTableGetNodeType($3, FunctionCallScope)) {
+        if(SymbolTableGetNodeType($1, VariableScope) == SymbolTableGetNodeType($3, FunctionCallScope)) {
             $$ = insertIntoAST(T_EQUALS_FUNCTION, $1, $3);
             $$->left = $4;
             //printf("$4 is %s\n", $4->RHS);
             //printAST($4, 3);
         } else {
 
-            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s\n", nodeTypeToString(SymbolTableGetNodeType($1, Scope)), nodeTypeToString(SymbolTableGetNodeType($3, FunctionCallScope)));
+            fprintf(stderr, "Semantic Error: Type Mismatch. Attempted to assign type %s to type %s\n", nodeTypeToString(SymbolTableGetNodeType($1, VariableScope)), nodeTypeToString(SymbolTableGetNodeType($3, FunctionCallScope)));
             exit(EXIT_FAILURE);
         }
 
@@ -653,9 +789,7 @@ Expression:
 
     | IDENTIFIER DOT IDENTIFIER Equals Expression {
 
-        //SymbolTablePrint();
         int StructScope = SymbolTableGetSymbolScope($1, S_STRUCT);
-        //SymbolTablePrint();
 
         if(SymbolTableExistsExternalFunctionCall($3, StructScope)) {
             
@@ -773,9 +907,9 @@ BuildingBlock:
     }
 
     | IDENTIFIER DOT IDENTIFIER {
-        //SymbolTablePrint();
+
         int StructScope = SymbolTableGetSymbolScope($1, S_STRUCT);
-        //SymbolTablePrint();
+
         if(SymbolTableExistsExternalFunctionCall($3, StructScope)) {
             
         }else {

@@ -15,7 +15,8 @@ typedef enum {
     S_ARRAY,
     S_FUNCTION,
     S_FUNCTION_PARAMETER,
-    S_STRUCT
+    S_STRUCT,
+    S_SWITCH
 } SymbolType;
 
 typedef enum {
@@ -26,7 +27,8 @@ typedef enum {
     SV_PARAMETER,
     SV_FUNCTION,
     SV_UNDEFINED,
-    SV_STRUCT
+    SV_STRUCT,
+    SV_SWITCH
 } SymbolValueType;
 
 const char* SymbolTypeToString(SymbolType type) {
@@ -37,6 +39,7 @@ const char* SymbolTypeToString(SymbolType type) {
         case S_STRUCT_VARIABLE: return "STRUCT VARIABLE";
         case S_ARRAY: return "ARRAY";
         case S_FUNCTION_PARAMETER: return "PARAMETER";
+        case S_SWITCH: return "SWITCH";
         default: return "UNDEFINED";
     }
 }
@@ -50,6 +53,7 @@ const char* SymbolValueTypeToString(SymbolValueType type) {
         case SV_FUNCTION: return "FUNCTION";
         case SV_ARRAY: return "ARRAY";
         case SV_STRUCT: return "STRUCT";
+        case SV_SWITCH: return "SWITCH";
         default: return "UNDEFINED";
     }
 }
@@ -84,6 +88,7 @@ SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
         case T_ARRAY: return SV_ARRAY;
         case T_FUNCTION: return SV_FUNCTION;    
         case T_STRUCT: return SV_STRUCT;
+        case T_SWITCH: return SV_SWITCH;
         default: return SV_UNDEFINED;
     }
 }

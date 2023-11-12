@@ -11,3 +11,18 @@ if(a > c) {
 } else {
     write c;
 }
+
+switch (a) {
+    case 1:
+        break;
+    case 2:
+        write a;
+        break;
+    case 3:
+        break;
+    case 4:
+        write a;
+        break;
+}
+
+int e = 5;

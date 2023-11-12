@@ -31,7 +31,9 @@ typedef enum {
     T_FLOAT,
     T_CHAR,
     T_FUNCTION,
-    T_FUNCTIONCALL
+    T_FUNCTIONCALL,
+    T_SWITCH,
+    T_CASE
 } NodeType;
 
 const char* nodeTypeToString(NodeType type) {
@@ -58,6 +60,8 @@ const char* nodeTypeToString(NodeType type) {
         case T_CHAR: return "CHARACTER";
         case T_FUNCTION: return "FUNCTION";
         case T_FUNCTIONCALL: return "FUNCTIONCALL";
+        case T_SWITCH: return "SWITCH";
+        case T_CASE: return "CASE";
         default: return "UNDEFINED";
     }
 }
@@ -79,10 +83,12 @@ struct AST{
         } StructEquals;
         struct ifNode {
             struct AST* condition;
+            int Scope;
         } IfNode;
         struct ifElseNode {
             struct AST* Condition;
             struct AST* ElseCodeBlock;
+            int Scope;
         } IfElseNode;
         struct conditionNode {
             const char *Operator;
@@ -130,7 +136,7 @@ struct AST* insertSyntaxTreeStructAssignment(NodeType nodeType, const char *LHS,
 
 }
 
-struct AST* insertSyntaxTreeIfStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition){
+struct AST* insertSyntaxTreeIfStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, int scope){
     
     struct AST* node = malloc(sizeof(struct AST));
     node->nodeType = nodeType;
@@ -138,10 +144,11 @@ struct AST* insertSyntaxTreeIfStatement(NodeType nodeType, const char* LHS, cons
     node->RHS = strdup(RHS);
     
     node->StructType.IfNode.condition = condition;
+    node->StructType.IfNode.Scope = scope;
 
 }
 
-struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, struct AST* elseBlock){
+struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, struct AST* elseBlock, int scope){
     
     struct AST* node = malloc(sizeof(struct AST));
     node->nodeType = nodeType;
@@ -150,6 +157,8 @@ struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, 
     
     node->StructType.IfElseNode.Condition = condition;
     node->StructType.IfElseNode.ElseCodeBlock = elseBlock;
+    printf("I am setting the SCOPE to %d\n\n\n", scope);
+    node->StructType.IfElseNode.Scope = scope;
 
 }
 
