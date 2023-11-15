@@ -93,6 +93,10 @@ struct AST{
         struct conditionNode {
             const char *Operator;
         } ConditionNode;
+        struct switchNode {
+            int Scope;
+            struct AST* CaseList;
+        } SwitchNode;
 
     } StructType;
 
@@ -169,6 +173,18 @@ struct AST* insertSyntaxTreeCondition(NodeType nodeType, const char* LHS, const 
     node->RHS = strdup(RHS);
     
     node->StructType.ConditionNode.Operator = strdup(logicop);
+}
+
+struct AST* insertSyntaxTreeSwitchStatement(NodeType nodeType, const char* LHS, const char *RHS, int scope, struct AST* caseList) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.SwitchNode.Scope = scope;
+    node->StructType.SwitchNode.CaseList = caseList;
+
 }
 
 void printDots(int num)

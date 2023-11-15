@@ -84,8 +84,65 @@ void IREmission(struct AST* leaf) {
 
         case T_SWITCH:
 
-        struct AST* SwitchNode = malloc(sizeof(struct AST));
-        
+            struct AST* SwitchNode = malloc(sizeof(struct AST));
+            SwitchNode = leaf;
+
+            Scope = leaf->StructType.SwitchNode.Scope;
+
+            int breakLabel = GetNewLabel();
+
+            int nextCaseLabel = GetNewLabel();
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            SwitchNode = SwitchNode->StructType.SwitchNode.CaseList;
+
+            fprintf(IRCMain, "if %s != %s goto L%d\n", leaf->RHS, SwitchNode->RHS, nextCaseLabel);
+
+            fclose(IRCMain);
+
+            IREmission(SwitchNode->left);
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, "goto L%d\n", breakLabel);
+
+            fclose(IRCMain);
+
+            while(SwitchNode->right){
+
+                IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+                SwitchNode = SwitchNode->right;
+
+                int CurrentCaseLabel = GetCurrentLabel();
+
+                int NextCaseLabel = GetNewLabel();
+
+                fprintf(IRCMain, "L%d: if %s != %s goto L%d\n", CurrentCaseLabel, leaf->RHS, SwitchNode->RHS, NextCaseLabel);
+
+                fclose(IRCMain);
+
+                IREmission(SwitchNode->left);
+
+                IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+                fprintf(IRCMain, "goto L%d\n", breakLabel);
+
+                fclose(IRCMain);
+
+            }
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, "L%d: goto L%d\nL%d:\n", GetCurrentLabel(), breakLabel, breakLabel);
+
+            fclose(IRCMain);
+
+            Scope = 0;
+
+            break;
+
         case T_IF:
 
             struct AST* IfNode = malloc(sizeof(struct AST));
@@ -107,12 +164,6 @@ void IREmission(struct AST* leaf) {
             if(leaf->left){
                 IREmission(leaf->left);
             }
-
-            IRCMain = fopen(IRCMainAbsolutePath, "a");
-
-            fprintf(IRCMain, ";L%d\n", ifBlockLabel);
-
-            fclose(IRCMain);
 
             Scope = 0;
 
@@ -143,19 +194,13 @@ void IREmission(struct AST* leaf) {
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
 
-            fprintf(IRCMain, ";L%d\nL%d:\n", ifElseBlockLabel, ElseBlockLabel);
+            fprintf(IRCMain, "L%d:\n", ElseBlockLabel);
 
             fclose(IRCMain);
 
             if(leaf->StructType.IfElseNode.ElseCodeBlock) {
                 IREmission(leaf->StructType.IfElseNode.ElseCodeBlock);
             }
-
-            IRCMain = fopen(IRCMainAbsolutePath, "a");
-
-            fprintf(IRCMain, ";L%d\n", ElseBlockLabel);
-
-            fclose(IRCMain);
 
             Scope = 0;
 

@@ -485,12 +485,16 @@ Statement:
 
 Switch:
 
-    SWITCH LPAREN BuildingBlock RPAREN LBRACKET CaseList RBRACKET {
+    SWITCH LPAREN BuildingBlock RPAREN {
 
-        $$ = insertIntoAST(T_SWITCH, nodeTypeToString($3->nodeType), $3->RHS);
-        //SymbolTableInsertInto()
+        int SwitchScope = SymbolTableDefineScopeValue();
+        Scope = SwitchScope;
+        
+    }
+    
+    LBRACKET CaseList RBRACKET {
 
-        $$->left = $6;
+        $$ = insertSyntaxTreeSwitchStatement(T_SWITCH, nodeTypeToString($3->nodeType), $3->RHS, Scope, $7);
 
     }
 
@@ -873,7 +877,7 @@ BuildingBlock:
                 $$ = insertIntoAST(T_INT, "", $1);
             }else {
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+                $$ = insertIntoAST(T_INT, "", $1);
                 
             }
 
@@ -883,7 +887,7 @@ BuildingBlock:
             // It doesn't, so the variable must be declared in the global scope.
             if(SymbolTableExistsExternalFunctionCall($1, 0)) {
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
+                $$ = insertIntoAST(T_INT, "", $1);
 
             } else {
                 // The variable doesn't exist in the function or global scope, meaning it doesn't exist, or we are accessing something we shouldn't. Failure!
@@ -898,7 +902,7 @@ BuildingBlock:
 
         } else {
 
-            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+            $$ = insertIntoAST(T_INT, "", $1);
 
         }
 
@@ -1085,7 +1089,7 @@ Operand:
             if(SymbolTableExistsExternalFunctionCall($1, 0)) {
 
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
+                $$ = insertIntoAST(T_INT, "", $1);
 
             } else {
                 // The variable doesn't exist in the function or global scope, meaning it doesn't exist, or we are accessing something we shouldn't. Failure!
@@ -1097,7 +1101,7 @@ Operand:
            }
         } else {
 
-            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+            $$ = insertIntoAST(T_INT, "", $1);
 
         }
 
