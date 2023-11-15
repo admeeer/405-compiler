@@ -303,30 +303,18 @@ void IREmission(struct AST* leaf) {
 
             fprintf(IRCMain, "function %s %s (", leaf->LHS, leaf->RHS);
             
-            // If the function has any parameters
-            if(SymbolTableSymbolValueSymbolExists(leaf->RHS, SymbolTableGetSymbolScope(leaf->RHS, S_FUNCTION))){
-                // Get the scope value of the function
-                int FunctionScope = SymbolTableGetSymbolScope(leaf->RHS, S_FUNCTION);
+            if(leaf->StructType.FunctionNode.Parameters){
 
-                if(SymbolTableSymbolValueSymbolExists(leaf->RHS, FunctionScope)){
+                //struct AST* IfElseNode = malloc(sizeof(struct AST));
+                struct AST* ParameterPointer = malloc(sizeof(struct AST));
 
-                    Symbol* Parameter = SymbolTableGetSymbolValueSymbol(leaf->RHS, FunctionScope);
+                ParameterPointer = leaf->StructType.FunctionNode.Parameters;
 
-                    while(1) {
+                while(ParameterPointer) {
+                    
+                    fprintf(IRCMain, "%s %s ", ParameterPointer->LHS, ParameterPointer->RHS);
+                    ParameterPointer = ParameterPointer->right;
 
-                        fprintf(IRCMain, "%s %s", SymbolValueTypeToString(Parameter->SymbolValueWrapper.SymbolValueWrapperSymbolValueType), Parameter->SymbolIdentifier);
-                        if(Parameter->Adjacent){
-                            fprintf(IRCMain, ", ");
-                            Parameter = Parameter->Adjacent;
-                            //printf("The parameter is %s\n", Parameter->SymbolIdentifier);
-                        }else {
-                            break;
-                        }
-
-                    }               
-                } else {
-
-                    //TO-DO ... something
                 }
 
             }
@@ -335,11 +323,11 @@ void IREmission(struct AST* leaf) {
 
             fclose(IRCMain);
 
-            if(leaf->left){
+            if(leaf->StructType.FunctionNode.CodeBlock){
 
                 //printf("Hey, we got here!\n");
                 //printf("Here. Scope is %d\n", Scope);
-                IREmission(leaf->left);
+                IREmission(leaf->StructType.FunctionNode.CodeBlock);
             }
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");

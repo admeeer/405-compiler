@@ -31,6 +31,7 @@ typedef enum {
     T_FLOAT,
     T_CHAR,
     T_FUNCTION,
+    T_PARAMETER,
     T_FUNCTIONCALL,
     T_SWITCH,
     T_CASE
@@ -59,6 +60,7 @@ const char* nodeTypeToString(NodeType type) {
         case T_FLOAT: return "FLOAT";
         case T_CHAR: return "CHARACTER";
         case T_FUNCTION: return "FUNCTION";
+        case T_PARAMETER: return "PARAMETER";
         case T_FUNCTIONCALL: return "FUNCTIONCALL";
         case T_SWITCH: return "SWITCH";
         case T_CASE: return "CASE";
@@ -97,6 +99,10 @@ struct AST{
             int Scope;
             struct AST* CaseList;
         } SwitchNode;
+        struct functionNode {
+            struct AST* CodeBlock;
+            struct AST* Parameters;
+        } FunctionNode;
 
     } StructType;
 
@@ -115,6 +121,18 @@ struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
     //printf("Node with type %s and LHS %s and RHS %s inserted into tree\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
 
     return node;
+}
+
+struct AST* insertSyntaxTreeFunction(NodeType nodeType, const char *LHS, const char *RHS, struct AST* codeBlock, struct AST* parameters) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+
+    node->StructType.FunctionNode.CodeBlock = codeBlock;
+    node->StructType.FunctionNode.Parameters = parameters;
+
 }
 
 struct AST* insertSyntaxTreeArrayAssignment(NodeType nodeType, const char *LHS, const char *RHS, int index) {

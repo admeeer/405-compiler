@@ -344,9 +344,8 @@ FunctionDeclaration:
 
     ParameterDeclarationList RPAREN CodeBlock {
 
-        $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
-
-        $$->left = $8;
+        //$$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+        $$ = insertSyntaxTreeFunction(T_FUNCTION, nodeTypeToString($2->nodeType), $3, $8, $6);
 
     }
 ;
@@ -380,6 +379,8 @@ ParameterDeclaration:
 
             SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType, Scope);
             SymbolTableSetSymbolUsed($2, Scope);
+
+            $$ = insertIntoAST(T_PARAMETER, nodeTypeToString($1->nodeType), $2);
 
         } else {
 
