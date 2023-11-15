@@ -2,6 +2,14 @@ int a = 1;
 
 int b = 2;
 
+ssstruct ab {
+    int a;
+    int b;
+}
+
+ab.a = a;
+ab.b = b;
+
 function int sum(int x, int y, int z){
     int f = x - a;
     y = y - b;

@@ -325,9 +325,8 @@ void IREmission(struct AST* leaf) {
 
             if(leaf->StructType.FunctionNode.CodeBlock){
 
-                //printf("Hey, we got here!\n");
-                //printf("Here. Scope is %d\n", Scope);
                 IREmission(leaf->StructType.FunctionNode.CodeBlock);
+                
             }
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
