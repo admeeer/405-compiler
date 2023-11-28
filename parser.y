@@ -305,7 +305,6 @@ VariableDeclaration:
             SymbolTableInsertInto($2, S_ARRAY, $1->nodeType, Scope);
 
             SymbolTableSetSymbolValueArrayLength($2, Scope, $4);
-            //SymbolTableSetSymbolValueArrayElementType($2, Scope);
 
             char length[3];
             sprintf(length, "%d", $4);
@@ -561,34 +560,6 @@ If:
 
     }
 
-    /*IF LPAREN Condition RPAREN {
-
-        int IfScope = SymbolTableDefineScopeValue();
-        Scope = IfScope;
-
-    }
-
-    CodeBlock {
-
-        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
-        $$->left = $6;
-
-    }
-
-    | IF LPAREN Condition RPAREN {
-
-        int IfScope = SymbolTableDefineScopeValue();
-        Scope = IfScope;
-
-    }
-
-    CodeBlock Else {
-
-        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
-        $$->left = $6;
-
-    }*/
-
 ;
 
 IfCondition:
@@ -604,8 +575,9 @@ IfCondition:
 Else:
 
     ELSE CodeBlock {
+
         $$ = $2;
-        //printAST($2, 3);
+
     }
 
 ;
@@ -962,21 +934,11 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
-
-            $$ = insertIntoAST(T_INT, "", Expression);
-
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        $$ = insertIntoAST(T_INT, "", Expression);
 
     }
 
@@ -988,22 +950,17 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+        $$ = insertIntoAST(T_INT, "", Expression);
 
-            $$ = insertIntoAST(T_INT, "", Expression);
-            
-        } else {
+        //printAST($$, 3);
 
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
+        //$$->right = $1;
 
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
-
+        //printf("Hey, we got here how many times? haha.\n");
     }
 ;
 
@@ -1019,21 +976,11 @@ MultiplyDivideExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
-
-            $$ = insertIntoAST(T_INT, "", Expression);
-            
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        $$ = insertIntoAST(T_INT, "", Expression);
 
     }
 
@@ -1045,21 +992,11 @@ MultiplyDivideExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
-
-            $$ = insertIntoAST(T_INT, "", Expression);
-            
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        $$ = insertIntoAST(T_INT, "", Expression);
 
     }
 ;
@@ -1080,7 +1017,7 @@ Operand:
                 break;
             } else {
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+                $$ = insertIntoAST(T_INT, "", $1);
                 
             }
 

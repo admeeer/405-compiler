@@ -24,6 +24,9 @@ test: build
 		./$(BUILD_DIR)/parser tests/$$testfile; \
 	done
 
+testdevel: build
+	./$(BUILD_DIR)/parser tests/test8.cmm
+
 clean:
 	rm -rf $(BUILD_DIR)
 	ls -l

@@ -78,6 +78,7 @@ typedef struct Symbol {
     struct Symbol* Adjacent;
     int SymbolScope;
     int IsSymbolUsed;
+    //char []
 } Symbol;
 
 SymbolValueType SymbolTableMatchSymbolValueType(Symbol* node) {
@@ -139,6 +140,10 @@ Symbol* SymbolTableExistsHandler(const char* identifier, int scope, const char* 
         exit(EXIT_FAILURE);
         return NULL; // clarity  
     }
+
+}
+
+void SymbolTableGetAddress(const char* identifier, int scope) {
 
 }
 

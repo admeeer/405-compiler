@@ -1,5 +1,9 @@
-int x;
-x = 3;
+int x = 1;
 
-int y;
-y = x;
+int y = 2;
+
+int z = 3;
+
+int w = 4;
+
+x = x + y + z + w;

@@ -5,7 +5,17 @@
 
 FILE* MIPS;
 
+typedef struct {
+    char *name;
+    char *addr;
+    struct VariableIndex* adj;
+} VariableIndex;
+
 extern char* BuildDirectory;
+
+struct VariableIndex* Master;
+
+int InsideFunction = 0;
 
 void MIPSInitializeFile() {
     char MIPSAbsolutePath[256];
@@ -46,31 +56,38 @@ void MIPSEmission() {
 
     fprintf(MIPS, ".data\n");
 
+    // loop over each line of IRC.ir
     while (fgets(buf, sizeof(buf), IRCFile)) {
+
         if (strncmp(buf, "main:", 5) == 0) {
             isInDataSection = 0;
             fprintf(MIPS, "\n.text\nmain:\n");
             continue;
         }
 
-        if (isInDataSection) {
-            char varName[50], value[50];
-            if (sscanf(buf, "%[^:] word %s", varName, value) == 2) {
-                fprintf(MIPS, "%s: .word %s\n", varName, value);
+        if(!isInDataSection) {
+
+            char arg1[50], arg2[50], arg3[50];
+            char operator;
+
+
+            if (sscanf(buf, "%s = %[^+*/-]%c%s", arg1, arg2, &operator, arg3) == 4) {
+                
             }
+            
+            //if(sscanf(buf, "%s %s"))
+
         } else {
-            char instruction[10], operand[50];
-            if (sscanf(buf, "%s %s", instruction, operand) == 2) {
-                if (strcmp(instruction, "write") == 0) {
-                    fprintf(MIPS, "li $v0, 1       # syscall to print int\n");
-                    fprintf(MIPS, "la $a0, %s # load int\n", operand);
-                    fprintf(MIPS, "syscall\n");
-                }
+            char variableName[50], variableValue[50];
+            if (sscanf(buf, "%s word %s", variableName, variableValue) == 2) {
+                fprintf(MIPS, "%s .word %s\n", variableName, variableValue);
             }
+
         }
+
     }
 
-    fprintf(MIPS, "\nli $v0, 10 # exit\n");
+    fprintf(MIPS, "\nli $v0, 10\n");
     fprintf(MIPS, "syscall\n");
 
     fclose(IRCFile);
