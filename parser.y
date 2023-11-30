@@ -91,7 +91,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock MathExpression MathExpressionList
 
 %start Program
 
@@ -922,6 +922,49 @@ BuildingBlock:
     }
 ;
 
+MathExpressionList:
+
+    MathExpression {
+        $$ = $1;
+    }
+
+    | MathExpression MathExpressionList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+;
+
+MathExpression:
+
+    Operand
+
+    | Operand ADD MathExpression {
+
+        char value[5];
+
+        char operatorArray[3];
+
+        sprintf(operatorArray, "%s", $2);
+
+        char Expression[100];
+
+        //sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+
+        ///$$ = insertIntoAST(T_INT, "", Expression);
+
+        //printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
+
+    }
+
+    | Operand SUBTRACT MathExpression
+
+    | Operand MULTIPLY MathExpression 
+
+    | Operand DIVIDE MathExpression
+
+;
+
 AddSubtractExpression:
 
     MultiplyDivideExpression
@@ -940,6 +983,8 @@ AddSubtractExpression:
 
         $$ = insertIntoAST(T_INT, "", Expression);
 
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
+
     }
 
     | AddSubtractExpression ADD MultiplyDivideExpression {
@@ -956,12 +1001,10 @@ AddSubtractExpression:
 
         $$ = insertIntoAST(T_INT, "", Expression);
 
-        //printAST($$, 3);
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
 
-        //$$->right = $1;
-
-        //printf("Hey, we got here how many times? haha.\n");
     }
+    
 ;
 
 MultiplyDivideExpression:
@@ -982,6 +1025,8 @@ MultiplyDivideExpression:
 
         $$ = insertIntoAST(T_INT, "", Expression);
 
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
+
     }
 
     | MultiplyDivideExpression DIVIDE Operand {
@@ -998,7 +1043,10 @@ MultiplyDivideExpression:
 
         $$ = insertIntoAST(T_INT, "", Expression);
 
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
+
     }
+
 ;
 
 Operand:
@@ -1060,13 +1108,6 @@ Operand:
     }
 
 ;
-
-/*BinOp: ADD {}
-    | SUBTRACT {}
-    | MULTIPLY {}
-    | DIVIDE {}*/
-
-
 
 %%
 

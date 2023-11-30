@@ -6,4 +6,4 @@ int z = 3;
 
 int w = 4;
 
-x = x + y + z + w;
+x = x + y - z + w * 5 + z - x + 55 * 3 / 2;

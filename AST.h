@@ -103,7 +103,11 @@ struct AST{
             struct AST* CodeBlock;
             struct AST* Parameters;
         } FunctionNode;
-
+        struct expressionNode {
+            const char *l;
+            const char *r;
+            const char *op;
+        } ExpressionNode;
     } StructType;
 
     struct AST* left;
@@ -121,6 +125,20 @@ struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
     //printf("Node with type %s and LHS %s and RHS %s inserted into tree\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
 
     return node;
+}
+
+
+struct AST* insertSyntaxTreeMathExpression(NodeType, nodeType, const char *LHS, const char *RHS, const char *l, const char *r, const char *op) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+
+    node->StructType.ExpressionNode.l = l;
+    node->StructType.ExpressionNode.r = r;
+    node->StructType.ExpressionNode.op = op;
+
 }
 
 struct AST* insertSyntaxTreeFunction(NodeType nodeType, const char *LHS, const char *RHS, struct AST* codeBlock, struct AST* parameters) {
