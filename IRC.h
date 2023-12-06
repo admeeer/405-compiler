@@ -214,6 +214,26 @@ void IREmission(struct AST* leaf) {
 
             break;
         
+        case T_STRUCT:
+
+            IRCData = fopen(IRCDataAbsolutePath, "a");
+            //fprintf(IRCData, );
+
+            struct AST* StructPointer = malloc(sizeof(struct AST));
+            StructPointer = leaf->left;
+            int n = 0;
+
+            while(StructPointer){
+                n += 1;
+                StructPointer = StructPointer->right;
+            }
+
+            fprintf(IRCData, "%s: .space %d\n", leaf->LHS, n*4);
+
+            fclose(IRCData);
+
+            break;
+        
         case T_STRUCT_VARIABLE_EQUALS:
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
@@ -222,6 +242,15 @@ void IREmission(struct AST* leaf) {
 
             break;
         
+        case T_ARRAY:
+
+            IRCData = fopen(IRCDataAbsolutePath, "a");
+            int space = 4*atoi(leaf->RHS);
+            fprintf(IRCData, "%s: .space %d\n", leaf->LHS, space);
+            fclose(IRCData);
+
+            break;
+
         case T_ARRAY_ELEMENT_EQUALS:
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");
@@ -279,7 +308,7 @@ void IREmission(struct AST* leaf) {
             if(Scope == 0) {
 
                 IRCData = fopen(IRCDataAbsolutePath, "a");
-                fprintf(IRCData, "%s word %s\n", leaf->LHS, leaf->RHS);
+                fprintf(IRCData, "%s .space 4\n", leaf->LHS);
                 fclose(IRCData);
 
             }

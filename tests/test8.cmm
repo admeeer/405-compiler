@@ -1,6 +1,6 @@
 int a = 1;
 
-int b = 2;
+int bb = 2;
 
 ssstruct ab {
     int a;
@@ -12,7 +12,7 @@ ab.b = b;
 
 function int sum(int x, int y, int z){
     int f = x - a;
-    y = y - b;
+    y = y - bb;
 
     z = x + y;
     write z;
@@ -33,11 +33,11 @@ function int product(int v, int w){
 int d = 4;
 
 write a;
-write b;
+write bb;
 write c;
 write d;
 
-d = product(a, b);
+d = product(a, bb);
 
 write d;
 

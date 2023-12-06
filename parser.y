@@ -91,7 +91,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock MathExpression MathExpressionList
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock
 
 %start Program
 
@@ -166,7 +166,6 @@ Struct:
 
         int StructScope = SymbolTableDefineScopeValue();
         Scope = StructScope;
-        printf("The identifier is %s\n", $2);
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
 
             SymbolTableInsertInto($2, S_STRUCT, T_STRUCT, Scope);
@@ -922,7 +921,7 @@ BuildingBlock:
     }
 ;
 
-MathExpressionList:
+/*MathExpressionList:
 
     MathExpression {
         $$ = $1;
@@ -963,7 +962,7 @@ MathExpression:
 
     | Operand DIVIDE MathExpression
 
-;
+;*/
 
 AddSubtractExpression:
 

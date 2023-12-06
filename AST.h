@@ -128,7 +128,7 @@ struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
 }
 
 
-struct AST* insertSyntaxTreeMathExpression(NodeType, nodeType, const char *LHS, const char *RHS, const char *l, const char *r, const char *op) {
+struct AST* insertSyntaxTreeMathExpression(NodeType nodeType, const char *LHS, const char *RHS, const char *l, const char *r, const char *op) {
 
     struct AST* node = malloc(sizeof(struct AST));
     node->nodeType = nodeType;

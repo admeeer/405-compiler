@@ -14,6 +14,8 @@ b = foo[4];
 
 ssstruct sum {
     int num;
+    float dum;
+    char am;
 }
 
 sum.num = 5;
