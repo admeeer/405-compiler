@@ -1,27 +1,63 @@
+int aa = 1;
 
+int bb = 2;
 
-int a = 1;
-int b = 2;
+ssstruct ab {
+    int a;
+    int b;
+}
+
+ab.a = a;
+ab.b = b;
+
+function int sum(int x, int y, int z){
+    int f = x - aa;
+    y = y - bb;
+
+    z = x + y;
+    write z;
+
+    return f + y + z;
+}
+
 int c = 3;
 
-if(a > c) {
+
+
+function int product(int v, int w){
+    v = v + c;
+    w = w + c;
+    return v * w;
+}
+
+int d = 4;
+
+write aa;
+write bb;
+write c;
+write d;
+
+d = product(aa, bb);
+
+write d;
+
+if(aa > c) {
     int d = 4;
-    a = a + d;
-    write a;
+    aa = aa + d;
+    write aa;
 } else {
     write c;
 }
 
-switch (a) {
+switch (aa) {
     case 1:
         break;
     case 2:
-        write a;
         break;
     case 3:
         break;
     case 4:
-        write a;
+        write aa;
         break;
 }
 

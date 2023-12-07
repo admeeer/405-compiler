@@ -91,7 +91,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock While WhileCondition
 
 %start Program
 
@@ -166,7 +166,6 @@ Struct:
 
         int StructScope = SymbolTableDefineScopeValue();
         Scope = StructScope;
-        printf("The identifier is %s\n", $2);
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
 
             SymbolTableInsertInto($2, S_STRUCT, T_STRUCT, Scope);
@@ -305,7 +304,6 @@ VariableDeclaration:
             SymbolTableInsertInto($2, S_ARRAY, $1->nodeType, Scope);
 
             SymbolTableSetSymbolValueArrayLength($2, Scope, $4);
-            //SymbolTableSetSymbolValueArrayElementType($2, Scope);
 
             char length[3];
             sprintf(length, "%d", $4);
@@ -344,9 +342,8 @@ FunctionDeclaration:
 
     ParameterDeclarationList RPAREN CodeBlock {
 
-        $$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
-
-        $$->left = $8;
+        //$$ = insertIntoAST(T_FUNCTION, nodeTypeToString($2->nodeType), $3);
+        $$ = insertSyntaxTreeFunction(T_FUNCTION, nodeTypeToString($2->nodeType), $3, $8, $6);
 
     }
 ;
@@ -380,6 +377,8 @@ ParameterDeclaration:
 
             SymbolTableInsertInto($2, S_FUNCTION_PARAMETER, $1->nodeType, Scope);
             SymbolTableSetSymbolUsed($2, Scope);
+
+            $$ = insertIntoAST(T_PARAMETER, nodeTypeToString($1->nodeType), $2);
 
         } else {
 
@@ -481,16 +480,22 @@ Statement:
 
     | Switch
 
+    | While
+
 ;
 
 Switch:
 
-    SWITCH LPAREN BuildingBlock RPAREN LBRACKET CaseList RBRACKET {
+    SWITCH LPAREN BuildingBlock RPAREN {
 
-        $$ = insertIntoAST(T_SWITCH, nodeTypeToString($3->nodeType), $3->RHS);
-        //SymbolTableInsertInto()
+        int SwitchScope = SymbolTableDefineScopeValue();
+        Scope = SwitchScope;
+        
+    }
+    
+    LBRACKET CaseList RBRACKET {
 
-        $$->left = $6;
+        $$ = insertSyntaxTreeSwitchStatement(T_SWITCH, nodeTypeToString($3->nodeType), $3->RHS, Scope, $7);
 
     }
 
@@ -556,34 +561,6 @@ If:
 
     }
 
-    /*IF LPAREN Condition RPAREN {
-
-        int IfScope = SymbolTableDefineScopeValue();
-        Scope = IfScope;
-
-    }
-
-    CodeBlock {
-
-        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
-        $$->left = $6;
-
-    }
-
-    | IF LPAREN Condition RPAREN {
-
-        int IfScope = SymbolTableDefineScopeValue();
-        Scope = IfScope;
-
-    }
-
-    CodeBlock Else {
-
-        $$ = insertSyntaxTreeIfStatement(T_IF, "", "", $3);
-        $$->left = $6;
-
-    }*/
-
 ;
 
 IfCondition:
@@ -599,11 +576,33 @@ IfCondition:
 Else:
 
     ELSE CodeBlock {
+
         $$ = $2;
-        //printAST($2, 3);
+
     }
 
 ;
+
+While:
+
+    WhileCondition CodeBlock {
+        
+        $$ = insertSyntaxTreeWhileStatement(T_WHILE, "", "", $1, Scope);
+        $$->left = $2;
+
+    }
+
+;
+
+WhileCondition:
+
+    WHILE LPAREN Condition RPAREN {
+        
+        $$ = $3;
+        int WhileScope = SymbolTableDefineScopeValue();
+        Scope = WhileScope;
+
+    }
 
 
 
@@ -873,7 +872,7 @@ BuildingBlock:
                 $$ = insertIntoAST(T_INT, "", $1);
             }else {
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+                $$ = insertIntoAST(T_INT, "", $1);
                 
             }
 
@@ -883,7 +882,7 @@ BuildingBlock:
             // It doesn't, so the variable must be declared in the global scope.
             if(SymbolTableExistsExternalFunctionCall($1, 0)) {
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
+                $$ = insertIntoAST(T_INT, "", $1);
 
             } else {
                 // The variable doesn't exist in the function or global scope, meaning it doesn't exist, or we are accessing something we shouldn't. Failure!
@@ -898,7 +897,7 @@ BuildingBlock:
 
         } else {
 
-            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+            $$ = insertIntoAST(T_INT, "", $1);
 
         }
 
@@ -945,6 +944,49 @@ BuildingBlock:
     }
 ;
 
+/*MathExpressionList:
+
+    MathExpression {
+        $$ = $1;
+    }
+
+    | MathExpression MathExpressionList {
+        $1->right = $2;
+        $$ = $1;
+    }
+
+;
+
+MathExpression:
+
+    Operand
+
+    | Operand ADD MathExpression {
+
+        char value[5];
+
+        char operatorArray[3];
+
+        sprintf(operatorArray, "%s", $2);
+
+        char Expression[100];
+
+        //sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+
+        ///$$ = insertIntoAST(T_INT, "", Expression);
+
+        //printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
+
+    }
+
+    | Operand SUBTRACT MathExpression
+
+    | Operand MULTIPLY MathExpression 
+
+    | Operand DIVIDE MathExpression
+
+;*/
+
 AddSubtractExpression:
 
     MultiplyDivideExpression
@@ -957,21 +999,13 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+        $$ = insertIntoAST(T_INT, "", Expression);
 
-            $$ = insertIntoAST(T_INT, "", Expression);
-
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
 
     }
 
@@ -983,23 +1017,16 @@ AddSubtractExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+        $$ = insertIntoAST(T_INT, "", Expression);
 
-            $$ = insertIntoAST(T_INT, "", Expression);
-            
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
 
     }
+    
 ;
 
 MultiplyDivideExpression:
@@ -1014,21 +1041,13 @@ MultiplyDivideExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+        $$ = insertIntoAST(T_INT, "", Expression);
 
-            $$ = insertIntoAST(T_INT, "", Expression);
-            
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
 
     }
 
@@ -1040,23 +1059,16 @@ MultiplyDivideExpression:
 
         sprintf(operatorArray, "%s", $2);
 
-        if( Scope != 0) {
+        char Expression[100];
 
-            char Expression[100];
+        sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
 
-            sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
+        $$ = insertIntoAST(T_INT, "", Expression);
 
-            $$ = insertIntoAST(T_INT, "", Expression);
-            
-        } else {
-
-            sprintf(value, "%d", computeEquation($1, $3, operatorArray[0]));
-
-            $$ = insertIntoAST(T_INT, "", value);
-
-        }
+        printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
 
     }
+
 ;
 
 Operand:
@@ -1075,7 +1087,7 @@ Operand:
                 break;
             } else {
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+                $$ = insertIntoAST(T_INT, "", $1);
                 
             }
 
@@ -1085,7 +1097,7 @@ Operand:
             if(SymbolTableExistsExternalFunctionCall($1, 0)) {
 
 
-                $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, 0));
+                $$ = insertIntoAST(T_INT, "", $1);
 
             } else {
                 // The variable doesn't exist in the function or global scope, meaning it doesn't exist, or we are accessing something we shouldn't. Failure!
@@ -1097,7 +1109,7 @@ Operand:
            }
         } else {
 
-            $$ = insertIntoAST(T_INT, "", SymbolTableGetValue($1, Scope));
+            $$ = insertIntoAST(T_INT, "", $1);
 
         }
 
@@ -1118,13 +1130,6 @@ Operand:
     }
 
 ;
-
-/*BinOp: ADD {}
-    | SUBTRACT {}
-    | MULTIPLY {}
-    | DIVIDE {}*/
-
-
 
 %%
 

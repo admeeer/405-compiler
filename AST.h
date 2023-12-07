@@ -31,9 +31,11 @@ typedef enum {
     T_FLOAT,
     T_CHAR,
     T_FUNCTION,
+    T_PARAMETER,
     T_FUNCTIONCALL,
     T_SWITCH,
-    T_CASE
+    T_CASE,
+    T_WHILE
 } NodeType;
 
 const char* nodeTypeToString(NodeType type) {
@@ -59,9 +61,11 @@ const char* nodeTypeToString(NodeType type) {
         case T_FLOAT: return "FLOAT";
         case T_CHAR: return "CHARACTER";
         case T_FUNCTION: return "FUNCTION";
+        case T_PARAMETER: return "PARAMETER";
         case T_FUNCTIONCALL: return "FUNCTIONCALL";
         case T_SWITCH: return "SWITCH";
         case T_CASE: return "CASE";
+        case T_WHILE: return "WHILE";
         default: return "UNDEFINED";
     }
 }
@@ -81,6 +85,10 @@ struct AST{
         struct structEquals {
             const char *variable;
         } StructEquals;
+        struct whileNode {
+            struct AST* condition;
+            int Scope;
+        } WhileNode;
         struct ifNode {
             struct AST* condition;
             int Scope;
@@ -93,7 +101,19 @@ struct AST{
         struct conditionNode {
             const char *Operator;
         } ConditionNode;
-
+        struct switchNode {
+            int Scope;
+            struct AST* CaseList;
+        } SwitchNode;
+        struct functionNode {
+            struct AST* CodeBlock;
+            struct AST* Parameters;
+        } FunctionNode;
+        struct expressionNode {
+            const char *l;
+            const char *r;
+            const char *op;
+        } ExpressionNode;
     } StructType;
 
     struct AST* left;
@@ -111,6 +131,32 @@ struct AST* insertIntoAST(NodeType nodeType, const char *LHS, const char *RHS) {
     //printf("Node with type %s and LHS %s and RHS %s inserted into tree\n", nodeTypeToString(node->nodeType), node->LHS, node->RHS);
 
     return node;
+}
+
+
+struct AST* insertSyntaxTreeMathExpression(NodeType nodeType, const char *LHS, const char *RHS, const char *l, const char *r, const char *op) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+
+    node->StructType.ExpressionNode.l = l;
+    node->StructType.ExpressionNode.r = r;
+    node->StructType.ExpressionNode.op = op;
+
+}
+
+struct AST* insertSyntaxTreeFunction(NodeType nodeType, const char *LHS, const char *RHS, struct AST* codeBlock, struct AST* parameters) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+
+    node->StructType.FunctionNode.CodeBlock = codeBlock;
+    node->StructType.FunctionNode.Parameters = parameters;
+
 }
 
 struct AST* insertSyntaxTreeArrayAssignment(NodeType nodeType, const char *LHS, const char *RHS, int index) {
@@ -148,6 +194,18 @@ struct AST* insertSyntaxTreeIfStatement(NodeType nodeType, const char* LHS, cons
 
 }
 
+struct AST* insertSyntaxTreeWhileStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, int scope){
+    
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.WhileNode.condition = condition;
+    node->StructType.WhileNode.Scope = scope;
+
+}
+
 struct AST* insertSyntaxTreeIfElseStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, struct AST* elseBlock, int scope){
     
     struct AST* node = malloc(sizeof(struct AST));
@@ -169,6 +227,18 @@ struct AST* insertSyntaxTreeCondition(NodeType nodeType, const char* LHS, const 
     node->RHS = strdup(RHS);
     
     node->StructType.ConditionNode.Operator = strdup(logicop);
+}
+
+struct AST* insertSyntaxTreeSwitchStatement(NodeType nodeType, const char* LHS, const char *RHS, int scope, struct AST* caseList) {
+
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.SwitchNode.Scope = scope;
+    node->StructType.SwitchNode.CaseList = caseList;
+
 }
 
 void printDots(int num)

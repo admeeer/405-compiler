@@ -24,6 +24,10 @@ test: build
 		./$(BUILD_DIR)/parser tests/$$testfile; \
 	done
 
+testdevel: build
+	./$(BUILD_DIR)/parser tests/test6.cmm
+	python asm.py
+
 clean:
 	rm -rf $(BUILD_DIR)
 	ls -l

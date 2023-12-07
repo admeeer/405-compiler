@@ -1,0 +1,8 @@
+int vara = 1;
+int varb = 2;
+int varc = 3;
+
+while (a < 5) {
+    write vara;
+    vara = vara + 1;
+}
