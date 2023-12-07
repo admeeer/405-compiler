@@ -143,6 +143,32 @@ void IREmission(struct AST* leaf) {
 
             break;
 
+        case T_WHILE:
+
+            struct AST* WhileNode = malloc(sizeof(struct AST));
+
+            WhileNode = leaf;
+            WhileNode = WhileNode->StructType.WhileNode.condition;
+
+            Scope = leaf->StructType.WhileNode.Scope;
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            int whileBlockLabel = GetNewLabel();
+
+            fprintf(IRCMain, "while %s %s %s goto L%d\n", WhileNode->LHS, WhileNode->StructType.ConditionNode.Operator, WhileNode->RHS, whileBlockLabel);
+            fprintf(IRCMain, "L%d:\n", whileBlockLabel);
+
+            fclose(IRCMain);
+
+            if(leaf->left){
+                IREmission(leaf->left);
+            }
+
+            Scope = 0;
+
+            break;
+
         case T_IF:
 
             struct AST* IfNode = malloc(sizeof(struct AST));

@@ -7,3 +7,4 @@ IRCMain.ir
 IRCData.ir
 IRC.ir
 MIPS.asm
+.env

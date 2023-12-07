@@ -91,7 +91,7 @@ void yyerror(const char* s);
 %left MULTIPLY
 %left DIVIDE
 
-%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock
+%type <ast> Program Declaration BlockDeclaration BlockDeclarationList DeclarationList VariableDeclaration StructDeclaration StructDeclarationList FunctionCall FunctionCallParameterList FunctionDeclaration ParameterDeclarationList ParameterDeclarationListTail ParameterDeclaration CodeBlock TYPE Statement StatementList Expression AddSubtractExpression MultiplyDivideExpression Operand BuildingBlock Array Struct StructBlock If Condition IfCondition Else Switch CaseList Case CaseBlock While WhileCondition
 
 %start Program
 
@@ -480,6 +480,8 @@ Statement:
 
     | Switch
 
+    | While
+
 ;
 
 Switch:
@@ -580,6 +582,27 @@ Else:
     }
 
 ;
+
+While:
+
+    WhileCondition CodeBlock {
+        
+        $$ = insertSyntaxTreeWhileStatement(T_WHILE, "", "", $1, Scope);
+        $$->left = $2;
+
+    }
+
+;
+
+WhileCondition:
+
+    WHILE LPAREN Condition RPAREN {
+        
+        $$ = $3;
+        int WhileScope = SymbolTableDefineScopeValue();
+        Scope = WhileScope;
+
+    }
 
 
 

@@ -34,7 +34,8 @@ typedef enum {
     T_PARAMETER,
     T_FUNCTIONCALL,
     T_SWITCH,
-    T_CASE
+    T_CASE,
+    T_WHILE
 } NodeType;
 
 const char* nodeTypeToString(NodeType type) {
@@ -64,6 +65,7 @@ const char* nodeTypeToString(NodeType type) {
         case T_FUNCTIONCALL: return "FUNCTIONCALL";
         case T_SWITCH: return "SWITCH";
         case T_CASE: return "CASE";
+        case T_WHILE: return "WHILE";
         default: return "UNDEFINED";
     }
 }
@@ -83,6 +85,10 @@ struct AST{
         struct structEquals {
             const char *variable;
         } StructEquals;
+        struct whileNode {
+            struct AST* condition;
+            int Scope;
+        } WhileNode;
         struct ifNode {
             struct AST* condition;
             int Scope;
@@ -185,6 +191,18 @@ struct AST* insertSyntaxTreeIfStatement(NodeType nodeType, const char* LHS, cons
     
     node->StructType.IfNode.condition = condition;
     node->StructType.IfNode.Scope = scope;
+
+}
+
+struct AST* insertSyntaxTreeWhileStatement(NodeType nodeType, const char* LHS, const char *RHS, struct AST* condition, int scope){
+    
+    struct AST* node = malloc(sizeof(struct AST));
+    node->nodeType = nodeType;
+    node->LHS = strdup(LHS);
+    node->RHS = strdup(RHS);
+    
+    node->StructType.WhileNode.condition = condition;
+    node->StructType.WhileNode.Scope = scope;
 
 }
 
