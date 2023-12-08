@@ -25,7 +25,7 @@ test: build
 	done
 
 testdevel: build
-	./$(BUILD_DIR)/parser tests/test6.cmm
+	./$(BUILD_DIR)/parser tests/TestWhile.cmm
 	python asm.py
 
 clean:

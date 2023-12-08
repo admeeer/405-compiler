@@ -1,0 +1,19 @@
+char vara = 'a';
+char varb = 'b';
+char varc = 'c';
+char vard = 'd';
+
+switch (vard) {
+    case 'a':
+        write 'a';
+        break;
+    case 'b':
+        write 'b';
+        break;
+    case 'c':
+        write 'c';
+        break;
+    case 'd':
+        write 'd';
+        break;
+}
