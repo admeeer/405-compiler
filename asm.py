@@ -20,7 +20,7 @@ def convert_ir_to_mips(file_path, output_path):
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are a code translator. Convert the IR code to MIPS Assembly code. Combine both the data and main section into one file. Add an exit to the end of the program. Return only the code."},
+            {"role": "system", "content": "You are a code translator. Convert the given Intermediate Representation (IR) Code to MIPS Assembly code. Combine both the data and main section into one file. Add an exit system call to the end of the program. Return only the code."},
            {"role": "user", "content": prompt}
         ]
     )
