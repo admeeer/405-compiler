@@ -497,6 +497,24 @@ Statement:
         }
 
         $$ = insertIntoAST(T_WRITE, "", $2->RHS);
+        $$->left = $2;
+    }
+
+    | WRITE IDENTIFIER FunctionCall {
+
+        $$ =insertIntoAST(T_WRITE_FUNCTION, "", $2);
+        $$->left = $3;
+
+
+    /*| IDENTIFIER FunctionCall {
+
+        //char formattedString[100];
+        //sprintf(formattedString, "%s", $1);
+
+        $$ = insertIntoAST(T_FUNCTIONCALL, "", $1);
+        $$->left = $2;    
+
+    }*/
     }
 
     | WRITELN SEMICOLON {

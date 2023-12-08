@@ -346,10 +346,38 @@ void IREmission(struct AST* leaf) {
             break;
         
         case T_WRITE:
+
             IRCMain = fopen(IRCMainAbsolutePath, "a");
+
             fprintf(IRCMain, "write %s\n", leaf->RHS);
+
             fclose(IRCMain);
             break;
+            
+        case T_WRITE_FUNCTION:
+
+            IRCMain = fopen(IRCMainAbsolutePath, "a");
+
+            fprintf(IRCMain, "write %s", leaf->RHS);
+
+            if(leaf->left){
+                struct AST* node = malloc(sizeof(struct AST));
+                node = leaf->left;
+                fprintf(IRCMain, "(");
+                
+                while(node){
+                    fprintf(IRCMain, "%s", node->RHS);
+                    if(node->right){
+                        fprintf(IRCMain, ", ");
+                    }
+                    node = node->right;
+                }
+            }
+
+            fprintf(IRCMain, ")\n");
+            fclose(IRCMain);
+            break;
+
         case T_FUNCTION:
 
             IRCMain = fopen(IRCMainAbsolutePath, "a");

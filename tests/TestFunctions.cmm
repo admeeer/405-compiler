@@ -28,6 +28,8 @@ write b;
 write c;
 write d;
 
-d = product(a, b);
+write sum(a, b, c);
 
-write d;
+write product(a, b);
+
+d = sum(a, b, c);
