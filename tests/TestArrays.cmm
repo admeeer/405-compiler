@@ -1,0 +1,21 @@
+char vara[10];
+
+vara[0] = 'h';
+vara[1] = 'e';
+vara[2] = 'l';
+vara[3] = 'l';
+vara[4] = 'o';
+vara[5] = 'w';
+vara[6] = 'o';
+vara[7] = 'r';
+vara[8] = 'l';
+vara[9] = 'd';
+
+int counter = 0;
+
+while(counter < 10) {
+
+    write vara[counter];
+    counter = counter + 1;
+
+}

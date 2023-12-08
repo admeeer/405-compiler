@@ -1,6 +1,6 @@
 BUILD_DIR := build
 
-TESTS := test1.cmm test2.cmm test3.cmm test4.cmm test5.cmm
+TESTS := TestArrays.cmm TestFunctions.cmm TestIfElse.cmm TestStruct.cmm TestSwitch.cmm TestWhile.cmm
 
 .PHONY: build clean setup test
 
@@ -25,7 +25,7 @@ test: build
 	done
 
 testdevel: build
-	./$(BUILD_DIR)/parser tests/test6.cmm
+	./$(BUILD_DIR)/parser tests/TestWhile.cmm
 	python asm.py
 
 clean:

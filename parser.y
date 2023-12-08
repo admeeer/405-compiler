@@ -270,6 +270,34 @@ VariableDeclaration:
 
     }
     // Primitive var
+    | TYPE IDENTIFIER Equals CHARACTER SEMICOLON {
+        
+        if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
+
+            SymbolTableInsertInto($2, S_VARIABLE, $1->nodeType, Scope);
+
+
+            SymbolTableSetValue($2, $4, Scope);
+
+            $$ = insertIntoAST(T_EQUALS, $2, $4);
+            //printf("%s\n\n\n", nodeTypeToString($1->nodeType));
+
+            if(Scope != 0) {
+
+                SymbolTableSetSymbolUsed($2, Scope);
+                
+            }
+
+
+        } else {
+
+            fprintf(stderr, "Semantic Error: %s already exists in the SymbolTable!\n", $2);
+            exit(EXIT_FAILURE);
+
+        }
+
+    }
+    
     | TYPE IDENTIFIER SEMICOLON {
 
         if(!SymbolTableExistsExternalFunctionCall($2, Scope)) {
@@ -316,6 +344,7 @@ VariableDeclaration:
        }
 
     }
+
 ;
 
 FunctionDeclaration:
@@ -468,6 +497,24 @@ Statement:
         }
 
         $$ = insertIntoAST(T_WRITE, "", $2->RHS);
+        $$->left = $2;
+    }
+
+    | WRITE IDENTIFIER FunctionCall {
+
+        $$ =insertIntoAST(T_WRITE_FUNCTION, "", $2);
+        $$->left = $3;
+
+
+    /*| IDENTIFIER FunctionCall {
+
+        //char formattedString[100];
+        //sprintf(formattedString, "%s", $1);
+
+        $$ = insertIntoAST(T_FUNCTIONCALL, "", $1);
+        $$->left = $2;    
+
+    }*/
     }
 
     | WRITELN SEMICOLON {
@@ -624,7 +671,6 @@ Condition:
 
 ;
 
-
 Array:
 
     IDENTIFIER LBRACKET INTEGER RBRACKET Equals BuildingBlock {
@@ -700,6 +746,57 @@ Array:
         $$ = insertSyntaxTreeArrayAssignment(T_EQUALS_ARRAY_ELEMENT, $1, $3, $5);
 
     }
+
+    | IDENTIFIER LBRACKET INTEGER RBRACKET {
+
+        if(!SymbolTableExistsExternalFunctionCall($1, Scope)) {
+            if(Scope != 0 && !SymbolTableExistsExternalFunctionCall($1, 0)){
+                fprintf(stderr, "Parser Error: Trying to index array that does not exist\n");
+            }
+        }
+
+        char formattedString[100];
+        sprintf(formattedString, "[%d]", $3);
+
+        $$ = insertIntoAST(T_ARRAY_AT_INDEX, "", formattedString);
+    }
+
+    | IDENTIFIER LBRACKET IDENTIFIER RBRACKET {
+
+        if(!SymbolTableExistsExternalFunctionCall($1, Scope)) {
+            if(Scope != 0 && !SymbolTableExistsExternalFunctionCall($1, 0)){
+                fprintf(stderr, "Parser Error: Trying to index array that does not exist\n");
+            }
+        }
+
+        int varScope = -1;
+
+        if(SymbolTableExistsExternalFunctionCall($3, Scope)) {
+
+            varScope = Scope;
+            
+            if(SymbolTableGetNodeType($3, Scope) != T_INT) {
+                fprintf(stderr, "Parser Error: can only index array with type INT, tried to index with type %s\n", nodeTypeToString(SymbolTableGetNodeType($4, Scope)));
+            }
+
+        } else if(Scope != 0 && SymbolTableExistsExternalFunctionCall($3, 0)) {
+
+            varScope = 0;
+
+            if(SymbolTableGetNodeType($3, 0) != T_INT) {
+                fprintf(stderr, "Parser Error: can only index array with type INT, tried to index with type %s\n", nodeTypeToString(SymbolTableGetNodeType($4, 0)));
+            }
+
+        } else {
+            fprintf(stderr, "Parser Error: Tried to index array with variable that doesn't exist!\n");
+        }
+
+        char formattedString[100];
+        sprintf(formattedString, "[%s]", $3);
+
+        $$ = insertIntoAST(T_ARRAY_AT_INDEX, "", formattedString);
+    }
+;
 
 
 Expression:
@@ -943,49 +1040,6 @@ BuildingBlock:
 
     }
 ;
-
-/*MathExpressionList:
-
-    MathExpression {
-        $$ = $1;
-    }
-
-    | MathExpression MathExpressionList {
-        $1->right = $2;
-        $$ = $1;
-    }
-
-;
-
-MathExpression:
-
-    Operand
-
-    | Operand ADD MathExpression {
-
-        char value[5];
-
-        char operatorArray[3];
-
-        sprintf(operatorArray, "%s", $2);
-
-        char Expression[100];
-
-        //sprintf(Expression, "%s%c%s", $1->RHS, operatorArray[0], $3->RHS);
-
-        ///$$ = insertIntoAST(T_INT, "", Expression);
-
-        //printf("Called, expression is %s%c%s\n", $1->RHS, operatorArray[0], $3->RHS);
-
-    }
-
-    | Operand SUBTRACT MathExpression
-
-    | Operand MULTIPLY MathExpression 
-
-    | Operand DIVIDE MathExpression
-
-;*/
 
 AddSubtractExpression:
 

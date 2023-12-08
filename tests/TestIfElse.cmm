@@ -1,0 +1,31 @@
+int vara = 1;
+int varb = 2;
+int varc = 3;
+
+if(vara > varb) {
+
+    write vara;
+
+} else {
+
+    if(varb > vara) {
+
+        write varb;
+
+        if(varb > varc) {
+
+            write varb;
+
+        } else {
+
+            if(varc > varb) {
+
+                write varc;
+
+            }
+
+        }
+
+    }
+
+}

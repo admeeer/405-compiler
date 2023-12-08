@@ -35,7 +35,9 @@ typedef enum {
     T_FUNCTIONCALL,
     T_SWITCH,
     T_CASE,
-    T_WHILE
+    T_WHILE,
+    T_ARRAY_AT_INDEX,
+    T_WRITE_FUNCTION
 } NodeType;
 
 const char* nodeTypeToString(NodeType type) {
@@ -66,6 +68,8 @@ const char* nodeTypeToString(NodeType type) {
         case T_SWITCH: return "SWITCH";
         case T_CASE: return "CASE";
         case T_WHILE: return "WHILE";
+        case T_ARRAY_AT_INDEX: return "ARRAYATINDEX";
+        case T_WRITE_FUNCTION: return "WRITEFUNCTION";
         default: return "UNDEFINED";
     }
 }

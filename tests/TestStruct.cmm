@@ -1,0 +1,17 @@
+ssstruct structy {
+    int varint;
+    char varchar;
+    float varfloat;
+}
+
+structy.varint = 1;
+
+structy.varchar = 'a';
+
+structy.varfloat = 1.1;
+
+write structy.varint;
+
+write structy.varchar;
+
+write structy.varfloat;

@@ -3,20 +3,21 @@ int a = 1;
 int b = 2;
 
 function int sum(int x, int y, int z){
-    int f = x - a;
+
+    x = x - a;
     y = y - b;
 
     z = x + y;
     write z;
 
-    return f + y + z;
+    return x + y + z;
 }
 
 int c = 3;
 
 function int product(int v, int w){
-    v = v + c;
-    w = w + c;
+    v = v + a;
+    w = w + b;
     return v * w;
 }
 
@@ -27,6 +28,8 @@ write b;
 write c;
 write d;
 
-d = product(a, b);
+write sum(a, b, c);
 
-write d;
+write product(a, b);
+
+d = sum(a, b, c);
